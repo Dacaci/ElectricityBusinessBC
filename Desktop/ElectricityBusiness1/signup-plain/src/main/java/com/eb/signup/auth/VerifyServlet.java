@@ -1,6 +1,6 @@
-package main.java.com.eb.signup.auth;
+package com.eb.signup.auth;
 
-import main.java.com.eb.signup.user.UserDao;
+import com.eb.signup.user.UserDao;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;

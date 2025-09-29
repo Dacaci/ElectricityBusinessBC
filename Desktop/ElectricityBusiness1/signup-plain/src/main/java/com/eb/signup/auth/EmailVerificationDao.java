@@ -1,4 +1,4 @@
-package main.java.com.eb.signup.auth;
+package com.eb.signup.auth;
 
 import javax.sql.DataSource;
 import java.sql.*;

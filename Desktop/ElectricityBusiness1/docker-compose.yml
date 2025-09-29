@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: eb
+      POSTGRES_PASSWORD: eb
+      POSTGRES_DB: eb
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mailhog:
+    image: mailhog/mailhog
+    ports: ["1025:1025", "8025:8025"]
+
+  signup-app:
+    image: tomcat:10.1-jdk21
+    ports: ["8080:8080"]
+    volumes:
+      - ./target/signup-plain.war:/usr/local/tomcat/webapps/ROOT.war
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/eb
+      - DB_USER=eb
+      - DB_PASS=eb
+      - MAIL_SMTP_HOST=mailhog
+      - MAIL_SMTP_PORT=1025
+      - MAIL_FROM=no-reply@eb.local
+    depends_on:
+      - db
+      - mailhog
+
+  # Backend Spring Boot (à ajouter plus tard)
+  # backend-app:
+  #   build: ./backend/eb-backend
+  #   ports: ["8081:8081"]
+  #   environment:
+  #     - DB_URL=jdbc:postgresql://db:5432/eb
+  #     - DB_USER=eb
+  #     - DB_PASS=eb
+  #   depends_on:
+  #     - db
+
+volumes:
+  postgres_data:

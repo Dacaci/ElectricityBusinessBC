@@ -1,4 +1,4 @@
-package main.java.com.eb.signup.mail;
+package com.eb.signup.mail;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;

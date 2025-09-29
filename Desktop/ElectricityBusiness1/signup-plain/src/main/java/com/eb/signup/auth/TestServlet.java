@@ -1,4 +1,4 @@
-package main.java.com.eb.signup.auth;
+package com.eb.signup.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
