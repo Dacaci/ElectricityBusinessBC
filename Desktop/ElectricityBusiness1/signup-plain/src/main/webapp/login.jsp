@@ -34,6 +34,12 @@
             </div>
         <% } %>
         
+        <% if ("logout".equals(request.getParameter("message"))) { %>
+            <div style="color: #28a745; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                ✅ Déconnexion réussie. À bientôt !
+            </div>
+        <% } %>
+        
         <form method="post" action="login">
             <div class="form-group">
                 <label for="email">Email</label>
