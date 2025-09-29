@@ -41,30 +41,83 @@ public class RegisterServlet extends HttpServlet {
   }
 
   @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    // Récupération des paramètres
+    var firstName = req.getParameter("firstName");
+    var lastName = req.getParameter("lastName");
     var email = req.getParameter("email");
+    var phone = req.getParameter("phone");
+    var dateOfBirthStr = req.getParameter("dateOfBirth");
+    var address = req.getParameter("address");
+    var postalCode = req.getParameter("postalCode");
+    var city = req.getParameter("city");
     var password = req.getParameter("password");
-    if (email == null || password == null || password.length() < 8) {
-      resp.sendError(400, "Paramètres invalides"); return;
+    var confirmPassword = req.getParameter("confirmPassword");
+    
+    // Validation des champs obligatoires
+    if (firstName == null || firstName.trim().isEmpty() ||
+        lastName == null || lastName.trim().isEmpty() ||
+        email == null || email.trim().isEmpty() ||
+        password == null || password.length() < 8) {
+      req.setAttribute("error", "Les champs marqués d'un * sont obligatoires et le mot de passe doit contenir au moins 8 caractères");
+      req.getRequestDispatcher("/register.jsp").forward(req, resp);
+      return;
     }
+    
+    // Validation de la confirmation du mot de passe
+    if (!password.equals(confirmPassword)) {
+      req.setAttribute("error", "Les mots de passe ne correspondent pas");
+      req.getRequestDispatcher("/register.jsp").forward(req, resp);
+      return;
+    }
+    
+    // Validation de l'email
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+      req.setAttribute("error", "Format d'email invalide");
+      req.getRequestDispatcher("/register.jsp").forward(req, resp);
+      return;
+    }
+    
     try {
       var existing = userDao.findByEmail(email);
-      if (existing != null) { resp.sendError(409, "Email déjà utilisé"); return; }
+      if (existing != null) { 
+        req.setAttribute("error", "Cet email est déjà utilisé");
+        req.getRequestDispatcher("/register.jsp").forward(req, resp);
+        return; 
+      }
+
+      // Conversion de la date de naissance
+      java.time.LocalDate dateOfBirth = null;
+      if (dateOfBirthStr != null && !dateOfBirthStr.trim().isEmpty()) {
+        try {
+          dateOfBirth = java.time.LocalDate.parse(dateOfBirthStr);
+        } catch (Exception e) {
+          req.setAttribute("error", "Format de date invalide");
+          req.getRequestDispatcher("/register.jsp").forward(req, resp);
+          return;
+        }
+      }
 
       var hash = org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt(10));
-      long userId = userDao.create(email, hash);
+      long userId = userDao.create(firstName.trim(), lastName.trim(), email.trim(), 
+                                  phone != null ? phone.trim() : null, dateOfBirth,
+                                  address != null ? address.trim() : null,
+                                  postalCode != null ? postalCode.trim() : null,
+                                  city != null ? city.trim() : null, hash);
 
-    String code = random6();
-    String codeHash = org.mindrot.jbcrypt.BCrypt.hashpw(code, org.mindrot.jbcrypt.BCrypt.gensalt(10));
-    codeDao.createCode(userId, codeHash, Instant.now().plus(Duration.ofMinutes(15)));
+      String code = random6();
+      String codeHash = org.mindrot.jbcrypt.BCrypt.hashpw(code, org.mindrot.jbcrypt.BCrypt.gensalt(10));
+      codeDao.createCode(userId, codeHash, Instant.now().plus(Duration.ofMinutes(15)));
 
-    // Log du code pour les tests
-    System.out.println("=== CODE DE VÉRIFICATION POUR " + email + " : " + code + " ===");
-    
-    mailer.sendCode(email, code);
+      // Log du code pour les tests
+      System.out.println("=== CODE DE VÉRIFICATION POUR " + email + " : " + code + " ===");
+      
+      mailer.sendCode(email, code);
+      
       // Rediriger vers la page de vérification
       resp.sendRedirect("verify");
     } catch (Exception e) {
-      throw new ServletException(e);
+      req.setAttribute("error", "Erreur lors de la création du compte : " + e.getMessage());
+      req.getRequestDispatcher("/register.jsp").forward(req, resp);
     }
   }
 
