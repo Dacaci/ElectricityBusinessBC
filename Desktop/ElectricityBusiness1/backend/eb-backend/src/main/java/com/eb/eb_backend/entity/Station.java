@@ -1,0 +1,63 @@
+package com.eb.eb_backend.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "stations", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"owner_id", "name"}))
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Station {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @NotNull(message = "Le propriétaire est obligatoire")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+    
+    @NotNull(message = "Le lieu est obligatoire")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+    
+    @NotBlank(message = "Le nom est obligatoire")
+    @Size(max = 255, message = "Le nom ne peut pas dépasser 255 caractères")
+    @Column(name = "name", nullable = false, length = 255)
+    private String name;
+    
+    @NotNull(message = "Le tarif horaire est obligatoire")
+    @DecimalMin(value = "0.0", message = "Le tarif horaire doit être positif")
+    @Digits(integer = 8, fraction = 2, message = "Format de tarif invalide")
+    @Column(name = "hourly_rate", nullable = false, precision = 10, scale = 2)
+    private BigDecimal hourlyRate = BigDecimal.ZERO;
+    
+    @NotBlank(message = "Le type de prise est obligatoire")
+    @Pattern(regexp = "^(TYPE1|TYPE2|TYPE2S|CHAdeMO|CCS|TESLA)$", 
+             message = "Type de prise invalide")
+    @Column(name = "plug_type", nullable = false, length = 50)
+    private String plugType = "TYPE2S";
+    
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+    
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+}
