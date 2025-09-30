@@ -26,10 +26,6 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .logo {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
         h2 { 
             color: #333; 
             margin: 0;
@@ -73,12 +69,13 @@
             position: relative;
         }
         .date-input::after {
-            content: "📅";
+            content: "●";
             position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
             pointer-events: none;
+            color: #667eea;
         }
         button { 
             width: 100%; 
@@ -141,7 +138,6 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">⚡</div>
             <h2>Inscription</h2>
             <p style="color: #666; margin: 10px 0 0 0;">Rejoignez Electricity Business</p>
         </div>

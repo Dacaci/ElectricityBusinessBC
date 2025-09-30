@@ -26,31 +26,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>⚡ Electricity Business</h1>
+        <h1>Electricity Business</h1>
         <p class="subtitle">Plateforme de gestion des stations de recharge électrique</p>
         
         <div class="nav-grid">
             <div class="nav-card">
-                <h3>📝 S'inscrire</h3>
+                <h3>S'inscrire</h3>
                 <p>Créez votre compte pour accéder à la plateforme</p>
                 <a href="register">S'inscrire</a>
             </div>
             
             <div class="nav-card">
-                <h3>✅ Vérifier le compte</h3>
+                <h3>Vérifier le compte</h3>
                 <p>Activez votre compte avec le code reçu par email</p>
                 <a href="verify">Vérifier</a>
             </div>
             
             <div class="nav-card">
-                <h3>🔐 Se connecter</h3>
+                <h3>Se connecter</h3>
                 <p>Accédez à votre tableau de bord</p>
                 <a href="login">Se connecter</a>
             </div>
         </div>
         
         <div class="status">
-            <strong>🎯 Cycle complet :</strong> Inscription → Validation Email → Connexion → Dashboard
+            <strong>Cycle complet :</strong> Inscription → Validation Email → Connexion → Dashboard
         </div>
     </div>
 </body>

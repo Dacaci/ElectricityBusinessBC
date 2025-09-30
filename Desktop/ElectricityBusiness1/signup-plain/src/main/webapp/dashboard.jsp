@@ -39,7 +39,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>⚡ Electricity Business</h1>
+        <h1>Electricity Business</h1>
         <div class="user-info">
             <span>Bienvenue, <%= ((User)request.getAttribute("user")).getEmail() %></span>
             <span class="status-badge status-active">Compte Actif</span>
@@ -49,7 +49,7 @@
     
     <div class="container">
         <div class="welcome-card">
-            <h2>🎉 Connexion réussie !</h2>
+            <h2>Connexion réussie !</h2>
             <p>
                 Félicitations ! Votre compte a été activé avec succès. Vous pouvez maintenant accéder 
                 à toutes les fonctionnalités de la plateforme Electricity Business.
@@ -63,32 +63,32 @@
         
         <div class="features-grid">
             <div class="feature-card">
-                <h3>🚗 Gestion des Stations</h3>
+                <h3>Gestion des Stations</h3>
                 <p>Gérez vos stations de recharge électrique, ajoutez de nouvelles bornes et surveillez leur statut.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
             
             <div class="feature-card">
-                <h3>📊 Monitoring</h3>
+                <h3>Monitoring</h3>
                 <p>Surveillez en temps réel l'utilisation de vos stations et consultez les statistiques détaillées.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
             
             <div class="feature-card">
-                <h3>💰 Facturation</h3>
+                <h3>Facturation</h3>
                 <p>Gérez la tarification et consultez les revenus générés par vos stations de recharge.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
             
             <div class="feature-card">
-                <h3>🔧 Maintenance</h3>
+                <h3>Maintenance</h3>
                 <p>Planifiez et suivez les opérations de maintenance de vos équipements.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
         </div>
         
         <div class="welcome-card">
-            <h3>📋 Prochaines étapes</h3>
+            <h3>Prochaines étapes</h3>
             <p>
                 Le système d'inscription et de connexion est maintenant opérationnel. 
                 Les fonctionnalités métier (gestion des stations, monitoring, etc.) seront 
