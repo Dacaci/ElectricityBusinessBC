@@ -79,6 +79,9 @@ public class User {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Location> locations = new ArrayList<>();
     
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Reservation> reservations = new ArrayList<>();
+    
     // Méthodes utilitaires
     public String getFullName() {
         return (firstName != null && lastName != null) ? firstName + " " + lastName : email;

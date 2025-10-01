@@ -271,6 +271,7 @@
                 <li><a href="#" class="nav-link" data-section="users">Utilisateurs</a></li>
                 <li><a href="#" class="nav-link" data-section="stations">Stations</a></li>
                 <li><a href="#" class="nav-link" data-section="locations">Emplacements</a></li>
+                <li><a href="#" class="nav-link" data-section="reservations">Réservations</a></li>
                 <li><a href="#" class="nav-link" data-section="api-test">Test API</a></li>
             </ul>
         </nav>
@@ -293,6 +294,10 @@
                     <div class="stat-card">
                         <div class="stat-number" id="locations-count">-</div>
                         <div class="stat-label">Emplacements</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="reservations-count">-</div>
+                        <div class="stat-label">Réservations</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" id="api-status">OK</div>
@@ -367,6 +372,17 @@
                     <h3>Liste des Emplacements</h3>
                     <button class="btn" onclick="loadLocations()">Actualiser</button>
                     <div id="locations-list" class="loading">Chargement...</div>
+                </div>
+            </div>
+            
+            <!-- Reservations Section -->
+            <div id="reservations" class="section">
+                <h2>Gestion des Réservations</h2>
+                
+                <div class="card">
+                    <h3>Liste des Réservations</h3>
+                    <button class="btn" onclick="loadReservations()">Actualiser</button>
+                    <div id="reservations-list"></div>
                 </div>
             </div>
             
@@ -461,6 +477,15 @@
                     document.getElementById('locations-count').textContent = locationsData.totalElements || 0;
                 } catch (e) {
                     document.getElementById('locations-count').textContent = 'N/A';
+                }
+                
+                // Load reservations count (if API available)
+                try {
+                    const reservationsResponse = await fetch(`${API_BASE}/reservations?size=1`);
+                    const reservationsData = await reservationsResponse.json();
+                    document.getElementById('reservations-count').textContent = reservationsData.totalElements || 0;
+                } catch (e) {
+                    document.getElementById('reservations-count').textContent = 'N/A';
                 }
                 
             } catch (error) {
