@@ -45,8 +45,8 @@ public class Station {
     private BigDecimal hourlyRate = BigDecimal.ZERO;
     
     @NotBlank(message = "Le type de prise est obligatoire")
-    @Pattern(regexp = "^(TYPE1|TYPE2|TYPE2S|CHAdeMO|CCS|TESLA)$", 
-             message = "Type de prise invalide")
+    @Pattern(regexp = "^(TYPE2S)$", 
+             message = "Seul le type TYPE2S est supporté")
     @Column(name = "plug_type", nullable = false, length = 50)
     private String plugType = "TYPE2S";
     

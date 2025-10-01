@@ -40,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_stations_active ON stations(is_active);
 ALTER TABLE locations ADD CONSTRAINT chk_latitude CHECK (latitude >= -90 AND latitude <= 90);
 ALTER TABLE locations ADD CONSTRAINT chk_longitude CHECK (longitude >= -180 AND longitude <= 180);
 ALTER TABLE stations ADD CONSTRAINT chk_hourly_rate CHECK (hourly_rate >= 0);
-ALTER TABLE stations ADD CONSTRAINT chk_plug_type CHECK (plug_type IN ('TYPE1', 'TYPE2', 'TYPE2S', 'CHAdeMO', 'CCS', 'TESLA'));
+ALTER TABLE stations ADD CONSTRAINT chk_plug_type CHECK (plug_type = 'TYPE2S');
 
 -- Données de test
 INSERT INTO locations (owner_id, label, address, latitude, longitude, description) VALUES
@@ -49,8 +49,8 @@ INSERT INTO locations (owner_id, label, address, latitude, longitude, descriptio
 ON CONFLICT DO NOTHING;
 
 INSERT INTO stations (owner_id, location_id, name, hourly_rate, plug_type) VALUES
-(1, 1, 'Borne 1 - Type 2', 0.50, 'TYPE2'),
-(1, 1, 'Borne 2 - Type 2S', 0.55, 'TYPE2S'),
+(1, 1, 'Borne 1', 0.50, 'TYPE2S'),
+(1, 1, 'Borne 2', 0.55, 'TYPE2S'),
 (1, 2, 'Borne Aéroport 1', 0.60, 'TYPE2S'),
-(1, 2, 'Borne Aéroport 2', 0.60, 'CHAdeMO')
+(1, 2, 'Borne Aéroport 2', 0.60, 'TYPE2S')
 ON CONFLICT DO NOTHING;

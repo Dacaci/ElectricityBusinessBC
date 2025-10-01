@@ -32,9 +32,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/users/**").permitAll() // Pour l'instant, on permet tout
+                .requestMatchers("/api/**").permitAll() // Permettre tous les endpoints API
                 .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() // Permettre tout pour les tests
             );
         
         return http.build();
