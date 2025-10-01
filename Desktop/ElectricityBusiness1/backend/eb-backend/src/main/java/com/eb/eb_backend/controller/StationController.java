@@ -1,6 +1,7 @@
 package com.eb.eb_backend.controller;
 
 import com.eb.eb_backend.dto.StationDto;
+import com.eb.eb_backend.dto.StationLocationDto;
 import com.eb.eb_backend.service.StationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -122,5 +123,20 @@ public class StationController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    
+    @GetMapping("/map")
+    public ResponseEntity<List<StationLocationDto>> getStationsForMap() {
+        List<StationLocationDto> stations = stationService.getAllStationsForMap();
+        return ResponseEntity.ok(stations);
+    }
+    
+    @GetMapping("/nearby")
+    public ResponseEntity<List<StationLocationDto>> getNearbyStations(
+            @RequestParam BigDecimal latitude,
+            @RequestParam BigDecimal longitude,
+            @RequestParam(defaultValue = "10") Double radiusKm) {
+        List<StationLocationDto> stations = stationService.getNearbyStations(latitude, longitude, radiusKm);
+        return ResponseEntity.ok(stations);
     }
 }

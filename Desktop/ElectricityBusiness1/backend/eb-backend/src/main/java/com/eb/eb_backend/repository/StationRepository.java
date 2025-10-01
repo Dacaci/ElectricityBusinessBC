@@ -21,6 +21,8 @@ public interface StationRepository extends JpaRepository<Station, Long> {
     
     List<Station> findByLocationAndIsActiveTrue(Location location);
     
+    List<Station> findByIsActiveTrue();
+    
     @Query("SELECT s FROM Station s WHERE " +
            "s.isActive = true AND " +
            "(:q IS NULL OR " +

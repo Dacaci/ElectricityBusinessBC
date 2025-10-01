@@ -1,6 +1,7 @@
 package com.eb.eb_backend.service;
 
 import com.eb.eb_backend.dto.StationDto;
+import com.eb.eb_backend.dto.StationLocationDto;
 import com.eb.eb_backend.entity.Location;
 import com.eb.eb_backend.entity.Station;
 import com.eb.eb_backend.entity.User;
@@ -13,8 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -139,5 +142,70 @@ public class StationService {
         station.setIsActive(false);
         Station savedStation = stationRepository.save(station);
         return new StationDto(savedStation);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<StationLocationDto> getAllStationsForMap() {
+        List<Station> stations = stationRepository.findByIsActiveTrue();
+        return stations.stream()
+                .map(StationLocationDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    @Transactional(readOnly = true)
+    public List<StationLocationDto> getNearbyStations(BigDecimal latitude, BigDecimal longitude, Double radiusKm) {
+        // Formule de Haversine pour calculer la distance entre deux points géographiques
+        // Rayon de la Terre en kilomètres
+        double earthRadius = 6371.0;
+        
+        // Conversion du rayon de km en degrés (approximation)
+        double latDelta = radiusKm / 111.0; // 1 degré de latitude ≈ 111 km
+        double lonDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(latitude.doubleValue())));
+        
+        // Créer une bounding box pour filtrer les stations
+        BigDecimal minLat = latitude.subtract(BigDecimal.valueOf(latDelta));
+        BigDecimal maxLat = latitude.add(BigDecimal.valueOf(latDelta));
+        BigDecimal minLon = longitude.subtract(BigDecimal.valueOf(lonDelta));
+        BigDecimal maxLon = longitude.add(BigDecimal.valueOf(lonDelta));
+        
+        // Récupérer toutes les stations actives dans la bounding box
+        List<Station> stations = stationRepository.findByIsActiveTrue();
+        
+        return stations.stream()
+                .filter(station -> {
+                    BigDecimal stationLat = station.getLocation().getLatitude();
+                    BigDecimal stationLon = station.getLocation().getLongitude();
+                    
+                    // Vérifier si la station est dans la bounding box
+                    if (stationLat.compareTo(minLat) >= 0 && stationLat.compareTo(maxLat) <= 0 &&
+                        stationLon.compareTo(minLon) >= 0 && stationLon.compareTo(maxLon) <= 0) {
+                        
+                        // Calculer la distance exacte avec la formule de Haversine
+                        double distance = calculateHaversineDistance(
+                            latitude.doubleValue(), longitude.doubleValue(),
+                            stationLat.doubleValue(), stationLon.doubleValue()
+                        );
+                        
+                        return distance <= radiusKm;
+                    }
+                    return false;
+                })
+                .map(StationLocationDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
+        double earthRadius = 6371.0; // Rayon de la Terre en kilomètres
+        
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        
+        return earthRadius * c;
     }
 }

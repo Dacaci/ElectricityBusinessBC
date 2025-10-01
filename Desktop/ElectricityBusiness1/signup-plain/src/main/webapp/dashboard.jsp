@@ -63,43 +63,30 @@
         
         <div class="features-grid">
             <div class="feature-card">
-                <h3>Gestion des Stations</h3>
-                <p>Gérez vos stations de recharge électrique, ajoutez de nouvelles bornes et surveillez leur statut.</p>
+                <h3>Mes Lieux de Recharge</h3>
+                <p>Gérez vos lieux de recharge électrique et ajoutez de nouveaux emplacements.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
             
             <div class="feature-card">
-                <h3>Monitoring</h3>
-                <p>Surveillez en temps réel l'utilisation de vos stations et consultez les statistiques détaillées.</p>
+                <h3>Mes Bornes de Recharge</h3>
+                <p>Ajoutez et gérez vos bornes de recharge avec leurs tarifs horaires.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
             
             <div class="feature-card">
-                <h3>Facturation</h3>
-                <p>Gérez la tarification et consultez les revenus générés par vos stations de recharge.</p>
-                <a href="#" class="btn disabled">Bientôt disponible</a>
+                <h3>Carte des Stations</h3>
+                <p>Trouvez les bornes de recharge disponibles près de chez vous sur la carte interactive.</p>
+                <a href="map" class="btn">Voir la Carte</a>
             </div>
             
             <div class="feature-card">
-                <h3>Maintenance</h3>
-                <p>Planifiez et suivez les opérations de maintenance de vos équipements.</p>
+                <h3>Mes Réservations</h3>
+                <p>Consultez vos réservations en cours et passées.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
         </div>
         
-        <div class="welcome-card">
-            <h3>Prochaines étapes</h3>
-            <p>
-                Le système d'inscription et de connexion est maintenant opérationnel. 
-                Les fonctionnalités métier (gestion des stations, monitoring, etc.) seront 
-                développées dans le backend Spring Boot avec une API REST moderne.
-            </p>
-            <p>
-                <strong>Architecture :</strong><br>
-                • <strong>Module d'inscription</strong> (Servlet) : Inscription → Validation → Connexion<br>
-                • <strong>API REST</strong> (Spring Boot) : Gestion des stations, JWT, Angular
-            </p>
-        </div>
     </div>
 </body>
 </html>
