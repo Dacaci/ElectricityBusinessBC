@@ -104,3 +104,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
            "ORDER BY r.startTime ASC")
     List<Reservation> findUpcomingStationReservations(@Param("station") Station station, @Param("now") LocalDateTime now);
 }
+

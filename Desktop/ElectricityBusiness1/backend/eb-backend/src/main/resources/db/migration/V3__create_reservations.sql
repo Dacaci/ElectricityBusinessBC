@@ -66,3 +66,4 @@ INSERT INTO reservations (user_id, station_id, start_time, end_time, total_amoun
 (1, 1, CURRENT_TIMESTAMP + INTERVAL '1 day', CURRENT_TIMESTAMP + INTERVAL '1 day 2 hours', 1.00, 'PENDING', 'Réservation de test'),
 (1, 2, CURRENT_TIMESTAMP + INTERVAL '2 days', CURRENT_TIMESTAMP + INTERVAL '2 days 3 hours', 1.65, 'CONFIRMED', 'Réservation confirmée')
 ON CONFLICT DO NOTHING;
+

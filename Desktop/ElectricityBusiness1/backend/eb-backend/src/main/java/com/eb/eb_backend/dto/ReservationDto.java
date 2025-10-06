@@ -84,3 +84,4 @@ public class ReservationDto {
         return status == Reservation.ReservationStatus.COMPLETED;
     }
 }
+

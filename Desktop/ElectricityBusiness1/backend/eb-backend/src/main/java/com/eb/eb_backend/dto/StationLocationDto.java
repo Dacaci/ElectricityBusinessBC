@@ -59,3 +59,5 @@ public class StationLocationDto {
         return hourlyRate + " €/h";
     }
 }
+
+

@@ -35,3 +35,4 @@ public class CreateReservationDto {
         return java.time.Duration.between(startTime, endTime).toHours() >= 1;
     }
 }
+
