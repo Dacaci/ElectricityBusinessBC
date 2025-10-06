@@ -3,6 +3,8 @@ package com.eb.eb_backend.controller;
 import com.eb.eb_backend.dto.CreateReservationDto;
 import com.eb.eb_backend.dto.ReservationDto;
 import com.eb.eb_backend.entity.Reservation;
+import com.eb.eb_backend.service.ExportService;
+import com.eb.eb_backend.service.ReceiptService;
 import com.eb.eb_backend.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import java.util.List;
 public class ReservationController {
     
     private final ReservationService reservationService;
+    private final ReceiptService receiptService;
+    private final ExportService exportService;
     
     @PostMapping
     public ResponseEntity<ReservationDto> createReservation(
@@ -170,6 +174,42 @@ public class ReservationController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/{id}/receipt.pdf")
+    public ResponseEntity<byte[]> getReservationReceipt(@PathVariable Long id) {
+        try {
+            byte[] pdf = receiptService.generateReservationReceiptPdf(id);
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "inline; filename=receipt-" + id + ".pdf")
+                    .body(pdf);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/export.xlsx")
+    public ResponseEntity<byte[]> exportReservations(
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String status
+    ) {
+        Reservation.ReservationStatus statusEnum = null;
+        if (status != null && !status.trim().isEmpty()) {
+            try { statusEnum = Reservation.ReservationStatus.valueOf(status.toUpperCase()); } catch (Exception ignored) {}
+        }
+
+        java.time.LocalDateTime fromDt = null;
+        java.time.LocalDateTime toDt = null;
+        try { if (from != null && !from.isBlank()) fromDt = java.time.LocalDateTime.parse(from); } catch (Exception ignored) {}
+        try { if (to != null && !to.isBlank()) toDt = java.time.LocalDateTime.parse(to); } catch (Exception ignored) {}
+
+        byte[] excel = exportService.exportReservations(fromDt, toDt, statusEnum);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .header("Content-Disposition", "attachment; filename=reservations.xlsx")
+                .body(excel);
     }
 }
 
