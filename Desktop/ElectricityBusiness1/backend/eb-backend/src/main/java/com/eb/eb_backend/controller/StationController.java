@@ -106,26 +106,6 @@ public class StationController {
         }
     }
     
-    @PostMapping("/{id}/activate")
-    public ResponseEntity<StationDto> activateStation(@PathVariable Long id) {
-        try {
-            StationDto activated = stationService.activateStation(id);
-            return ResponseEntity.ok(activated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-    
-    @PostMapping("/{id}/deactivate")
-    public ResponseEntity<StationDto> deactivateStation(@PathVariable Long id) {
-        try {
-            StationDto deactivated = stationService.deactivateStation(id);
-            return ResponseEntity.ok(deactivated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-    
     @GetMapping("/map")
     public ResponseEntity<List<StationLocationDto>> getStationsForMap() {
         List<StationLocationDto> stations = stationService.getAllStationsForMap();

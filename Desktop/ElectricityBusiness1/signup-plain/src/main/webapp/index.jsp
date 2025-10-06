@@ -49,9 +49,6 @@
             </div>
         </div>
         
-        <div class="status">
-            <strong>Cycle complet :</strong> Inscription → Validation Email → Connexion → Dashboard
-        </div>
     </div>
 </body>
 </html>

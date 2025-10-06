@@ -1,6 +1,6 @@
 package com.eb.eb_backend.service;
 
-import com.eb.eb_backend.config.JwtUtil;
+// Removed JWT import
 import com.eb.eb_backend.dto.CreateUserDto;
 import com.eb.eb_backend.dto.LoginRequest;
 import com.eb.eb_backend.dto.LoginResponse;
@@ -8,9 +8,8 @@ import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.entity.User;
 import com.eb.eb_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.BadCredentialsException;
+// Removed unused imports
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,9 +24,9 @@ public class AuthService implements UserDetailsService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final UserService userService;
-    private final AuthenticationManager authenticationManager;
+    // Removed JWT dependency
+    // Removed UserService to avoid circular dependency
+    // Removed AuthenticationManager/Configuration to avoid circular dependency
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -46,26 +45,37 @@ public class AuthService implements UserDetailsService {
     }
     
     public LoginResponse login(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-        
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(userDetails);
-        
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
-        
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
+            throw new BadCredentialsException("Email ou mot de passe incorrect");
+        }
+        // Simplified login without JWT for now
         UserDto userDto = new UserDto(user);
-        
-        return new LoginResponse(token, userDto);
+        return new LoginResponse("dummy-token", userDto);
     }
     
     public UserDto register(CreateUserDto createUserDto) {
-        return userService.createUser(createUserDto);
+        // Vérifier si l'email existe déjà
+        if (userRepository.existsByEmail(createUserDto.getEmail())) {
+            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
+        }
+        
+        // Créer l'utilisateur
+        User user = new User();
+        user.setFirstName(createUserDto.getFirstName());
+        user.setLastName(createUserDto.getLastName());
+        user.setEmail(createUserDto.getEmail());
+        user.setPhone(createUserDto.getPhone());
+        user.setDateOfBirth(createUserDto.getDateOfBirth());
+        user.setAddress(createUserDto.getAddress());
+        user.setPostalCode(createUserDto.getPostalCode());
+        user.setCity(createUserDto.getCity());
+        user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
+        user.setStatus(User.UserStatus.PENDING);
+        
+        User savedUser = userRepository.save(user);
+        return new UserDto(savedUser);
     }
     
     public boolean verifyEmail(String email, String code) {

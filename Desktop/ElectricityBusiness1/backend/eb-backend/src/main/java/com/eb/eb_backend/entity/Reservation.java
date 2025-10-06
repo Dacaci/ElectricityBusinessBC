@@ -33,7 +33,6 @@ public class Reservation {
     private Station station;
     
     @NotNull(message = "La date de début est obligatoire")
-    @Future(message = "La date de début doit être dans le futur")
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
     

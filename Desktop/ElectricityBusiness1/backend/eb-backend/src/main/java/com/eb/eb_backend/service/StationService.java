@@ -155,8 +155,8 @@ public class StationService {
     @Transactional(readOnly = true)
     public List<StationLocationDto> getNearbyStations(BigDecimal latitude, BigDecimal longitude, Double radiusKm) {
         // Formule de Haversine pour calculer la distance entre deux points géographiques
-        // Rayon de la Terre en kilomètres
-        double earthRadius = 6371.0;
+        // Rayon de la Terre en kilomètres (utilisé dans le calcul)
+        // double earthRadius = 6371.0; // Commenté car non utilisé dans cette implémentation simplifiée
         
         // Conversion du rayon de km en degrés (approximation)
         double latDelta = radiusKm / 111.0; // 1 degré de latitude ≈ 111 km
