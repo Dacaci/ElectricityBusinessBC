@@ -85,6 +85,18 @@
                 <p>Consultez vos réservations en cours et passées.</p>
                 <a href="#" class="btn disabled">Bientôt disponible</a>
             </div>
+            
+            <div class="feature-card">
+                <h3>Export des Données</h3>
+                <p>Téléchargez vos réservations au format Excel pour vos archives.</p>
+                <a href="http://localhost:8080/api/reservations/export.xlsx" class="btn" target="_blank">📊 Télécharger Excel</a>
+            </div>
+            
+            <div class="feature-card">
+                <h3>Reçus PDF</h3>
+                <p>Générez des reçus PDF pour vos réservations confirmées.</p>
+                <a href="http://localhost:8080/api/reservations/1/receipt.pdf" class="btn" target="_blank">📄 Télécharger PDF</a>
+            </div>
         </div>
         
     </div>
