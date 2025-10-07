@@ -63,27 +63,27 @@
         
         <div class="features-grid">
             <div class="feature-card">
-                <h3>Mes Lieux de Recharge</h3>
+                <h3>📍 Mes Lieux de Recharge</h3>
                 <p>Gérez vos lieux de recharge électrique et ajoutez de nouveaux emplacements.</p>
-                <a href="#" class="btn disabled">Bientôt disponible</a>
+                <a href="locations.jsp" class="btn">Gérer les Lieux</a>
             </div>
             
             <div class="feature-card">
-                <h3>Mes Bornes de Recharge</h3>
+                <h3>🔌 Mes Bornes de Recharge</h3>
                 <p>Ajoutez et gérez vos bornes de recharge avec leurs tarifs horaires.</p>
-                <a href="#" class="btn disabled">Bientôt disponible</a>
+                <a href="stations.jsp" class="btn">Gérer les Bornes</a>
             </div>
             
             <div class="feature-card">
-                <h3>Carte des Stations</h3>
+                <h3>🗺️ Carte des Stations</h3>
                 <p>Trouvez les bornes de recharge disponibles près de chez vous sur la carte interactive.</p>
-                <a href="map" class="btn">Voir la Carte</a>
+                <a href="map.jsp" class="btn">Voir la Carte</a>
             </div>
             
             <div class="feature-card">
-                <h3>Mes Réservations</h3>
+                <h3>📅 Mes Réservations</h3>
                 <p>Consultez vos réservations en cours et passées.</p>
-                <a href="#" class="btn disabled">Bientôt disponible</a>
+                <a href="reservations.jsp" class="btn">Gérer les Réservations</a>
             </div>
             
             <div class="feature-card">
@@ -102,3 +102,6 @@
     </div>
 </body>
 </html>
+
+
+

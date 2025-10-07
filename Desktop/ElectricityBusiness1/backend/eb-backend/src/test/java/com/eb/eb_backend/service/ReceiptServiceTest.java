@@ -88,3 +88,5 @@ class ReceiptServiceTest {
         verify(reservationRepository).findById(999L);
     }
 }
+
+
