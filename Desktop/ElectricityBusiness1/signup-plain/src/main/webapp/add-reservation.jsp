@@ -365,8 +365,16 @@
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            loadData();
             setMinDateTime();
+            const params = new URLSearchParams(window.location.search);
+            const preselectId = params.get('stationId');
+            loadData().then(() => {
+                if (preselectId) {
+                    const select = document.getElementById('stationId');
+                    select.value = preselectId;
+                    updateStationInfo();
+                }
+            });
         });
         
         function setMinDateTime() {

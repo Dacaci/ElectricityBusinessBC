@@ -300,7 +300,7 @@
         
         // Réserver une station
         function reserveStation(stationId) {
-            alert(`Fonctionnalité de réservation pour la station ${stationId} - À implémenter`);
+            window.location.href = `add-reservation.jsp?stationId=${stationId}`;
         }
         
         // Afficher/masquer le loading
