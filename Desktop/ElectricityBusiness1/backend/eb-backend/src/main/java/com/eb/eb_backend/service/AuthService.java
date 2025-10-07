@@ -8,6 +8,7 @@ import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.entity.User;
 import com.eb.eb_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import com.eb.eb_backend.security.JwtUtil;
 import org.springframework.security.authentication.BadCredentialsException;
 // Removed unused imports
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,7 @@ public class AuthService implements UserDetailsService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    // Removed JWT dependency
+    private final JwtUtil jwtUtil;
     // Removed UserService to avoid circular dependency
     // Removed AuthenticationManager/Configuration to avoid circular dependency
     
@@ -50,9 +51,9 @@ public class AuthService implements UserDetailsService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Email ou mot de passe incorrect");
         }
-        // Simplified login without JWT for now
         UserDto userDto = new UserDto(user);
-        return new LoginResponse("dummy-token", userDto);
+        String token = jwtUtil.generateToken(user.getEmail(), java.util.Map.of("uid", user.getId()));
+        return new LoginResponse(token, userDto);
     }
     
     public UserDto register(CreateUserDto createUserDto) {

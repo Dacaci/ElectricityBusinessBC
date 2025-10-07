@@ -4,6 +4,7 @@ import com.eb.eb_backend.dto.LoginRequest;
 import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.service.AuthService;
+import com.eb.eb_backend.security.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
     
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -26,6 +28,23 @@ public class AuthController {
         }
     }
     
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest().build();
+            }
+            String oldToken = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(oldToken);
+            if (username == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            String newToken = jwtUtil.generateToken(username, java.util.Map.of());
+            return ResponseEntity.ok(new LoginResponse(newToken, null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@Valid @RequestBody com.eb.eb_backend.dto.CreateUserDto createUserDto) {
         try {
