@@ -7,8 +7,8 @@ import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.entity.User;
 import com.eb.eb_backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import com.eb.eb_backend.security.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 // Removed unused imports
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,6 @@ public class AuthService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    // Removed UserService to avoid circular dependency
-    // Removed AuthenticationManager/Configuration to avoid circular dependency
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -40,7 +39,7 @@ public class AuthService implements UserDetailsService {
                 user.isActive(),
                 true, // accountNonExpired
                 true, // credentialsNonExpired
-                !user.isActive(), // accountNonLocked
+                user.isActive(), // accountNonLocked
                 new ArrayList<>() // authorities
         );
     }

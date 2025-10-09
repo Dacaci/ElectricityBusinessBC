@@ -371,8 +371,12 @@
                     throw new Error('Erreur lors du chargement des lieux');
                 }
                 
-                stations = await stationsResponse.json();
-                locations = await locationsResponse.json();
+                const stationsData = await stationsResponse.json();
+                const locationsData = await locationsResponse.json();
+                
+                // L'API retourne une structure paginée {content: [...], ...}
+                stations = stationsData.content || stationsData;
+                locations = locationsData.content || locationsData;
                 
                 displayStations(stations);
                 showLoading(false);
@@ -398,41 +402,36 @@
                 const location = locations.find(loc => loc.id === station.locationId);
                 const locationName = location ? location.label : 'Lieu inconnu';
                 const locationAddress = location ? location.address : '';
+                const statusBadge = station.isActive ? 'status-active' : 'status-inactive';
+                const statusText = station.isActive ? 'Active' : 'Inactive';
+                const toggleBtnClass = station.isActive ? 'btn-secondary' : 'btn-success';
+                const toggleBtnText = station.isActive ? '⏸️ Désactiver' : '▶️ Activer';
                 
-                return `
-                    <div class="station-card">
-                        <div class="station-header">
-                            <div>
-                                <div class="station-title">${station.name}</div>
-                                <div class="station-location">📍 ${locationName}</div>
-                                <div class="station-location" style="font-size: 0.85em; color: #6c757d;">${locationAddress}</div>
-                            </div>
-                            <span class="status-badge ${station.isActive ? 'status-active' : 'status-inactive'}">
-                                ${station.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                        </div>
-                        
-                        <div class="station-details">
-                            <div class="detail-item">
-                                <div class="detail-label">Type de prise</div>
-                                <div class="detail-value">${station.plugType}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Tarif horaire</div>
-                                <div class="detail-value">${station.hourlyRate} €/h</div>
-                            </div>
-                        </div>
-                        
-                        <div class="station-actions">
-                            <a href="edit-station.jsp?id=${station.id}" class="btn btn-warning">✏️ Modifier</a>
-                            <button onclick="toggleStationStatus(${station.id}, ${station.isActive})" 
-                                    class="btn ${station.isActive ? 'btn-secondary' : 'btn-success'}">
-                                ${station.isActive ? '⏸️ Désactiver' : '▶️ Activer'}
-                            </button>
-                            <button onclick="deleteStation(${station.id})" class="btn btn-danger">🗑️ Supprimer</button>
-                        </div>
-                    </div>
-                `;
+                return '<div class="station-card">' +
+                    '<div class="station-header">' +
+                        '<div>' +
+                            '<div class="station-title">' + station.name + '</div>' +
+                            '<div class="station-location">📍 ' + locationName + '</div>' +
+                            '<div class="station-location" style="font-size: 0.85em; color: #6c757d;">' + locationAddress + '</div>' +
+                        '</div>' +
+                        '<span class="status-badge ' + statusBadge + '">' + statusText + '</span>' +
+                    '</div>' +
+                    '<div class="station-details">' +
+                        '<div class="detail-item">' +
+                            '<div class="detail-label">Type de prise</div>' +
+                            '<div class="detail-value">' + station.plugType + '</div>' +
+                        '</div>' +
+                        '<div class="detail-item">' +
+                            '<div class="detail-label">Tarif horaire</div>' +
+                            '<div class="detail-value">' + station.hourlyRate + ' €/h</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="station-actions">' +
+                        '<a href="edit-station.jsp?id=' + station.id + '" class="btn btn-warning">✏️ Modifier</a>' +
+                        '<button onclick="toggleStationStatus(' + station.id + ', ' + station.isActive + ')" class="btn ' + toggleBtnClass + '">' + toggleBtnText + '</button>' +
+                        '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">🗑️ Supprimer</button>' +
+                    '</div>' +
+                '</div>';
             }).join('');
             
             container.style.display = 'grid';
@@ -524,6 +523,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

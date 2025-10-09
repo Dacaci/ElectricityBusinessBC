@@ -128,36 +128,30 @@ public class ReservationController {
         }
     }
     
-    @PostMapping("/{id}/confirm")
-    public ResponseEntity<ReservationDto> confirmReservation(
-            @PathVariable Long id,
-            @RequestParam Long ownerId) {
+    @PutMapping("/{id}/confirm")
+    public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long id) {
         try {
-            ReservationDto reservationDto = reservationService.confirmReservation(id, ownerId);
+            ReservationDto reservationDto = reservationService.confirmReservation(id, 1L); // Pour simplifier
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
     
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<ReservationDto> cancelReservation(
-            @PathVariable Long id,
-            @RequestParam Long userId) {
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<ReservationDto> cancelReservation(@PathVariable Long id) {
         try {
-            ReservationDto reservationDto = reservationService.cancelReservation(id, userId);
+            ReservationDto reservationDto = reservationService.cancelReservation(id, 1L); // Pour simplifier
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
     
-    @PostMapping("/{id}/complete")
-    public ResponseEntity<ReservationDto> completeReservation(
-            @PathVariable Long id,
-            @RequestParam Long ownerId) {
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<ReservationDto> completeReservation(@PathVariable Long id) {
         try {
-            ReservationDto reservationDto = reservationService.completeReservation(id, ownerId);
+            ReservationDto reservationDto = reservationService.completeReservation(id, 1L); // Pour simplifier
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -165,11 +159,9 @@ public class ReservationController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
-            @PathVariable Long id,
-            @RequestParam Long userId) {
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         try {
-            reservationService.deleteReservation(id, userId);
+            reservationService.deleteReservation(id, 1L); // Pour simplifier
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

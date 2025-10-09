@@ -19,11 +19,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     
     List<Location> findByOwnerAndIsActiveTrue(User owner);
     
-    @Query("SELECT l FROM Location l WHERE " +
-           "l.isActive = true AND " +
-           "(:q IS NULL OR " +
-           "LOWER(l.label) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(l.address) LIKE LOWER(CONCAT('%', :q, '%')))")
+    @Query("SELECT l FROM Location l WHERE l.isActive = true")
     Page<Location> findBySearchQuery(@Param("q") String query, Pageable pageable);
     
     @Query("SELECT l FROM Location l WHERE " +

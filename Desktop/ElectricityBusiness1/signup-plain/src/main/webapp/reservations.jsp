@@ -447,9 +447,14 @@
                     throw new Error('Erreur lors du chargement des lieux');
                 }
                 
-                reservations = await reservationsResponse.json();
-                stations = await stationsResponse.json();
-                locations = await locationsResponse.json();
+                const reservationsData = await reservationsResponse.json();
+                const stationsData = await stationsResponse.json();
+                const locationsData = await locationsResponse.json();
+                
+                // L'API retourne une structure paginée {content: [...], ...}
+                reservations = reservationsData.content || reservationsData;
+                stations = stationsData.content || stationsData;
+                locations = locationsData.content || locationsData;
                 
                 displayReservations(reservations);
                 showLoading(false);
@@ -476,19 +481,24 @@
                 const station = stations.find(s => s.id === reservation.stationId);
                 const location = locations.find(l => l.id === station?.locationId);
                 
+                const userFirstName = reservation.user?.firstName || 'N/A';
+                const userLastName = reservation.user?.lastName || 'N/A';
+                const stationName = station?.name || 'Borne inconnue';
+                const locationLabel = location?.label || 'Lieu inconnu';
+                
                 return `
                     <tr>
-                        <td>#${reservation.id}</td>
-                        <td>${reservation.user?.firstName || 'N/A'} ${reservation.user?.lastName || 'N/A'}</td>
-                        <td>${station?.name || 'Borne inconnue'}</td>
-                        <td>${location?.label || 'Lieu inconnu'}</td>
-                        <td>${formatDateTime(reservation.startTime)}</td>
-                        <td>${formatDateTime(reservation.endTime)}</td>
-                        <td><span class="status-badge status-${reservation.status.toLowerCase()}">${getStatusLabel(reservation.status)}</span></td>
-                        <td>${reservation.totalAmount} €</td>
+                        <td>#\${reservation.id}</td>
+                        <td>\${userFirstName} \${userLastName}</td>
+                        <td>\${stationName}</td>
+                        <td>\${locationLabel}</td>
+                        <td>\${formatDateTime(reservation.startTime)}</td>
+                        <td>\${formatDateTime(reservation.endTime)}</td>
+                        <td><span class="status-badge status-\${reservation.status.toLowerCase()}">\${getStatusLabel(reservation.status)}</span></td>
+                        <td>\${reservation.totalAmount} €</td>
                         <td>
                             <div class="reservation-actions">
-                                ${getActionButtons(reservation)}
+                                \${getActionButtons(reservation)}
                             </div>
                         </td>
                     </tr>
@@ -679,6 +689,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

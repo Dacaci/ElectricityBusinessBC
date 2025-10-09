@@ -305,7 +305,9 @@
                     throw new Error('Erreur lors du chargement des lieux');
                 }
                 
-                locations = await response.json();
+                const data = await response.json();
+                // L'API retourne une structure paginée {content: [...], ...}
+                locations = data.content || data;
                 displayLocations(locations);
                 showLoading(false);
                 
@@ -326,20 +328,20 @@
                 return;
             }
             
-            container.innerHTML = locationsToShow.map(location => `
-                <div class="location-card">
-                    <div class="location-header">
-                        <div>
-                            <div class="location-title">${location.label}</div>
-                            <div class="location-address">${location.address}</div>
-                        </div>
-                    </div>
-                    <div class="location-actions">
-                        <a href="edit-location.jsp?id=${location.id}" class="btn btn-warning">✏️ Modifier</a>
-                        <button onclick="deleteLocation(${location.id})" class="btn btn-danger">🗑️ Supprimer</button>
-                    </div>
-                </div>
-            `).join('');
+            container.innerHTML = locationsToShow.map(location => {
+                return '<div class="location-card">' +
+                    '<div class="location-header">' +
+                        '<div>' +
+                            '<div class="location-title">' + location.label + '</div>' +
+                            '<div class="location-address">' + location.address + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="location-actions">' +
+                        '<a href="edit-location.jsp?id=' + location.id + '" class="btn btn-warning">✏️ Modifier</a>' +
+                        '<button onclick="deleteLocation(' + location.id + ')" class="btn btn-danger">🗑️ Supprimer</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
             
             container.style.display = 'grid';
             noLocations.style.display = 'none';
@@ -405,6 +407,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

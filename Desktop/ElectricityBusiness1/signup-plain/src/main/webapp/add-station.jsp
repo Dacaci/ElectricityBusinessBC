@@ -284,7 +284,15 @@
                     throw new Error('Erreur lors du chargement des lieux');
                 }
                 
-                locations = await response.json();
+                const data = await response.json();
+                // L'API retourne une structure paginée {content: [...], ...}
+                locations = data.content || data;
+                
+                if (locations.length === 0) {
+                    showError('Aucun lieu disponible. Veuillez d\'abord créer un lieu de recharge.');
+                    return;
+                }
+                
                 populateLocationSelect();
                 showLoading(false);
                 
@@ -299,10 +307,23 @@
             const select = document.getElementById('locationId');
             select.innerHTML = '<option value="">Sélectionnez un lieu...</option>';
             
+            console.log('Locations récupérées:', locations);
+            console.log('Nombre de locations:', locations.length);
+            
+            if (!locations || locations.length === 0) {
+                select.innerHTML += '<option value="" disabled>Aucun lieu disponible - Créez-en un d\'abord</option>';
+                document.getElementById('formContainer').style.display = 'block';
+                return;
+            }
+            
             locations.forEach(location => {
                 const option = document.createElement('option');
                 option.value = location.id;
-                option.textContent = `${location.label} - ${location.address}`;
+                const label = location.label || 'Sans nom';
+                const address = location.address || 'Sans adresse';
+                // Utiliser la concaténation au lieu de template literals
+                option.textContent = label + ' - ' + address;
+                console.log('Option créée:', option.textContent);
                 select.appendChild(option);
             });
             
@@ -331,7 +352,8 @@
             try {
                 showLoading(true);
                 
-                const response = await fetch('http://localhost:8080/api/stations', {
+                // Pour simplifier, on utilise l'utilisateur 1
+                const response = await fetch('http://localhost:8080/api/stations?ownerId=1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -387,6 +409,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

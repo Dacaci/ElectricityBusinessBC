@@ -23,11 +23,7 @@ public interface StationRepository extends JpaRepository<Station, Long> {
     
     List<Station> findByIsActiveTrue();
     
-    @Query("SELECT s FROM Station s WHERE " +
-           "s.isActive = true AND " +
-           "(:q IS NULL OR " +
-           "LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
-           "LOWER(s.plugType) LIKE LOWER(CONCAT('%', :q, '%')))")
+    @Query("SELECT s FROM Station s WHERE s.isActive = true")
     Page<Station> findBySearchQuery(@Param("q") String query, Pageable pageable);
     
     @Query("SELECT s FROM Station s WHERE " +

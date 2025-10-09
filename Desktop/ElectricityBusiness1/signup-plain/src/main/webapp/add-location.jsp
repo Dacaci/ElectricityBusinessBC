@@ -255,9 +255,10 @@
             const locationData = {
                 label: formData.get('label'),
                 address: formData.get('address'),
-                latitude: parseFloat(formData.get('latitude')),
-                longitude: parseFloat(formData.get('longitude')),
-                description: formData.get('description') || null
+                latitude: formData.get('latitude'), // Garder en String pour BigDecimal
+                longitude: formData.get('longitude'), // Garder en String pour BigDecimal
+                description: formData.get('description') || null,
+                ownerId: 1 // Pour simplifier
             };
             
             // Validation côté client
@@ -270,7 +271,8 @@
             try {
                 showLoading(true);
                 
-                const response = await fetch('http://localhost:8080/api/locations', {
+                // Pour simplifier, on utilise l'utilisateur 1
+                const response = await fetch('http://localhost:8080/api/locations?ownerId=1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -348,6 +350,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

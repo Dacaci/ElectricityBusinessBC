@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="com.eb.signup.user.User" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -138,7 +139,7 @@
     <div class="header">
         <h1>Electricity Business - Carte des Stations</h1>
         <div class="user-info">
-            <span>Bienvenue, <%= ((User)request.getAttribute("user")).getEmail() %></span>
+            <span>Bienvenue, <%= request.getAttribute("user") != null ? ((User)request.getAttribute("user")).getEmail() : "Utilisateur" %></span>
             <a href="dashboard">Dashboard</a>
             <a href="logout">Déconnexion</a>
         </div>
@@ -190,26 +191,45 @@
             
             try {
                 const response = await fetch('http://localhost:8080/api/stations/map');
-                const stations = await response.json();
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const stations = await response.json();
+                console.log('Stations chargées:', stations);
+                
+                if (stations.length === 0) {
+                    alert('Aucune station disponible. Créez d\'abord une borne de recharge !');
+                    showLoading(false);
+                    return;
+                }
+                
+                // L'API /stations/map retourne déjà latitude et longitude
                 stations.forEach(station => {
-                    const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
-                        .bindPopup(createStationPopup(station));
-                    
-                    stationsLayer.addLayer(marker);
+                    if (station.latitude && station.longitude) {
+                        const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
+                            .bindPopup(createStationPopup(station));
+                        
+                        stationsLayer.addLayer(marker);
+                    } else {
+                        console.warn('Station sans coordonnées:', station);
+                    }
                 });
                 
                 // Ajuster la vue pour montrer toutes les stations
-                if (stations.length > 0) {
+                if (stationsLayer.getLayers().length > 0) {
                     const group = new L.featureGroup(stationsLayer.getLayers());
                     map.fitBounds(group.getBounds().pad(0.1));
+                } else {
+                    alert('Aucune station avec coordonnées GPS valides');
                 }
                 
                 showLoading(false);
             } catch (error) {
                 console.error('Erreur lors du chargement des stations:', error);
                 showLoading(false);
-                alert('Erreur lors du chargement des stations');
+                alert('Erreur lors du chargement des stations: ' + error.message);
             }
         }
         
@@ -272,15 +292,18 @@
         
         // Créer le popup pour une station
         function createStationPopup(station) {
+            const address = station.address || 'Adresse non disponible';
+            const rate = station.hourlyRate ? `${station.hourlyRate}€/h` : 'N/A';
+            const label = station.locationLabel || '';
+            
             return `
                 <div class="station-popup">
                     <h3>${station.name}</h3>
-                    <p><strong>Adresse:</strong> ${station.formattedAddress}</p>
-                    <p><strong>Tarif:</strong> <span class="price">${station.formattedRate}</span></p>
-                    <p><strong>Type de prise:</strong> ${station.plugType}</p>
-                    <p><strong>Propriétaire:</strong> ${station.ownerName}</p>
-                    ${station.locationDescription ? `<p><em>${station.locationDescription}</em></p>` : ''}
-                    <a href="#" class="btn" onclick="reserveStation(${station.id})">Réserver</a>
+                    <p><strong>Lieu:</strong> ${label}</p>
+                    <p><strong>Adresse:</strong> ${address}</p>
+                    <p><strong>Tarif:</strong> <span class="price">${rate}</span></p>
+                    <p><strong>Type de prise:</strong> ${station.plugType || 'TYPE2S'}</p>
+                    <a href="add-reservation.jsp?stationId=${station.id}" class="btn">Réserver</a>
                 </div>
             `;
         }
@@ -315,10 +338,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-

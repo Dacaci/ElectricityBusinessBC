@@ -41,7 +41,7 @@
     <div class="header">
         <h1>Electricity Business</h1>
         <div class="user-info">
-            <span>Bienvenue, <%= ((User)request.getAttribute("user")).getEmail() %></span>
+            <span>Bienvenue, <%= request.getAttribute("user") != null ? ((User)request.getAttribute("user")).getEmail() : "Utilisateur" %></span>
             <span class="status-badge status-active">Compte Actif</span>
             <a href="logout">Déconnexion</a>
         </div>
@@ -102,6 +102,9 @@
     </div>
 </body>
 </html>
+
+
+
 
 
 
