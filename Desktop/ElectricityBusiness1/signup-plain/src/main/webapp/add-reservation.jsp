@@ -402,8 +402,15 @@
                     throw new Error('Erreur lors du chargement des lieux');
                 }
                 
-                stations = await stationsResponse.json();
-                locations = await locationsResponse.json();
+                const stationsData = await stationsResponse.json();
+                const locationsData = await locationsResponse.json();
+                
+                // Gérer la pagination
+                stations = stationsData.content || stationsData;
+                locations = locationsData.content || locationsData;
+                
+                console.log('Stations chargées:', stations);
+                console.log('Locations chargées:', locations);
                 
                 populateStationSelect();
                 showLoading(false);
@@ -419,13 +426,71 @@
             const select = document.getElementById('stationId');
             select.innerHTML = '<option value="">Sélectionnez une borne...</option>';
             
-            stations.filter(station => station.isActive).forEach(station => {
+            console.log('Nombre de stations:', stations.length);
+            console.log('Nombre de locations:', locations.length);
+            
+            if (!Array.isArray(stations)) {
+                console.error('Stations n\'est pas un tableau:', stations);
+                showError('Erreur: Les données des bornes sont invalides');
+                return;
+            }
+            
+            if (!Array.isArray(locations)) {
+                console.error('Locations n\'est pas un tableau:', locations);
+                showError('Erreur: Les données des lieux sont invalides');
+                return;
+            }
+            
+            const activeStations = stations.filter(station => station.isActive);
+            console.log('Stations actives:', activeStations);
+            
+            if (activeStations.length === 0) {
+                showError('Aucune borne active disponible. Veuillez créer des bornes d\'abord.');
+                document.getElementById('formContainer').style.display = 'block';
+                return;
+            }
+            
+            activeStations.forEach(station => {
+                console.log('Traitement station:', station);
+                console.log('  - ID:', station.id);
+                console.log('  - Name:', station.name);
+                console.log('  - HourlyRate:', station.hourlyRate);
+                console.log('  - LocationId:', station.locationId);
+                
                 const location = locations.find(loc => loc.id === station.locationId);
+                console.log('Location trouvée:', location);
+                if (location) {
+                    console.log('  - Location label:', location.label);
+                }
+                
                 const locationName = location ? location.label : 'Lieu inconnu';
                 
                 const option = document.createElement('option');
                 option.value = station.id;
-                option.textContent = `${station.name} - ${locationName} (${station.hourlyRate}€/h)`;
+                
+                // Construction du texte étape par étape pour debug
+                let optionText = '';
+                if (station.name) {
+                    optionText += station.name;
+                } else {
+                    optionText += 'Borne sans nom';
+                }
+                
+                optionText += ' - ';
+                optionText += locationName;
+                optionText += ' (';
+                
+                if (station.hourlyRate !== undefined && station.hourlyRate !== null) {
+                    optionText += station.hourlyRate;
+                } else {
+                    optionText += '0.00';
+                }
+                
+                optionText += '€/h)';
+                
+                console.log('  - Texte option finale:', optionText);
+                
+                option.textContent = optionText;
                 option.dataset.station = JSON.stringify(station);
                 select.appendChild(option);
             });
