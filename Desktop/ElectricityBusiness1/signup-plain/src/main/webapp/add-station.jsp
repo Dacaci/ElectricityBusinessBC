@@ -84,7 +84,8 @@
         }
         
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e9ecef;
@@ -93,10 +94,39 @@
             transition: border-color 0.3s;
         }
         
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: #2196F3;
+        }
+        
+        .location-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .location-link:hover {
+            text-decoration: underline;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
         }
         
         .form-row {
@@ -221,36 +251,60 @@
             <div id="formContainer" class="form-container" style="display: none;">
                 <form id="stationForm">
                     <div class="form-group">
-                        <label for="name">Nom de la borne <span class="required">*</span></label>
-                        <input type="text" id="name" name="name" required maxlength="255" 
-                               placeholder="Ex: Borne principale - Parking A">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="locationId">Lieu de recharge <span class="required">*</span></label>
+                        <label for="locationId">Lieu <span class="required">*</span></label>
                         <select id="locationId" name="locationId" required>
                             <option value="">Sélectionnez un lieu...</option>
                         </select>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="name">Nom <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="Borne 3" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="power">Puissance <span class="required">*</span></label>
+                        <select id="power" name="power" required>
+                            <option value="">Sélectionnez une puissance...</option>
+                            <option value="3.7">3,7 KVA</option>
+                            <option value="7.4" selected>7,4 KVA</option>
+                            <option value="11">11 KVA</option>
+                            <option value="22">22 KVA</option>
+                            <option value="50">50 KVA</option>
+                            <option value="150">150 KVA</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">Ville <span class="required">*</span></label>
+                        <input type="text" id="city" name="city" placeholder="Sélectionnez une ville..." required>
+                    </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="hourlyRate">Tarif horaire (€/h) <span class="required">*</span></label>
-                            <input type="number" id="hourlyRate" name="hourlyRate" step="0.01" min="0" required 
-                                   placeholder="Ex: 2.50">
+                            <label for="latitude">Latitude <span class="required">*</span></label>
+                            <input type="text" id="latitude" name="latitude" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="plugType">Type de prise</label>
-                            <input type="text" id="plugType" name="plugType" value="TYPE2S" readonly 
-                                   style="background-color: #f8f9fa; color: #6c757d;">
+                            <label for="longitude">Longitude <span class="required">*</span></label>
+                            <input type="text" id="longitude" name="longitude" required>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="isActive" name="isActive" checked> 
-                            Borne active (disponible pour les réservations)
+                        <a href="#" id="useLocation" class="location-link">Utiliser ma position</a>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="instructions">Instruction</label>
+                        <textarea id="instructions" name="instructions" rows="4" placeholder="Tournez à droite dès que vous avez passé le portail d'entrée.&#10;La borne se situe à 20 mètres de distance par rapport au portail d'entrée."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="onFoot" name="onFoot">
+                            Sur pied
                         </label>
                     </div>
                     
@@ -269,6 +323,7 @@
         // Charger les lieux au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
             loadLocations();
+            setupLocationButton();
         });
         
         async function loadLocations() {
@@ -333,14 +388,20 @@
             const stationData = {
                 name: formData.get('name'),
                 locationId: parseInt(formData.get('locationId')),
-                hourlyRate: parseFloat(formData.get('hourlyRate')),
+                power: parseFloat(formData.get('power')),
+                city: formData.get('city'),
+                latitude: formData.get('latitude'),
+                longitude: formData.get('longitude'),
+                instructions: formData.get('instructions'),
+                onFoot: formData.get('onFoot') === 'on',
                 plugType: 'TYPE2S', // Toujours TYPE2S
-                isActive: formData.get('isActive') === 'on'
+                hourlyRate: 2.0, // Tarif par défaut
+                isActive: true // Toujours actif
             };
             
             // Validation côté client
-            if (!stationData.name || !stationData.locationId || 
-                isNaN(stationData.hourlyRate) || stationData.hourlyRate < 0) {
+            if (!stationData.name || !stationData.locationId || !stationData.power || 
+                !stationData.city || !stationData.latitude || !stationData.longitude) {
                 showError('Veuillez remplir tous les champs obligatoires correctement');
                 return;
             }
@@ -391,6 +452,55 @@
                     submitBtn.disabled = false;
                 }
             }
+        }
+        
+        function setupLocationButton() {
+            const useLocationBtn = document.getElementById('useLocation');
+            useLocationBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                getCurrentLocation();
+            });
+        }
+        
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                showError('La géolocalisation n\'est pas supportée par ce navigateur');
+                return;
+            }
+            
+            showLoading(true);
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    
+                    document.getElementById('latitude').value = latitude.toFixed(6);
+                    document.getElementById('longitude').value = longitude.toFixed(6);
+                    
+                    showSuccess('Position géolocalisée avec succès !');
+                    showLoading(false);
+                },
+                function(error) {
+                    let errorMessage = 'Erreur lors de la géolocalisation : ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += 'Permission refusée';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += 'Position indisponible';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += 'Délai d\'attente dépassé';
+                            break;
+                        default:
+                            errorMessage += 'Erreur inconnue';
+                            break;
+                    }
+                    showError(errorMessage);
+                    showLoading(false);
+                }
+            );
         }
         
         function showError(message) {
