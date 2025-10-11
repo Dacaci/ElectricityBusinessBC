@@ -14,35 +14,71 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+            width: 100%;
+            padding: 20px;
         }
         
         .header {
-            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
-            color: white;
-            padding: 30px;
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .lightning {
+            font-size: 1.5em;
+        }
+        
+        .car {
+            font-size: 1.2em;
+        }
+        
+        .logo-text {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #2c3e50;
+        }
+        
+        .logout-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .logout-link:hover {
+            text-decoration: underline;
+        }
+        
+        .main-title {
             text-align: center;
-        }
-        
-        .header h1 {
             font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            margin: 40px 0;
+            color: #2c3e50;
+            font-weight: bold;
         }
         
         .nav {
@@ -132,6 +168,15 @@
         .btn-secondary {
             background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
             box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn-reserve {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            font-size: 1.1em;
+            padding: 15px 30px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
         }
         
         .form-actions {
@@ -244,8 +289,69 @@
             padding-top: 10px;
             margin-top: 10px;
             font-weight: 600;
-            font-size: 1.1em;
+            font-size: 1.2em;
             color: #155724;
+        }
+        
+        .station-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .station-input-container select {
+            flex: 1;
+        }
+        
+        .find-station-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        
+        .find-station-link:hover {
+            text-decoration: underline;
+        }
+        
+        .datetime-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .datetime-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .datetime-group label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+        
+        .payment-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .payment-section h4 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #9C27B0;
+            padding-bottom: 10px;
+        }
+        
+        #cardNumber {
+            letter-spacing: 2px;
+        }
+        
+        #cvv {
+            text-align: center;
         }
         
         @media (max-width: 768px) {
@@ -260,23 +366,43 @@
             .station-details {
                 grid-template-columns: 1fr;
             }
+            
+            .datetime-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .station-input-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .find-station-link {
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .datetime-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>➕ Nouvelle Réservation</h1>
-            <p>Réservez une borne de recharge électrique</p>
-        </div>
-        
-        <div class="nav">
-            <a href="dashboard.jsp">🏠 Tableau de bord</a>
-            <a href="locations.jsp">📍 Lieux</a>
-            <a href="stations.jsp">🔌 Bornes</a>
-            <a href="reservations.jsp">📅 Réservations</a>
-            <a href="map.jsp">🗺️ Carte</a>
-            <a href="logout">🚪 Déconnexion</a>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="lightning">⚡</span>
+                    <span class="car">🚗</span>
+                    <div class="logo-text">Electricity Business</div>
+                </div>
+                <div class="user-info">
+                    <span>Utilisateur connecté: Julia RIGHI</span>
+                    <a href="logout" class="logout-link">Déconnexion</a>
+                </div>
+            </div>
         </div>
         
         <div class="content">
@@ -294,10 +420,14 @@
             <div id="formContainer" class="form-container" style="display: none;">
                 <form id="reservationForm">
                     <div class="form-group">
-                        <label for="stationId">Borne de recharge <span class="required">*</span></label>
-                        <select id="stationId" name="stationId" required onchange="updateStationInfo()">
-                            <option value="">Sélectionnez une borne...</option>
-                        </select>
+                        <label for="stationId">Borne <span class="required">*</span></label>
+                        <div class="station-input-container">
+                            <input type="text" id="stationSearch" placeholder="Rechercher une borne..." oninput="filterStations()" style="display: none;">
+                            <select id="stationId" name="stationId" required onchange="updateStationInfo()">
+                                <option value="">Sélectionnez une borne...</option>
+                            </select>
+                            <a href="map.jsp" class="find-station-link">Trouver une borne</a>
+                        </div>
                     </div>
                     
                     <div id="stationInfo" class="station-info">
@@ -322,20 +452,30 @@
                         </div>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="startTime">Date et heure de début <span class="required">*</span></label>
-                            <input type="datetime-local" id="startTime" name="startTime" required onchange="calculatePrice()">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="endTime">Date et heure de fin <span class="required">*</span></label>
-                            <input type="datetime-local" id="endTime" name="endTime" required onchange="calculatePrice()">
+                    <div class="form-group">
+                        <label>Quand ? <span class="required">*</span></label>
+                        <div class="datetime-row">
+                            <div class="datetime-group">
+                                <label for="startDate">Date début</label>
+                                <input type="date" id="startDate" name="startDate" required onchange="calculatePrice()">
+                            </div>
+                            <div class="datetime-group">
+                                <label for="startTime">Heure début</label>
+                                <input type="time" id="startTime" name="startTime" required onchange="calculatePrice()">
+                            </div>
+                            <div class="datetime-group">
+                                <label for="endDate">Date fin</label>
+                                <input type="date" id="endDate" name="endDate" required onchange="calculatePrice()">
+                            </div>
+                            <div class="datetime-group">
+                                <label for="endTime">Heure de fin</label>
+                                <input type="time" id="endTime" name="endTime" required onchange="calculatePrice()">
+                            </div>
                         </div>
                     </div>
                     
                     <div id="priceCalculation" class="price-calculation">
-                        <h5>Calcul du prix</h5>
+                        <h5>Montant à régler</h5>
                         <div class="price-breakdown">
                             <span>Durée:</span>
                             <span id="duration">-</span>
@@ -345,14 +485,55 @@
                             <span id="hourlyRate">-</span>
                         </div>
                         <div class="total-price">
-                            <span>Total:</span>
+                            <span>Montant à régler:</span>
                             <span id="totalPrice">-</span>
                         </div>
                     </div>
                     
+                    <div class="payment-section">
+                        <h4>💳 Informations de paiement</h4>
+                        
+                        <div class="form-group">
+                            <label for="cardNumber">Numéro de la carte bancaire <span class="required">*</span></label>
+                            <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiryMonth">Mois d'expiration <span class="required">*</span></label>
+                                <select id="expiryMonth" name="expiryMonth" required>
+                                    <option value="">Mois</option>
+                                    <option value="01">Janvier</option>
+                                    <option value="02">Février</option>
+                                    <option value="03">Mars</option>
+                                    <option value="04">Avril</option>
+                                    <option value="05">Mai</option>
+                                    <option value="06">Juin</option>
+                                    <option value="07">Juillet</option>
+                                    <option value="08">Août</option>
+                                    <option value="09">Septembre</option>
+                                    <option value="10">Octobre</option>
+                                    <option value="11">Novembre</option>
+                                    <option value="12">Décembre</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="expiryYear">Année d'expiration <span class="required">*</span></label>
+                                <select id="expiryYear" name="expiryYear" required>
+                                    <option value="">Année</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cvv">CVV <span class="required">*</span></label>
+                                <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="form-actions">
-                        <a href="reservations.jsp" class="btn btn-secondary">❌ Annuler</a>
-                        <button type="submit" class="btn">✅ Créer la réservation</button>
+                        <button type="submit" class="btn btn-reserve">Réserver</button>
                     </div>
                 </form>
             </div>
@@ -365,7 +546,9 @@
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            setMinDateTime();
+            setMinDate();
+            populateExpiryYears();
+            setupCardNumberFormatting();
             const params = new URLSearchParams(window.location.search);
             const preselectId = params.get('stationId');
             loadData().then(() => {
@@ -377,11 +560,38 @@
             });
         });
         
-        function setMinDateTime() {
+        function setMinDate() {
             const now = new Date();
-            const minDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            document.getElementById('startTime').min = minDateTime;
-            document.getElementById('endTime').min = minDateTime;
+            const today = now.toISOString().split('T')[0];
+            document.getElementById('startDate').min = today;
+            document.getElementById('endDate').min = today;
+        }
+        
+        function populateExpiryYears() {
+            const yearSelect = document.getElementById('expiryYear');
+            const currentYear = new Date().getFullYear();
+            
+            for (let i = 0; i < 10; i++) {
+                const year = currentYear + i;
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+        
+        function setupCardNumberFormatting() {
+            const cardInput = document.getElementById('cardNumber');
+            cardInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            });
+        }
+        
+        function filterStations() {
+            // Fonction pour filtrer les stations (à implémenter si nécessaire)
+            console.log('Filtrage des stations...');
         }
         
         async function loadData() {
@@ -520,34 +730,56 @@
         }
         
         function calculatePrice() {
+            console.log('=== calculatePrice appelée ===');
+            const startDate = document.getElementById('startDate').value;
             const startTime = document.getElementById('startTime').value;
+            const endDate = document.getElementById('endDate').value;
             const endTime = document.getElementById('endTime').value;
             const stationId = document.getElementById('stationId').value;
             
-            if (!startTime || !endTime || !stationId) {
+            console.log('StartDate:', startDate, 'StartTime:', startTime);
+            console.log('EndDate:', endDate, 'EndTime:', endTime);
+            console.log('StationId:', stationId);
+            
+            if (!startDate || !startTime || !endDate || !endTime || !stationId) {
+                console.log('Données manquantes pour calculer le prix');
                 document.getElementById('priceCalculation').style.display = 'none';
                 return;
             }
             
-            const start = new Date(startTime);
-            const end = new Date(endTime);
+            const start = new Date(startDate + 'T' + startTime);
+            const end = new Date(endDate + 'T' + endTime);
+            
+            console.log('Start DateTime:', start);
+            console.log('End DateTime:', end);
             
             if (end <= start) {
+                console.log('Date de fin avant ou égale à la date de début');
                 document.getElementById('priceCalculation').style.display = 'none';
                 return;
             }
             
             const station = stations.find(s => s.id == stationId);
-            if (!station) return;
+            console.log('Station trouvée:', station);
+            
+            if (!station) {
+                console.error('Station non trouvée avec ID:', stationId);
+                return;
+            }
             
             const durationMs = end - start;
             const durationHours = durationMs / (1000 * 60 * 60);
             const totalPrice = durationHours * station.hourlyRate;
             
-            document.getElementById('duration').textContent = `${durationHours.toFixed(2)} heures`;
-            document.getElementById('hourlyRate').textContent = `${station.hourlyRate} €/h`;
-            document.getElementById('totalPrice').textContent = `${totalPrice.toFixed(2)} €`;
+            console.log('Durée (heures):', durationHours);
+            console.log('Tarif horaire:', station.hourlyRate);
+            console.log('Prix total:', totalPrice);
             
+            document.getElementById('duration').textContent = durationHours.toFixed(2) + ' heures';
+            document.getElementById('hourlyRate').textContent = station.hourlyRate + ' €/h';
+            document.getElementById('totalPrice').textContent = totalPrice.toFixed(2) + ' €';
+            
+            console.log('Affichage du bloc de calcul');
             document.getElementById('priceCalculation').style.display = 'block';
         }
         
@@ -555,11 +787,47 @@
             e.preventDefault();
             
             const formData = new FormData(this);
+            
+            // Combiner date et heure
+            const startDate = formData.get('startDate');
+            const startTime = formData.get('startTime');
+            const endDate = formData.get('endDate');
+            const endTime = formData.get('endTime');
+            
+            const startDateTime = startDate + 'T' + startTime + ':00';
+            const endDateTime = endDate + 'T' + endTime + ':00';
+            
             const reservationData = {
                 stationId: parseInt(formData.get('stationId')),
-                startTime: formData.get('startTime'),
-                endTime: formData.get('endTime')
+                startTime: startDateTime,
+                endTime: endDateTime
             };
+            
+            // Validation des informations de paiement
+            const cardNumber = formData.get('cardNumber');
+            const expiryMonth = formData.get('expiryMonth');
+            const expiryYear = formData.get('expiryYear');
+            const cvv = formData.get('cvv');
+            
+            if (!cardNumber || !expiryMonth || !expiryYear || !cvv) {
+                showError('Veuillez remplir toutes les informations de paiement');
+                return;
+            }
+            
+            // Validation basique du numéro de carte (16 chiffres)
+            const cleanCardNumber = cardNumber.replace(/\s/g, '');
+            if (cleanCardNumber.length !== 16 || !/^\d+$/.test(cleanCardNumber)) {
+                showError('Le numéro de carte doit contenir 16 chiffres');
+                return;
+            }
+            
+            // Validation du CVV (3 ou 4 chiffres)
+            if (!/^\d{3,4}$/.test(cvv)) {
+                showError('Le CVV doit contenir 3 ou 4 chiffres');
+                return;
+            }
+            
+            console.log('Données de réservation envoyées:', reservationData);
             
             // Validation côté client
             if (!reservationData.stationId || !reservationData.startTime || !reservationData.endTime) {
@@ -583,7 +851,9 @@
             try {
                 showLoading(true);
                 
-                const response = await fetch('http://localhost:8080/api/reservations', {
+                // L'API attend userId comme paramètre de requête
+                // TODO: Récupérer dynamiquement l'ID de l'utilisateur connecté depuis la session
+                const response = await fetch('http://localhost:8080/api/reservations?userId=8', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

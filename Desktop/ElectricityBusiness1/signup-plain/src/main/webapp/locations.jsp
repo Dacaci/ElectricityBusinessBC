@@ -15,25 +15,21 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+            width: 100%;
+            padding: 20px;
         }
         
         .header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
+            background: white;
+            color: #333;
             padding: 30px;
             text-align: center;
+            border-bottom: 1px solid #ddd;
         }
         
         .header h1 {

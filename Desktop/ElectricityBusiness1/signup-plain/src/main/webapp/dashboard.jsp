@@ -5,20 +5,20 @@
 <head>
     <title>Dashboard - Electricity Business</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background-color: #f5f5f5; }
-        .header { background-color: #007bff; color: white; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: Arial, sans-serif; margin: 0; background-color: white; }
+        .header { background-color: white; color: #333; padding: 20px; border-bottom: 1px solid #ddd; }
         .header h1 { margin: 0; display: inline-block; }
         .header .user-info { float: right; margin-top: 5px; }
-        .header .user-info a { color: white; text-decoration: none; margin-left: 15px; }
+        .header .user-info a { color: #007bff; text-decoration: none; margin-left: 15px; }
         .header .user-info a:hover { text-decoration: underline; }
         
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .welcome-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .welcome-card { background: white; padding: 30px; border: 1px solid #ddd; margin-bottom: 30px; }
         .welcome-card h2 { color: #333; margin-top: 0; }
         .welcome-card p { color: #666; font-size: 16px; line-height: 1.6; }
         
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .feature-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .feature-card { background: white; padding: 25px; border: 1px solid #ddd; text-align: center; }
         .feature-card h3 { color: #007bff; margin-top: 0; }
         .feature-card p { color: #666; margin-bottom: 20px; }
         .feature-card .btn { 
@@ -102,6 +102,7 @@
     </div>
 </body>
 </html>
+
 
 
 

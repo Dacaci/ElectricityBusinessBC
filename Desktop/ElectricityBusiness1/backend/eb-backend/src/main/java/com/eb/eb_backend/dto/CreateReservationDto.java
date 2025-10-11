@@ -12,7 +12,7 @@ public class CreateReservationDto {
     private Long stationId;
     
     @NotNull(message = "La date de début est obligatoire")
-    @Future(message = "La date de début doit être dans le futur")
+    @FutureOrPresent(message = "La date de début ne peut pas être dans le passé")
     private LocalDateTime startTime;
     
     @NotNull(message = "La date de fin est obligatoire")

@@ -11,16 +11,16 @@
         body { 
             font-family: Arial, sans-serif; 
             margin: 0; 
-            background-color: #f5f5f5; 
+            background-color: white; 
             height: 100vh;
             overflow: hidden;
         }
         
         .header { 
-            background-color: #007bff; 
-            color: white; 
+            background-color: white; 
+            color: #333; 
             padding: 15px 20px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #ddd;
             position: relative;
             z-index: 1000;
         }
@@ -37,7 +37,7 @@
         }
         
         .header .user-info a { 
-            color: white; 
+            color: #007bff; 
             text-decoration: none; 
             margin-left: 15px; 
             font-size: 14px;

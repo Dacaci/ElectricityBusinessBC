@@ -18,7 +18,7 @@ services:
     image: tomcat:10.1-jdk21
     ports: ["8081:8080"]
     volumes:
-      - ./signup-plain/target/ROOT.war:/usr/local/tomcat/webapps/ROOT.war
+      - ./signup-plain/target/signup-plain.war:/usr/local/tomcat/webapps/ROOT.war
     environment:
       - DB_URL=jdbc:postgresql://db:5432/eb
       - DB_USER=eb
