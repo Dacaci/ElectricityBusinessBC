@@ -47,8 +47,62 @@
             text-decoration: underline; 
         }
         
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .search-title {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: end;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .search-form .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .search-form label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .search-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .search-form .search-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .search-form .search-btn:hover {
+            background: #0056b3;
+        }
+        
         .map-container {
-            height: calc(100vh - 70px);
+            height: calc(100vh - 200px);
             position: relative;
         }
         
@@ -143,9 +197,43 @@
             <a href="dashboard">Dashboard</a>
             <a href="logout">Déconnexion</a>
         </div>
-    </div>
-    
-    <div class="map-container">
+        </div>
+        
+        <div class="search-section">
+            <h2 class="search-title">Trouver une borne disponible autour de soi</h2>
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="location">Lieu</label>
+                    <input type="text" id="location" name="location" value="Paris" placeholder="Paris">
+                </div>
+                
+                <div class="form-group">
+                    <label for="startDate">Date de début</label>
+                    <input type="date" id="startDate" name="startDate" value="2023-10-06">
+                </div>
+                
+                <div class="form-group">
+                    <label for="startTime">Heure de début</label>
+                    <input type="time" id="startTime" name="startTime" value="10:00">
+                </div>
+                
+                <div class="form-group">
+                    <label for="endDate">Date de fin</label>
+                    <input type="date" id="endDate" name="endDate" value="2023-10-06">
+                </div>
+                
+                <div class="form-group">
+                    <label for="endTime">Heure de fin</label>
+                    <input type="time" id="endTime" name="endTime" value="18:00">
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="search-btn">Rechercher</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="map-container">
         <div id="map"></div>
         
         <div class="controls">
@@ -196,7 +284,8 @@
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const stations = await response.json();
+                const data = await response.json();
+                const stations = Array.isArray(data) ? data : (data.content || []);
                 console.log('Stations chargées:', stations);
                 
                 if (stations.length === 0) {
@@ -268,25 +357,47 @@
         
         // Charger les stations à proximité
         async function loadNearbyStations(lat, lng, radius = 10) {
+            // Vérifier que les coordonnées sont valides
+            if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+                console.warn('Coordonnées invalides, chargement de toutes les stations');
+                loadAllStations();
+                return;
+            }
+            
             showLoading(true);
             stationsLayer.clearLayers();
             
             try {
                 const response = await fetch(`http://localhost:8080/api/stations/nearby?latitude=${lat}&longitude=${lng}&radiusKm=${radius}`);
-                const stations = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const stations = Array.isArray(data) ? data : (data.content || []);
+                
+                if (!Array.isArray(stations)) {
+                    console.error('Format de données invalide:', data);
+                    showLoading(false);
+                    return;
+                }
                 
                 stations.forEach(station => {
-                    const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
-                        .bindPopup(createStationPopup(station));
-                    
-                    stationsLayer.addLayer(marker);
+                    if (station.latitude && station.longitude) {
+                        const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
+                            .bindPopup(createStationPopup(station));
+                        
+                        stationsLayer.addLayer(marker);
+                    }
                 });
                 
                 showLoading(false);
             } catch (error) {
                 console.error('Erreur lors du chargement des stations proches:', error);
                 showLoading(false);
-                alert('Erreur lors du chargement des stations à proximité');
+                // En cas d'erreur, charger toutes les stations
+                loadAllStations();
             }
         }
         
@@ -307,6 +418,7 @@
                 </div>
             `;
         }
+        
         
         // Basculer le mode recherche à proximité
         function toggleNearbySearch() {
@@ -334,7 +446,36 @@
         // Charger les stations au démarrage
         document.addEventListener('DOMContentLoaded', function() {
             loadAllStations();
+            setupSearchForm();
         });
+        
+        function setupSearchForm() {
+            const searchForm = document.getElementById('searchForm');
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+        }
+        
+        function performSearch() {
+            const formData = new FormData(document.getElementById('searchForm'));
+            const location = formData.get('location');
+            const startDate = formData.get('startDate');
+            const startTime = formData.get('startTime');
+            const endDate = formData.get('endDate');
+            const endTime = formData.get('endTime');
+            
+            console.log('Recherche avec:', { location, startDate, startTime, endDate, endTime });
+            
+            // Pour l'instant, on recharge toutes les stations
+            // Dans une vraie implémentation, on filtrerait par date/heure
+            loadAllStations();
+            
+            // Optionnel : centrer la carte sur le lieu recherché
+            if (location && location.toLowerCase() === 'paris') {
+                map.setView([48.8566, 2.3522], 13); // Centre de Paris
+            }
+        }
     </script>
 </body>
 </html>
