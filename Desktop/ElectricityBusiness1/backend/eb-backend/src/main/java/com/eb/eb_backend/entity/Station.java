@@ -55,6 +55,28 @@ public class Station {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private StationStatus status = StationStatus.ACTIVE;
+    
+    @Column(name = "power", precision = 10, scale = 2)
+    private BigDecimal power;
+    
+    @Column(name = "city", length = 255)
+    private String city;
+    
+    @Column(name = "latitude", precision = 10, scale = 6)
+    private BigDecimal latitude;
+    
+    @Column(name = "longitude", precision = 10, scale = 6)
+    private BigDecimal longitude;
+    
+    @Column(name = "instructions", columnDefinition = "TEXT")
+    private String instructions;
+    
+    @Column(name = "on_foot")
+    private Boolean onFoot = false;
+    
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

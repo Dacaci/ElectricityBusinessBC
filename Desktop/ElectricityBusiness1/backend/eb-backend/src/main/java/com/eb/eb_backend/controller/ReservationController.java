@@ -118,6 +118,34 @@ public class ReservationController {
         }
     }
     
+    /**
+     * Récupérer les réservations passées d'un utilisateur
+     * Équivalent SQL: WHERE U.id = userId AND NOW() > r.date_fin
+     */
+    @GetMapping("/user/{userId}/past")
+    public ResponseEntity<List<ReservationDto>> getPastUserReservations(@PathVariable Long userId) {
+        try {
+            List<ReservationDto> reservations = reservationService.getPastUserReservations(userId);
+            return ResponseEntity.ok(reservations);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    /**
+     * Récupérer les réservations actuelles (en cours) d'un utilisateur
+     * Équivalent SQL: WHERE date_debut <= NOW() AND date_fin >= NOW()
+     */
+    @GetMapping("/user/{userId}/current")
+    public ResponseEntity<List<ReservationDto>> getCurrentUserReservations(@PathVariable Long userId) {
+        try {
+            List<ReservationDto> reservations = reservationService.getCurrentUserReservations(userId);
+            return ResponseEntity.ok(reservations);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
     @GetMapping("/station/{stationId}/upcoming")
     public ResponseEntity<List<ReservationDto>> getUpcomingStationReservations(@PathVariable Long stationId) {
         try {

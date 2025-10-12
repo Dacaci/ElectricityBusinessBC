@@ -48,19 +48,6 @@
     </div>
     
     <div class="container">
-        <div class="welcome-card">
-            <h2>Connexion réussie !</h2>
-            <p>
-                Félicitations ! Votre compte a été activé avec succès. Vous pouvez maintenant accéder 
-                à toutes les fonctionnalités de la plateforme Electricity Business.
-            </p>
-            <p>
-                <strong>ID Utilisateur :</strong> <%= request.getAttribute("userId") %><br>
-                <strong>Email :</strong> <%= request.getAttribute("userEmail") %><br>
-                <strong>Statut :</strong> <span class="status-badge status-active">ACTIVE</span>
-            </p>
-        </div>
-        
         <div class="features-grid">
             <div class="feature-card">
                 <h3>📍 Mes Lieux de Recharge</h3>

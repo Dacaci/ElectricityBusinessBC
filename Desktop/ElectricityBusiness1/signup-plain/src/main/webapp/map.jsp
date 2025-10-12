@@ -273,9 +273,12 @@
         });
         
         // Charger toutes les stations
-        async function loadAllStations() {
+        async function loadAllStations(keepMapPosition = false) {
             showLoading(true);
             stationsLayer.clearLayers();
+            
+            const currentCenter = keepMapPosition ? map.getCenter() : null;
+            const currentZoom = keepMapPosition ? map.getZoom() : null;
             
             try {
                 const response = await fetch('http://localhost:8080/api/stations/map');
@@ -309,7 +312,13 @@
                 // Ajuster la vue pour montrer toutes les stations
                 if (stationsLayer.getLayers().length > 0) {
                     const group = new L.featureGroup(stationsLayer.getLayers());
-                    map.fitBounds(group.getBounds().pad(0.1));
+                    // Ajuster la vue pour voir toutes les stations (sauf si on garde la position)
+                    if (!keepMapPosition) {
+                        map.fitBounds(group.getBounds().pad(0.1));
+                    } else if (currentCenter && currentZoom) {
+                        // Restaurer la position précédente
+                        map.setView(currentCenter, currentZoom);
+                    }
                 } else {
                     alert('Aucune station avec coordonnées GPS valides');
                 }
@@ -325,29 +334,65 @@
         // Obtenir la position de l'utilisateur
         function getUserLocation() {
             if (navigator.geolocation) {
+                console.log('Demande de géolocalisation en cours...');
+                showLoading(true);
+                
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         userLocation = [position.coords.latitude, position.coords.longitude];
                         
+                        console.log('Position obtenue:', {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            precision: position.coords.accuracy + 'm'
+                        });
+                        
                         // Ajouter un marqueur pour la position de l'utilisateur
-                        L.marker(userLocation, {
+                        const userMarker = L.marker(userLocation, {
                             icon: L.divIcon({
                                 className: 'user-marker',
-                                html: '<div style="background-color: #28a745; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
-                                iconSize: [16, 16],
-                                iconAnchor: [8, 8]
+                                html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
                             })
-                        }).bindPopup('Votre position').addTo(map);
+                        }).bindPopup('📍 Votre position').addTo(map);
                         
-                        // Centrer la carte sur la position de l'utilisateur
-                        map.setView(userLocation, 13);
+                        // Centrer la carte sur la position de l'utilisateur avec animation
+                        console.log('Centrage de la carte sur:', userLocation);
+                        map.flyTo(userLocation, 14, {
+                            duration: 1.5
+                        });
                         
-                        // Charger les stations à proximité
-                        loadNearbyStations(userLocation[0], userLocation[1]);
+                        // Charger les stations à proximité (en gardant la position de la carte)
+                        setTimeout(() => {
+                            loadNearbyStations(userLocation[0], userLocation[1], 10, true);
+                        }, 500);
+                        
+                        showLoading(false);
                     },
                     function(error) {
-                        console.error('Erreur de géolocalisation:', error);
-                        alert('Impossible d\'obtenir votre position. Veuillez autoriser la géolocalisation.');
+                        showLoading(false);
+                        let errorMessage = 'Erreur de géolocalisation: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Permission refusée. Autorisez la géolocalisation dans votre navigateur.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Position indisponible.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Délai d\'attente dépassé.';
+                                break;
+                            default:
+                                errorMessage += 'Erreur inconnue.';
+                        }
+                        console.error(errorMessage, error);
+                        alert(errorMessage);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
                     }
                 );
             } else {
@@ -356,14 +401,15 @@
         }
         
         // Charger les stations à proximité
-        async function loadNearbyStations(lat, lng, radius = 10) {
+        async function loadNearbyStations(lat, lng, radius = 10, keepMapPosition = false) {
             // Vérifier que les coordonnées sont valides
             if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
                 console.warn('Coordonnées invalides, chargement de toutes les stations');
-                loadAllStations();
+                loadAllStations(keepMapPosition);
                 return;
             }
             
+            console.log(`Chargement des stations dans un rayon de ${radius}km autour de [${lat}, ${lng}]`);
             showLoading(true);
             stationsLayer.clearLayers();
             
@@ -383,6 +429,8 @@
                     return;
                 }
                 
+                console.log(`${stations.length} stations trouvées à proximité`);
+                
                 stations.forEach(station => {
                     if (station.latitude && station.longitude) {
                         const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
@@ -396,8 +444,9 @@
             } catch (error) {
                 console.error('Erreur lors du chargement des stations proches:', error);
                 showLoading(false);
-                // En cas d'erreur, charger toutes les stations
-                loadAllStations();
+                // En cas d'erreur, charger toutes les stations sans recentrer
+                console.warn('Fallback: chargement de toutes les stations');
+                loadAllStations(true);
             }
         }
         

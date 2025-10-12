@@ -52,6 +52,13 @@ public class StationService {
         station.setHourlyRate(stationDto.getHourlyRate());
         station.setPlugType(stationDto.getPlugType());
         station.setIsActive(stationDto.getIsActive() != null ? stationDto.getIsActive() : true);
+        station.setStatus(stationDto.getStatus() != null ? stationDto.getStatus() : com.eb.eb_backend.entity.StationStatus.ACTIVE);
+        station.setPower(stationDto.getPower());
+        station.setCity(stationDto.getCity());
+        station.setLatitude(stationDto.getLatitude());
+        station.setLongitude(stationDto.getLongitude());
+        station.setInstructions(stationDto.getInstructions());
+        station.setOnFoot(stationDto.getOnFoot() != null ? stationDto.getOnFoot() : false);
         
         Station savedStation = stationRepository.save(station);
         return new StationDto(savedStation);
@@ -207,5 +214,65 @@ public class StationService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         
         return earthRadius * c;
+    }
+    
+    /**
+     * Rechercher les bornes disponibles par ville et période
+     * Équivalent SQL:
+     * SELECT * FROM bornes b 
+     * JOIN lieux l ON l.id = b.id_lieux
+     * LEFT JOIN reservations r ON r.id_borne = b.id 
+     *   AND r.date_debut < endTime AND r.date_fin > startTime
+     * WHERE b.city = city AND r.id IS NULL
+     */
+    @Transactional(readOnly = true)
+    public List<StationDto> findAvailableStationsByCityAndPeriod(
+            String city, 
+            java.time.LocalDateTime startTime, 
+            java.time.LocalDateTime endTime) {
+        
+        // Récupérer toutes les stations de la ville avec status ACTIVE
+        List<Station> stationsInCity = stationRepository.findAll().stream()
+                .filter(station -> city.equalsIgnoreCase(station.getCity()) 
+                        && station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE
+                        && station.getIsActive())
+                .collect(Collectors.toList());
+        
+        // Filtrer les stations qui n'ont pas de réservations conflictuelles
+        return stationsInCity.stream()
+                .filter(station -> {
+                    // Vérifier si la station a des réservations qui se chevauchent avec la période
+                    boolean hasConflict = station.getReservations().stream()
+                            .anyMatch(reservation -> {
+                                // Une réservation est en conflit si :
+                                // - Elle commence avant la fin de la période demandée
+                                // - ET elle se termine après le début de la période demandée
+                                return reservation.getStartTime().isBefore(endTime)
+                                        && reservation.getEndTime().isAfter(startTime);
+                            });
+                    
+                    return !hasConflict; // Disponible si pas de conflit
+                })
+                .map(StationDto::new)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Rechercher les bornes avec le statut spécifique pour un propriétaire
+     * Équivalent SQL:
+     * SELECT * FROM utilisateurs u
+     * JOIN lieux l ON l.id_utilisateur = u.id
+     * JOIN bornes b ON b.id_lieux = l.id
+     * WHERE b.status = 'PENDING' AND u.id = ownerId
+     */
+    @Transactional(readOnly = true)
+    public List<StationDto> findStationsByOwnerAndStatus(Long ownerId, com.eb.eb_backend.entity.StationStatus status) {
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
+        
+        return stationRepository.findByOwner(owner, Pageable.unpaged()).stream()
+                .filter(station -> station.getStatus() == status)
+                .map(StationDto::new)
+                .collect(Collectors.toList());
     }
 }

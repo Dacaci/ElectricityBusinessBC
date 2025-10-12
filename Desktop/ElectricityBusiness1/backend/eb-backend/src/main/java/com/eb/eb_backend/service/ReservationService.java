@@ -235,5 +235,46 @@ public class ReservationService {
         
         reservationRepository.delete(reservation);
     }
+    
+    /**
+     * Récupérer les réservations passées d'un utilisateur
+     * Équivalent SQL: 
+     * SELECT * FROM utilisateurs u
+     * JOIN reservations r ON r.id_utilisateur = u.id
+     * WHERE U.id = userId AND NOW() > r.date_fin
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationDto> getPastUserReservations(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + userId));
+        
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        
+        return reservationRepository.findByUser(user, org.springframework.data.domain.Pageable.unpaged()).stream()
+                .filter(reservation -> reservation.getEndTime().isBefore(now))
+                .map(ReservationDto::new)
+                .collect(java.util.stream.Collectors.toList());
+    }
+    
+    /**
+     * Récupérer les réservations actuelles (en cours) d'un utilisateur
+     * Équivalent SQL:
+     * SELECT * FROM reservations WHERE id_utilisateur = userId 
+     * AND date_debut <= NOW() AND date_fin >= NOW()
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationDto> getCurrentUserReservations(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + userId));
+        
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        
+        return reservationRepository.findByUser(user, org.springframework.data.domain.Pageable.unpaged()).stream()
+                .filter(reservation -> 
+                    !reservation.getStartTime().isAfter(now) && 
+                    !reservation.getEndTime().isBefore(now))
+                .map(ReservationDto::new)
+                .collect(java.util.stream.Collectors.toList());
+    }
 }
 

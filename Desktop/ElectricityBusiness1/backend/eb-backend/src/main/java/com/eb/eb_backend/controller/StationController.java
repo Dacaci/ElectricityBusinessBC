@@ -120,4 +120,43 @@ public class StationController {
         List<StationLocationDto> stations = stationService.getNearbyStations(latitude, longitude, radiusKm);
         return ResponseEntity.ok(stations);
     }
+    
+    /**
+     * Rechercher les bornes disponibles par ville et période
+     * Équivalent SQL du projet: 
+     * SELECT * FROM bornes b JOIN lieux l ... LEFT JOIN reservations r ... WHERE r.id IS NULL
+     */
+    @GetMapping("/available")
+    public ResponseEntity<List<StationDto>> getAvailableStations(
+            @RequestParam String city,
+            @RequestParam String startTime,
+            @RequestParam String endTime) {
+        try {
+            java.time.LocalDateTime start = java.time.LocalDateTime.parse(startTime);
+            java.time.LocalDateTime end = java.time.LocalDateTime.parse(endTime);
+            
+            List<StationDto> stations = stationService.findAvailableStationsByCityAndPeriod(city, start, end);
+            return ResponseEntity.ok(stations);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    /**
+     * Rechercher les bornes par statut pour un propriétaire
+     * Équivalent SQL: WHERE b.status = 'PENDING' AND u.id = ownerId
+     */
+    @GetMapping("/owner/{ownerId}/status/{status}")
+    public ResponseEntity<List<StationDto>> getStationsByStatus(
+            @PathVariable Long ownerId,
+            @PathVariable String status) {
+        try {
+            com.eb.eb_backend.entity.StationStatus stationStatus = 
+                com.eb.eb_backend.entity.StationStatus.valueOf(status.toUpperCase());
+            List<StationDto> stations = stationService.findStationsByOwnerAndStatus(ownerId, stationStatus);
+            return ResponseEntity.ok(stations);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.eb.eb_backend.dto;
 
 import com.eb.eb_backend.entity.Station;
+import com.eb.eb_backend.entity.StationStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,20 @@ public class StationDto {
     
     private Boolean isActive = true;
     
+    private StationStatus status = StationStatus.ACTIVE;
+    
+    private BigDecimal power;
+    
+    private String city;
+    
+    private BigDecimal latitude;
+    
+    private BigDecimal longitude;
+    
+    private String instructions;
+    
+    private Boolean onFoot = false;
+    
     private Long ownerId;
     private Long locationId;
     
@@ -40,6 +55,13 @@ public class StationDto {
         this.hourlyRate = station.getHourlyRate();
         this.plugType = station.getPlugType();
         this.isActive = station.getIsActive();
+        this.status = station.getStatus();
+        this.power = station.getPower();
+        this.city = station.getCity();
+        this.latitude = station.getLatitude();
+        this.longitude = station.getLongitude();
+        this.instructions = station.getInstructions();
+        this.onFoot = station.getOnFoot();
         this.ownerId = station.getOwner().getId();
         this.locationId = station.getLocation().getId();
     }
