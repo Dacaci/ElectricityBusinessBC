@@ -328,23 +328,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📅 Gestion des Réservations</h1>
+            <h1>Gestion des Réservations</h1>
             <p>Gérez vos réservations de bornes de recharge</p>
         </div>
         
         <div class="nav">
-            <a href="dashboard.jsp">🏠 Tableau de bord</a>
-            <a href="locations.jsp">📍 Lieux</a>
-            <a href="stations.jsp">🔌 Bornes</a>
-            <a href="reservations.jsp" class="active">📅 Réservations</a>
-            <a href="map.jsp">🗺️ Carte</a>
-            <a href="logout">🚪 Déconnexion</a>
+            <a href="dashboard.jsp">Tableau de bord</a>
+            <a href="locations.jsp">Lieux</a>
+            <a href="stations.jsp">Bornes</a>
+            <a href="reservations.jsp" class="active">Réservations</a>
+            <a href="map.jsp">Carte</a>
+            <a href="logout">Déconnexion</a>
         </div>
         
         <div class="content">
             <div class="actions">
                 <div>
-                    <a href="add-reservation.jsp" class="btn">➕ Nouvelle réservation</a>
+                    <a href="add-reservation.jsp" class="btn">Nouvelle réservation</a>
                 </div>
                 <div class="filters">
                     <div class="filter-group">
@@ -405,7 +405,7 @@
             <div id="noReservationsMessage" class="no-reservations" style="display: none;">
                 <h3>Aucune réservation trouvée</h3>
                 <p>Commencez par créer votre première réservation.</p>
-                <a href="add-reservation.jsp" class="btn" style="margin-top: 15px;">➕ Nouvelle réservation</a>
+                <a href="add-reservation.jsp" class="btn" style="margin-top: 15px;">Nouvelle réservation</a>
             </div>
         </div>
     </div>
@@ -414,6 +414,10 @@
         let reservations = [];
         let stations = [];
         let locations = [];
+        
+        // ID de l'utilisateur connecté (pour simplifier, on utilise 1 pour le propriétaire)
+        // Dans une vraie application, on récupérerait ça depuis la session
+        const CURRENT_USER_ID = 1; // Utilisateur propriétaire connecté
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
@@ -516,18 +520,31 @@
         }
         
         function getActionButtons(reservation) {
+            
             let buttons = '';
             
-            if (reservation.status === 'PENDING') {
-                buttons += `<button onclick="confirmReservation(${reservation.id})" class="btn btn-success">✅ Confirmer</button>`;
-                buttons += `<button onclick="cancelReservation(${reservation.id})" class="btn btn-danger">❌ Refuser</button>`;
-            } else if (reservation.status === 'CONFIRMED') {
-                buttons += `<button onclick="completeReservation(${reservation.id})" class="btn btn-info">✅ Terminer</button>`;
-                buttons += `<button onclick="cancelReservation(${reservation.id})" class="btn btn-warning">❌ Annuler</button>`;
+            // Vérifier si l'utilisateur connecté est le client (celui qui a fait la réservation)
+            const isClient = reservation.userId === CURRENT_USER_ID;
+            
+            if (isClient) {
+                // EN TANT QUE CLIENT : Seulement "Annuler" pour ses propres réservations
+                if (reservation.status === 'PENDING' || reservation.status === 'CONFIRMED') {
+                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-warning">Annuler ma réservation</button>';
+                }
+            } else {
+                // EN TANT QUE PROPRIÉTAIRE : Peut confirmer/refuser les réservations sur ses stations
+                if (reservation.status === 'PENDING') {
+                    buttons += '<button onclick="confirmReservation(' + reservation.id + ')" class="btn btn-success">Accepter</button>';
+                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-danger">Refuser</button>';
+                } else if (reservation.status === 'CONFIRMED') {
+                    buttons += '<button onclick="completeReservation(' + reservation.id + ')" class="btn btn-info">Marquer comme terminée</button>';
+                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-warning">Annuler</button>';
+                }
             }
             
-            buttons += `<a href="http://localhost:8080/api/reservations/${reservation.id}/receipt.pdf" class="btn btn-secondary" target="_blank">📄 PDF</a>`;
-            buttons += `<button onclick="deleteReservation(${reservation.id})" class="btn btn-danger">🗑️ Supprimer</button>`;
+            // PDF et suppression pour tous
+            buttons += '<a href="http://localhost:8080/api/reservations/' + reservation.id + '/receipt.pdf" class="btn btn-secondary" target="_blank">PDF</a>';
+            buttons += '<button onclick="deleteReservation(' + reservation.id + ')" class="btn btn-danger">Supprimer</button>';
             
             return buttons;
         }
@@ -574,8 +591,15 @@
         }
         
         async function confirmReservation(reservationId) {
+            if (!reservationId) {
+                alert('Erreur: ID de réservation manquant');
+                return;
+            }
+            
             try {
-                const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}/confirm`, {
+                const url = 'http://localhost:8080/api/reservations/' + reservationId + '/confirm';
+                
+                const response = await fetch(url, {
                     method: 'PUT'
                 });
                 
@@ -593,12 +617,19 @@
         }
         
         async function cancelReservation(reservationId) {
+            if (!reservationId) {
+                alert('Erreur: ID de réservation manquant');
+                return;
+            }
+            
             if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
                 return;
             }
             
             try {
-                const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}/cancel`, {
+                const url = 'http://localhost:8080/api/reservations/' + reservationId + '/cancel';
+                
+                const response = await fetch(url, {
                     method: 'PUT'
                 });
                 
@@ -616,8 +647,15 @@
         }
         
         async function completeReservation(reservationId) {
+            if (!reservationId) {
+                alert('Erreur: ID de réservation manquant');
+                return;
+            }
+            
             try {
-                const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}/complete`, {
+                const url = 'http://localhost:8080/api/reservations/' + reservationId + '/complete';
+                
+                const response = await fetch(url, {
                     method: 'PUT'
                 });
                 
@@ -635,12 +673,19 @@
         }
         
         async function deleteReservation(reservationId) {
+            if (!reservationId) {
+                alert('Erreur: ID de réservation manquant');
+                return;
+            }
+            
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) {
                 return;
             }
             
             try {
-                const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}`, {
+                const url = 'http://localhost:8080/api/reservations/' + reservationId;
+                
+                const response = await fetch(url, {
                     method: 'DELETE'
                 });
                 

@@ -394,8 +394,8 @@
         <div class="header">
             <div class="header-content">
                 <div class="logo">
-                    <span class="lightning">⚡</span>
-                    <span class="car">🚗</span>
+                    <span class="lightning">ELECTRIC</span>
+                    <span class="car">VEHICULE</span>
                     <div class="logo-text">Electricity Business</div>
                 </div>
                 <div class="user-info">
@@ -409,7 +409,7 @@
             <div id="messageContainer"></div>
             
             <div class="info-box">
-                <h4>ℹ️ Information importante</h4>
+                <h4>Information importante</h4>
                 <p>Veuillez sélectionner une borne disponible et choisir vos créneaux de réservation. Le montant sera calculé automatiquement.</p>
             </div>
             

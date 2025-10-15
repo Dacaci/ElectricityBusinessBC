@@ -170,7 +170,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                ⚡ 🚗 Electricity Business
+                ELECTRIC VEHICLE Electricity Business
             </div>
             <div class="user-info">
                 Utilisateur connecté: Julia RIGHI

@@ -223,24 +223,24 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>➕ Ajouter une Borne</h1>
+            <h1>Ajouter une Borne</h1>
             <p>Créez une nouvelle borne de recharge électrique</p>
         </div>
         
         <div class="nav">
-            <a href="dashboard.jsp">🏠 Tableau de bord</a>
-            <a href="locations.jsp">📍 Lieux</a>
-            <a href="stations.jsp">🔌 Bornes</a>
-            <a href="reservations.jsp">📅 Réservations</a>
-            <a href="map.jsp">🗺️ Carte</a>
-            <a href="logout">🚪 Déconnexion</a>
+            <a href="dashboard.jsp">Tableau de bord</a>
+            <a href="locations.jsp">Lieux</a>
+            <a href="stations.jsp">Bornes</a>
+            <a href="reservations.jsp">Réservations</a>
+            <a href="map.jsp">Carte</a>
+            <a href="logout">Déconnexion</a>
         </div>
         
         <div class="content">
             <div id="messageContainer"></div>
             
             <div class="info-box">
-                <h4>ℹ️ Information importante</h4>
+                <h4>Information importante</h4>
                 <p>Toutes les bornes utilisent le type de prise TYPE2S, compatible avec la plupart des véhicules électriques.</p>
             </div>
             

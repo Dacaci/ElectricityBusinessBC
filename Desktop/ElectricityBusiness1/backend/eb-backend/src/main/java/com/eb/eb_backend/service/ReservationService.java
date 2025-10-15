@@ -148,6 +148,7 @@ public class ReservationService {
         return new ReservationDto(savedReservation);
     }
     
+    @Transactional
     public ReservationDto cancelReservation(Long reservationId, Long userId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Réservation non trouvée avec l'ID: " + reservationId));
@@ -168,9 +169,14 @@ public class ReservationService {
             throw new IllegalArgumentException("Les réservations terminées ne peuvent pas être annulées");
         }
         
-        reservation.setStatus(Reservation.ReservationStatus.CANCELLED);
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return new ReservationDto(savedReservation);
+        // Utiliser une requête native pour éviter la validation
+        reservationRepository.updateReservationStatus(reservationId, Reservation.ReservationStatus.CANCELLED);
+        
+        // Récupérer la réservation mise à jour
+        Reservation updatedReservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Réservation non trouvée après mise à jour"));
+        
+        return new ReservationDto(updatedReservation);
     }
     
     public ReservationDto completeReservation(Long reservationId, Long ownerId) {

@@ -210,6 +210,108 @@
             border: 1px solid #f5c6cb;
         }
         
+        /* Styles pour la nouvelle interface */
+        .location-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .location-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .location-address {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .stations-container {
+            margin-bottom: 20px;
+        }
+        
+        .station-item {
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+        
+        .station-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .station-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .station-icons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .station-icons .icon {
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+        
+        .station-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .action-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        
+        .action-link:hover {
+            background-color: #e3f2fd;
+            text-decoration: underline;
+        }
+        
+        .action-link.delete-link {
+            color: #dc3545;
+        }
+        
+        .action-link.delete-link:hover {
+            background-color: #f8d7da;
+        }
+        
+        .location-actions {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .no-stations {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+        
         .success {
             background: #d4edda;
             color: #155724;
@@ -242,23 +344,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📍 Gestion des Lieux</h1>
+            <h1>Gestion des Lieux</h1>
             <p>Gérez vos lieux de recharge électrique</p>
         </div>
         
         <div class="nav">
-            <a href="dashboard.jsp">🏠 Tableau de bord</a>
-            <a href="locations.jsp" class="active">📍 Lieux</a>
-            <a href="stations.jsp">🔌 Bornes</a>
-            <a href="reservations.jsp">📅 Réservations</a>
-            <a href="map.jsp">🗺️ Carte</a>
-            <a href="logout">🚪 Déconnexion</a>
+            <a href="dashboard.jsp">Tableau de bord</a>
+            <a href="locations.jsp" class="active">Lieux</a>
+            <a href="stations.jsp">Bornes</a>
+            <a href="reservations.jsp">Réservations</a>
+            <a href="map.jsp">Carte</a>
+            <a href="logout">Déconnexion</a>
         </div>
         
         <div class="content">
             <div class="actions">
                 <div>
-                    <a href="add-location.jsp" class="btn">➕ Ajouter un lieu</a>
+                    <a href="add-location.jsp" class="btn">Ajouter un lieu</a>
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Rechercher un lieu..." onkeyup="filterLocations()">
@@ -279,42 +381,63 @@
             <div id="noLocationsMessage" class="no-locations" style="display: none;">
                 <h3>Aucun lieu trouvé</h3>
                 <p>Commencez par ajouter votre premier lieu de recharge.</p>
-                <a href="add-location.jsp" class="btn" style="margin-top: 15px;">➕ Ajouter un lieu</a>
+                <a href="add-location.jsp" class="btn" style="margin-top: 15px;">Ajouter un lieu</a>
             </div>
         </div>
     </div>
 
     <script>
         let locations = [];
+        let stations = [];
+        let stationsByLocation = {}; // Pour grouper les stations par lieu
         
-        // Charger les lieux au chargement de la page
+        // Charger les lieux et stations au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            loadLocations();
+            loadLocationsAndStations();
         });
         
-        async function loadLocations() {
+        async function loadLocationsAndStations() {
             try {
                 showLoading(true);
-                const response = await fetch('http://localhost:8080/api/locations');
                 
-                if (!response.ok) {
-                    throw new Error('Erreur lors du chargement des lieux');
+                // Charger les lieux et stations en parallèle
+                const [locationsResponse, stationsResponse] = await Promise.all([
+                    fetch('http://localhost:8080/api/locations'),
+                    fetch('http://localhost:8080/api/stations')
+                ]);
+                
+                if (!locationsResponse.ok || !stationsResponse.ok) {
+                    throw new Error('Erreur lors du chargement des données');
                 }
                 
-                const data = await response.json();
+                const locationsData = await locationsResponse.json();
+                const stationsData = await stationsResponse.json();
+                
                 // L'API retourne une structure paginée {content: [...], ...}
-                locations = data.content || data;
-                displayLocations(locations);
+                locations = locationsData.content || locationsData;
+                stations = stationsData.content || stationsData;
+                
+                // Grouper les stations par lieu
+                stationsByLocation = {};
+                stations.forEach(station => {
+                    const locationId = station.locationId;
+                    if (!stationsByLocation[locationId]) {
+                        stationsByLocation[locationId] = [];
+                    }
+                    stationsByLocation[locationId].push(station);
+                });
+                
+                displayLocationsWithStations(locations);
                 showLoading(false);
                 
             } catch (error) {
                 console.error('Erreur:', error);
-                showError('Erreur lors du chargement des lieux: ' + error.message);
+                showError('Erreur lors du chargement des données: ' + error.message);
                 showLoading(false);
             }
         }
         
-        function displayLocations(locationsToShow) {
+        function displayLocationsWithStations(locationsToShow) {
             const container = document.getElementById('locationsContainer');
             const noLocations = document.getElementById('noLocationsMessage');
             
@@ -325,16 +448,42 @@
             }
             
             container.innerHTML = locationsToShow.map(location => {
+                const locationStations = stationsByLocation[location.id] || [];
+                
+                let stationsHtml = '';
+                if (locationStations.length > 0) {
+                    stationsHtml = locationStations.map(station => {
+                        return '<div class="station-item">' +
+                            '<div class="station-info">' +
+                                '<div class="station-name">' + (station.name || 'Borne sans nom') + '</div>' +
+                                '<div class="station-icons">' +
+                                    '<span class="icon">PHOTO</span>' +
+                                    '<span class="icon">VIDEO</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="station-actions">' +
+                                '<a href="edit-station.jsp?id=' + station.id + '" class="action-link">Modifier</a>' +
+                                '<a href="station-rates.jsp?id=' + station.id + '" class="action-link">Définir un tarifs horaires</a>' +
+                                '<a href="#" onclick="uploadPhoto(' + station.id + ')" class="action-link">Téléverser 1 photo</a>' +
+                                '<a href="#" onclick="uploadVideo(' + station.id + ')" class="action-link">Téléverser 1 vidéo</a>' +
+                                '<a href="#" onclick="deleteStation(' + station.id + ')" class="action-link delete-link">Supprimer</a>' +
+                            '</div>' +
+                        '</div>';
+                    }).join('');
+                } else {
+                    stationsHtml = '<div class="no-stations">Aucune borne dans ce lieu</div>';
+                }
+                
                 return '<div class="location-card">' +
                     '<div class="location-header">' +
-                        '<div>' +
-                            '<div class="location-title">' + location.label + '</div>' +
-                            '<div class="location-address">' + location.address + '</div>' +
-                        '</div>' +
+                        '<div class="location-address">' + (location.address || 'Adresse non spécifiée') + '</div>' +
+                    '</div>' +
+                    '<div class="stations-container">' +
+                        stationsHtml +
                     '</div>' +
                     '<div class="location-actions">' +
-                        '<a href="edit-location.jsp?id=' + location.id + '" class="btn btn-warning">✏️ Modifier</a>' +
-                        '<button onclick="deleteLocation(' + location.id + ')" class="btn btn-danger">🗑️ Supprimer</button>' +
+                        '<a href="add-station.jsp?locationId=' + location.id + '" class="action-link">Ajouter une borne</a>' +
+                        '<a href="edit-location.jsp?id=' + location.id + '" class="action-link">Modifier ce lieu</a>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -349,7 +498,38 @@
                 location.label.toLowerCase().includes(searchTerm) ||
                 location.address.toLowerCase().includes(searchTerm)
             );
-            displayLocations(filteredLocations);
+            displayLocationsWithStations(filteredLocations);
+        }
+        
+        // Nouvelles fonctions pour les actions des stations
+        function uploadPhoto(stationId) {
+            alert('Fonctionnalité de téléversement de photo pour la station ' + stationId + ' à implémenter');
+        }
+        
+        function uploadVideo(stationId) {
+            alert('Fonctionnalité de téléversement de vidéo pour la station ' + stationId + ' à implémenter');
+        }
+        
+        async function deleteStation(stationId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/stations/' + stationId, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Borne supprimée avec succès');
+                    loadLocationsAndStations(); // Recharger les données
+                } else {
+                    throw new Error('Erreur lors de la suppression');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la suppression de la borne: ' + error.message);
+            }
         }
         
         async function deleteLocation(locationId) {

@@ -6,6 +6,7 @@ import com.eb.eb_backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -103,5 +104,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
            "AND r.status IN ('PENDING', 'CONFIRMED') " +
            "ORDER BY r.startTime ASC")
     List<Reservation> findUpcomingStationReservations(@Param("station") Station station, @Param("now") LocalDateTime now);
+    
+    // Mise à jour du statut sans validation
+    @Modifying
+    @Query("UPDATE Reservation r SET r.status = :status WHERE r.id = :id")
+    void updateReservationStatus(@Param("id") Long id, @Param("status") Reservation.ReservationStatus status);
 }
 

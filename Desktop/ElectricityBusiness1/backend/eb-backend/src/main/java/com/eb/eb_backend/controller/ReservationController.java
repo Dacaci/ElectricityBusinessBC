@@ -159,7 +159,9 @@ public class ReservationController {
     @PutMapping("/{id}/confirm")
     public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long id) {
         try {
-            ReservationDto reservationDto = reservationService.confirmReservation(id, 1L); // Pour simplifier
+            // Pour simplifier, on utilise userId=1 pour toutes les confirmations
+            // Dans une vraie application, on récupérerait l'ID depuis la session/token
+            ReservationDto reservationDto = reservationService.confirmReservation(id, 1L);
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -169,10 +171,16 @@ public class ReservationController {
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ReservationDto> cancelReservation(@PathVariable Long id) {
         try {
-            ReservationDto reservationDto = reservationService.cancelReservation(id, 1L); // Pour simplifier
+            // Pour simplifier, on utilise userId=1 pour toutes les annulations
+            // Dans une vraie application, on récupérerait l'ID depuis la session/token
+            ReservationDto reservationDto = reservationService.cancelReservation(id, 1L);
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            // Log l'erreur pour le debug
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
     }
     

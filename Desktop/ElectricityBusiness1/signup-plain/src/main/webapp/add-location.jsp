@@ -184,17 +184,17 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>➕ Ajouter un Lieu</h1>
+            <h1>Ajouter un Lieu</h1>
             <p>Créez un nouveau lieu de recharge électrique</p>
         </div>
         
         <div class="nav">
-            <a href="dashboard.jsp">🏠 Tableau de bord</a>
-            <a href="locations.jsp">📍 Lieux</a>
-            <a href="stations.jsp">🔌 Bornes</a>
-            <a href="reservations.jsp">📅 Réservations</a>
-            <a href="map.jsp">🗺️ Carte</a>
-            <a href="logout">🚪 Déconnexion</a>
+            <a href="dashboard.jsp">Tableau de bord</a>
+            <a href="locations.jsp">Lieux</a>
+            <a href="stations.jsp">Bornes</a>
+            <a href="reservations.jsp">Réservations</a>
+            <a href="map.jsp">Carte</a>
+            <a href="logout">Déconnexion</a>
         </div>
         
         <div class="content">
@@ -317,7 +317,7 @@
             geoButton.type = 'button';
             geoButton.className = 'btn btn-secondary';
             geoButton.style.marginTop = '5px';
-            geoButton.innerHTML = '📍 Utiliser ma position actuelle';
+            geoButton.innerHTML = 'Utiliser ma position actuelle';
             geoButton.onclick = getCurrentLocation;
             
             lngField.parentNode.appendChild(geoButton);

@@ -355,7 +355,7 @@
                                 iconSize: [20, 20],
                                 iconAnchor: [10, 10]
                             })
-                        }).bindPopup('📍 Votre position').addTo(map);
+                        }).bindPopup('Votre position').addTo(map);
                         
                         // Centrer la carte sur la position de l'utilisateur avec animation
                         console.log('Centrage de la carte sur:', userLocation);
@@ -452,20 +452,22 @@
         
         // Créer le popup pour une station
         function createStationPopup(station) {
-            const address = station.address || 'Adresse non disponible';
-            const rate = station.hourlyRate ? `${station.hourlyRate}€/h` : 'N/A';
-            const label = station.locationLabel || '';
+            // Debug: afficher la station dans la console
+            console.log('Données de la station pour le popup:', station);
             
-            return `
-                <div class="station-popup">
-                    <h3>${station.name}</h3>
-                    <p><strong>Lieu:</strong> ${label}</p>
-                    <p><strong>Adresse:</strong> ${address}</p>
-                    <p><strong>Tarif:</strong> <span class="price">${rate}</span></p>
-                    <p><strong>Type de prise:</strong> ${station.plugType || 'TYPE2S'}</p>
-                    <a href="add-reservation.jsp?stationId=${station.id}" class="btn">Réserver</a>
-                </div>
-            `;
+            const address = station.address || 'Adresse non disponible';
+            const rate = station.hourlyRate ? station.hourlyRate + '€/h' : 'N/A';
+            const label = station.locationLabel || 'Lieu non spécifié';
+            const plugType = station.plugType || 'TYPE2S';
+            
+            return '<div class="station-popup">' +
+                '<h3>' + (station.name || 'Sans nom') + '</h3>' +
+                '<p><strong>Lieu:</strong> ' + label + '</p>' +
+                '<p><strong>Adresse:</strong> ' + address + '</p>' +
+                '<p><strong>Tarif:</strong> <span class="price">' + rate + '</span></p>' +
+                '<p><strong>Type de prise:</strong> ' + plugType + '</p>' +
+                '<a href="add-reservation.jsp?stationId=' + station.id + '" class="btn">Réserver</a>' +
+                '</div>';
         }
         
         

@@ -303,18 +303,18 @@
         </div>
         
         <div class="nav">
-            <a href="dashboard.jsp">🏠 Tableau de bord</a>
-            <a href="locations.jsp">📍 Lieux</a>
-            <a href="stations.jsp" class="active">🔌 Bornes</a>
-            <a href="reservations.jsp">📅 Réservations</a>
-            <a href="map.jsp">🗺️ Carte</a>
-            <a href="logout">🚪 Déconnexion</a>
+            <a href="dashboard.jsp">Tableau de bord</a>
+            <a href="locations.jsp">Lieux</a>
+            <a href="stations.jsp" class="active">Bornes</a>
+            <a href="reservations.jsp">Réservations</a>
+            <a href="map.jsp">Carte</a>
+            <a href="logout">Déconnexion</a>
         </div>
         
         <div class="content">
             <div class="actions">
                 <div>
-                    <a href="add-station.jsp" class="btn">➕ Ajouter une borne</a>
+                    <a href="add-station.jsp" class="btn">Ajouter une borne</a>
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Rechercher une borne..." onkeyup="filterStations()">
@@ -335,7 +335,7 @@
             <div id="noStationsMessage" class="no-stations" style="display: none;">
                 <h3>Aucune borne trouvée</h3>
                 <p>Commencez par ajouter votre première borne de recharge.</p>
-                <a href="add-station.jsp" class="btn" style="margin-top: 15px;">➕ Ajouter une borne</a>
+                <a href="add-station.jsp" class="btn" style="margin-top: 15px;">Ajouter une borne</a>
             </div>
         </div>
     </div>
@@ -401,13 +401,13 @@
                 const statusBadge = station.isActive ? 'status-active' : 'status-inactive';
                 const statusText = station.isActive ? 'Active' : 'Inactive';
                 const toggleBtnClass = station.isActive ? 'btn-secondary' : 'btn-success';
-                const toggleBtnText = station.isActive ? '⏸️ Désactiver' : '▶️ Activer';
+                const toggleBtnText = station.isActive ? 'Désactiver' : 'Activer';
                 
                 return '<div class="station-card">' +
                     '<div class="station-header">' +
                         '<div>' +
                             '<div class="station-title">' + station.name + '</div>' +
-                            '<div class="station-location">📍 ' + locationName + '</div>' +
+                            '<div class="station-location">' + locationName + '</div>' +
                             '<div class="station-location" style="font-size: 0.85em; color: #6c757d;">' + locationAddress + '</div>' +
                         '</div>' +
                         '<span class="status-badge ' + statusBadge + '">' + statusText + '</span>' +
@@ -423,9 +423,9 @@
                         '</div>' +
                     '</div>' +
                     '<div class="station-actions">' +
-                        '<a href="edit-station.jsp?id=' + station.id + '" class="btn btn-warning">✏️ Modifier</a>' +
+                        '<a href="edit-station.jsp?id=' + station.id + '" class="btn btn-warning">Modifier</a>' +
                         '<button onclick="toggleStationStatus(' + station.id + ', ' + station.isActive + ')" class="btn ' + toggleBtnClass + '">' + toggleBtnText + '</button>' +
-                        '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">🗑️ Supprimer</button>' +
+                        '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>' +
                     '</div>' +
                 '</div>';
             }).join('');

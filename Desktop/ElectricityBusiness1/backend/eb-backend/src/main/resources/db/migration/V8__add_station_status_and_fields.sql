@@ -17,3 +17,5 @@ CREATE INDEX idx_stations_city ON stations(city);
 -- Créer un index composite pour les recherches géographiques
 CREATE INDEX idx_stations_location ON stations(latitude, longitude);
 
+
+
