@@ -2,6 +2,8 @@ package com.eb.eb_backend.controller;
 
 import com.eb.eb_backend.dto.LocationDto;
 import com.eb.eb_backend.service.LocationService;
+import com.eb.eb_backend.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,12 +20,17 @@ import java.util.List;
 public class LocationController {
     
     private final LocationService locationService;
+    private final SecurityUtil securityUtil;
     
     @PostMapping
     public ResponseEntity<LocationDto> createLocation(
-            @RequestParam Long ownerId,
-            @Valid @RequestBody LocationDto locationDto) {
+            @Valid @RequestBody LocationDto locationDto,
+            HttpServletRequest request) {
         try {
+            Long ownerId = securityUtil.getCurrentUserId(request);
+            if (ownerId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             LocationDto created = locationService.createLocation(ownerId, locationDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {

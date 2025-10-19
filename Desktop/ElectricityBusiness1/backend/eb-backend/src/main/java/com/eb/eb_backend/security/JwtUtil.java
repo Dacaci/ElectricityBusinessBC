@@ -37,6 +37,15 @@ public class JwtUtil {
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+    
+    public Long extractUserId(String token) {
+        Claims claims = extractAllClaims(token);
+        Object uid = claims.get("uid");
+        if (uid instanceof Number) {
+            return ((Number) uid).longValue();
+        }
+        return null;
+    }
 
     public boolean isTokenValid(String token, String username) {
         String subject = extractUsername(token);

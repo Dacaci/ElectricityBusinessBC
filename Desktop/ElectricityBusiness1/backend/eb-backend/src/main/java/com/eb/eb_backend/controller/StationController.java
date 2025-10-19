@@ -3,6 +3,8 @@ package com.eb.eb_backend.controller;
 import com.eb.eb_backend.dto.StationDto;
 import com.eb.eb_backend.dto.StationLocationDto;
 import com.eb.eb_backend.service.StationService;
+import com.eb.eb_backend.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,12 +22,17 @@ import java.util.List;
 public class StationController {
     
     private final StationService stationService;
+    private final SecurityUtil securityUtil;
     
     @PostMapping
     public ResponseEntity<StationDto> createStation(
-            @RequestParam Long ownerId,
-            @Valid @RequestBody StationDto stationDto) {
+            @Valid @RequestBody StationDto stationDto,
+            HttpServletRequest request) {
         try {
+            Long ownerId = securityUtil.getCurrentUserId(request);
+            if (ownerId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             StationDto created = stationService.createStation(ownerId, stationDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {

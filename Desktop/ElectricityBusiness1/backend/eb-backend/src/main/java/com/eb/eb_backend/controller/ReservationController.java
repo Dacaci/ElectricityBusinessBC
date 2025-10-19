@@ -6,6 +6,8 @@ import com.eb.eb_backend.entity.Reservation;
 import com.eb.eb_backend.service.ExportService;
 import com.eb.eb_backend.service.ReceiptService;
 import com.eb.eb_backend.service.ReservationService;
+import com.eb.eb_backend.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,12 +26,17 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReceiptService receiptService;
     private final ExportService exportService;
+    private final SecurityUtil securityUtil;
     
     @PostMapping
     public ResponseEntity<ReservationDto> createReservation(
-            @RequestParam Long userId,
-            @Valid @RequestBody CreateReservationDto createReservationDto) {
+            @Valid @RequestBody CreateReservationDto createReservationDto,
+            HttpServletRequest request) {
         try {
+            Long userId = securityUtil.getCurrentUserId(request);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             ReservationDto reservationDto = reservationService.createReservation(userId, createReservationDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
         } catch (IllegalArgumentException e) {
@@ -157,11 +164,13 @@ public class ReservationController {
     }
     
     @PutMapping("/{id}/confirm")
-    public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long id) {
+    public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long id, HttpServletRequest request) {
         try {
-            // Pour simplifier, on utilise userId=1 pour toutes les confirmations
-            // Dans une vraie application, on récupérerait l'ID depuis la session/token
-            ReservationDto reservationDto = reservationService.confirmReservation(id, 1L);
+            Long userId = securityUtil.getCurrentUserId(request);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            ReservationDto reservationDto = reservationService.confirmReservation(id, userId);
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -169,11 +178,13 @@ public class ReservationController {
     }
     
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<ReservationDto> cancelReservation(@PathVariable Long id) {
+    public ResponseEntity<ReservationDto> cancelReservation(@PathVariable Long id, HttpServletRequest request) {
         try {
-            // Pour simplifier, on utilise userId=1 pour toutes les annulations
-            // Dans une vraie application, on récupérerait l'ID depuis la session/token
-            ReservationDto reservationDto = reservationService.cancelReservation(id, 1L);
+            Long userId = securityUtil.getCurrentUserId(request);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            ReservationDto reservationDto = reservationService.cancelReservation(id, userId);
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -185,9 +196,13 @@ public class ReservationController {
     }
     
     @PutMapping("/{id}/complete")
-    public ResponseEntity<ReservationDto> completeReservation(@PathVariable Long id) {
+    public ResponseEntity<ReservationDto> completeReservation(@PathVariable Long id, HttpServletRequest request) {
         try {
-            ReservationDto reservationDto = reservationService.completeReservation(id, 1L); // Pour simplifier
+            Long userId = securityUtil.getCurrentUserId(request);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            ReservationDto reservationDto = reservationService.completeReservation(id, userId);
             return ResponseEntity.ok(reservationDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -195,9 +210,13 @@ public class ReservationController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, HttpServletRequest request) {
         try {
-            reservationService.deleteReservation(id, 1L); // Pour simplifier
+            Long userId = securityUtil.getCurrentUserId(request);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            reservationService.deleteReservation(id, userId);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

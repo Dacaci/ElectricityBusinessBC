@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="com.eb.signup.user.User" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,9 +40,9 @@
     <div class="header">
         <h1>Electricity Business</h1>
         <div class="user-info">
-            <span>Bienvenue, <%= request.getAttribute("user") != null ? ((User)request.getAttribute("user")).getEmail() : "Utilisateur" %></span>
+            <span id="welcomeMessage">Bienvenue, Utilisateur</span>
             <span class="status-badge status-active">Compte Actif</span>
-            <a href="logout">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
     
@@ -76,18 +75,75 @@
             <div class="feature-card">
                 <h3>Export des Données</h3>
                 <p>Téléchargez vos réservations au format Excel pour vos archives.</p>
-                <a href="http://localhost:8080/api/reservations/export.xlsx" class="btn" target="_blank">📊 Télécharger Excel</a>
+                <a href="http://localhost:8080/api/reservations/export.xlsx" class="btn" target="_blank">Télécharger Excel</a>
             </div>
             
             <div class="feature-card">
                 <h3>Reçus PDF</h3>
                 <p>Générez des reçus PDF pour vos réservations confirmées.</p>
-                <a href="http://localhost:8080/api/reservations/1/receipt.pdf" class="btn" target="_blank">📄 Télécharger PDF</a>
+                <a href="http://localhost:8080/api/reservations/1/receipt.pdf" class="btn" target="_blank">Télécharger PDF</a>
             </div>
         </div>
         
     </div>
 </body>
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js?v=20251017"></script>
+    <script>
+        // Vérifier l'authentification au chargement de la page
+        if (!requireAuth()) {
+            // L'utilisateur sera redirigé automatiquement vers login.jsp
+            // par la fonction requireAuth()
+        } else {
+        
+        // Afficher les informations utilisateur
+        const user = getAuthUser();
+        if (user) {
+            document.getElementById('welcomeMessage').textContent = `Bienvenue, ${user.firstName} ${user.lastName}`;
+        }
+        
+        // Fonction de déconnexion directe
+        function logout() {
+            console.log('=== DÉCONNEXION DÉMARRÉE ===');
+            
+            // Afficher un message de confirmation
+            alert('Déconnexion en cours...');
+            
+            console.log('=== NETTOYAGE COMPLET ===');
+            
+            try {
+                // Nettoyage manuel complet
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('authUser');
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('auth_user');
+                
+                // Vider complètement les storages
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                console.log('Storages vidés avec succès');
+                
+                // Redirection immédiate
+                console.log('Redirection vers login...');
+                window.location.replace('/login.jsp?message=logout');
+                
+            } catch (error) {
+                console.error('Erreur lors de la déconnexion:', error);
+                // Redirection même en cas d'erreur
+                window.location.replace('/login.jsp?message=logout');
+            }
+        }
+        
+        // Vérifier la validité du token toutes les minutes
+        setInterval(() => {
+            if (!validateAuthData()) {
+                window.location.href = '/login.jsp';
+            }
+        }, 60000); // 60 secondes
+        
+        } // Fermer le bloc else
+    </script>
 </html>
 
 

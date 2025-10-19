@@ -75,6 +75,14 @@ public class LoginServlet extends HttpServlet {
       session.setAttribute("userId", user.getId());
       session.setAttribute("userEmail", user.getEmail());
       
+      // Log de débogage
+      System.out.println("=== LOGIN SUCCESSFUL ===");
+      System.out.println("User ID: " + user.getId());
+      System.out.println("User Email: " + user.getEmail());
+      System.out.println("Session ID: " + session.getId());
+      System.out.println("userId attribute type: " + user.getId().getClass().getName());
+      System.out.println("========================");
+      
       // Rediriger vers le dashboard
       resp.sendRedirect("dashboard");
       

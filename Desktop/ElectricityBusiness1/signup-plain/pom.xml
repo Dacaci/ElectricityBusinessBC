@@ -68,6 +68,50 @@
           <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
       </plugin>
+      
+      <!-- Plugin Cargo pour déployer sur Tomcat -->
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven3-plugin</artifactId>
+        <version>1.10.10</version>
+        <configuration>
+          <container>
+            <containerId>tomcat10x</containerId>
+            <type>installed</type>
+            <home>${env.CATALINA_HOME}</home>
+          </container>
+          <configuration>
+            <type>existing</type>
+            <home>${env.CATALINA_HOME}</home>
+          </configuration>
+          <deployables>
+            <deployable>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <type>war</type>
+              <properties>
+                <context>signup-plain</context>
+              </properties>
+            </deployable>
+          </deployables>
+        </configuration>
+      </plugin>
+      
+      <!-- Plugin Jetty comme alternative -->
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>11.0.18</version>
+        <configuration>
+          <httpConnector>
+            <port>8081</port>
+          </httpConnector>
+          <webApp>
+            <contextPath>/signup-plain</contextPath>
+          </webApp>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

@@ -36,11 +36,11 @@
         
         <% if ("logout".equals(request.getParameter("message"))) { %>
             <div style="color: #28a745; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
-                ✅ Déconnexion réussie. À bientôt !
+                Déconnexion réussie. À bientôt !
             </div>
         <% } %>
         
-        <form method="post" action="login">
+        <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required 
@@ -55,11 +55,79 @@
             <button type="submit">Se connecter</button>
         </form>
         
+        
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div id="successMessage" style="color: #28a745; background-color: #d4edda; padding: 10px; border-radius: 4px; margin-bottom: 20px; display: none;"></div>
+        
         <div class="links">
             <a href="register">Créer un compte</a>
             <a href="verify">Vérifier un compte</a>
             <a href="index">Accueil</a>
         </div>
     </div>
+    
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            // Masquer les messages précédents
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Sauvegarder le token et les données utilisateur
+                    saveAuthData(data.token, data.user);
+                    
+                    successDiv.textContent = 'Connexion réussie ! Redirection...';
+                    successDiv.style.display = 'block';
+                    
+                    // Rediriger vers le dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.jsp';
+                    }, 1000);
+                    
+                } else {
+                    const errorData = await response.json().catch(() => ({ message: 'Erreur de connexion' }));
+                    errorDiv.textContent = errorData.message || 'Email ou mot de passe incorrect';
+                    errorDiv.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorDiv.textContent = 'Erreur de connexion au serveur';
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        // Vérifier si l'utilisateur est déjà connecté
+        if (isAuthenticated()) {
+            console.log('Utilisateur déjà connecté, redirection vers dashboard');
+            window.location.href = '/dashboard.jsp';
+        } else {
+            console.log('Utilisateur non connecté, affichage de la page de login');
+        }
+        
+    </script>
 </body>
 </html>

@@ -260,8 +260,8 @@
                     </div>
                     
                     <div class="form-actions">
-                        <a href="stations.jsp" class="btn btn-secondary">❌ Annuler</a>
-                        <button type="submit" class="btn">✅ Sauvegarder</button>
+                        <a href="stations.jsp" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn">Sauvegarder</button>
                     </div>
                 </form>
             </div>
@@ -398,7 +398,7 @@
             } else {
                 const submitBtn = document.querySelector('button[type="submit"]');
                 if (submitBtn) {
-                    submitBtn.innerHTML = '✅ Sauvegarder';
+                    submitBtn.innerHTML = 'Sauvegarder';
                     submitBtn.disabled = false;
                 }
             }

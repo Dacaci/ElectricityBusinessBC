@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Lieu - Electricity Business</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
     <style>
         * {
             margin: 0;
@@ -63,6 +64,8 @@
         
         .content {
             padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         .form-container {
@@ -170,6 +173,10 @@
             color: #dc3545;
         }
         
+        .geo-button-container {
+            margin-top: 10px;
+        }
+        
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -177,6 +184,10 @@
             
             .form-actions {
                 flex-direction: column;
+            }
+            
+            .content {
+                padding: 20px;
             }
         }
     </style>
@@ -228,6 +239,18 @@
                         </div>
                     </div>
                     
+                    <div class="geo-button-container">
+                        <button type="button" class="btn btn-secondary" id="geoButton">
+                            Utiliser ma position actuelle
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="searchAddress()" style="margin-left: 10px;">
+                            Rechercher l'adresse
+                        </button>
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Astuce : Saisissez l'adresse et cliquez sur "Rechercher l'adresse" pour obtenir les coordonnées automatiquement
+                    </p>
+                    
                     <div class="form-group">
                         <label for="description">Description (optionnel)</label>
                         <textarea id="description" name="description" maxlength="1000" 
@@ -235,56 +258,77 @@
                     </div>
                     
                     <div class="form-actions">
-                        <a href="locations.jsp" class="btn btn-secondary">❌ Annuler</a>
-                        <button type="submit" class="btn">✅ Créer le lieu</button>
+                        <a href="locations.jsp" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn" id="submitBtn">Créer le lieu</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js"></script>
+    <script src="js/nominatim-utils.js"></script>
     <script>
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            // L'utilisateur sera redirigé automatiquement par requireAuth()
+        } else {
+        
+        // Récupérer l'ID de l'utilisateur depuis le token JWT
+        const CURRENT_USER_ID = getCurrentUserId();
+        
+        console.log('User ID connecté:', CURRENT_USER_ID);
+        
         document.getElementById('locationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
             const locationData = {
-                label: formData.get('label'),
-                address: formData.get('address'),
-                latitude: formData.get('latitude'), // Garder en String pour BigDecimal
-                longitude: formData.get('longitude'), // Garder en String pour BigDecimal
-                description: formData.get('description') || null,
-                ownerId: 1 // Pour simplifier
+                label: formData.get('label').trim(),
+                address: formData.get('address').trim(),
+                latitude: formData.get('latitude'),
+                longitude: formData.get('longitude'),
+                description: formData.get('description')?.trim() || null,
+                ownerId: CURRENT_USER_ID // Utilisation du vrai ID utilisateur
             };
             
             // Validation côté client
-            if (!locationData.label || !locationData.address || 
-                isNaN(locationData.latitude) || isNaN(locationData.longitude)) {
+            if (!locationData.label || !locationData.address) {
                 showError('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            if (isNaN(locationData.latitude) || isNaN(locationData.longitude)) {
+                showError('Les coordonnées GPS doivent être des nombres valides');
                 return;
             }
             
             try {
                 showLoading(true);
                 
-                // Pour simplifier, on utilise l'utilisateur 1
-                const response = await fetch('http://localhost:8080/api/locations?ownerId=1', {
+                console.log('Création du lieu avec les données:', locationData);
+                
+                const response = await authenticatedFetch('http://localhost:8080/api/locations', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify(locationData)
                 });
                 
+                console.log('Réponse API status:', response.status);
+                
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la création du lieu');
+                    const errorText = await response.text();
+                    console.error('Erreur API:', errorText);
+                    throw new Error(errorText || 'Erreur lors de la création du lieu');
                 }
+                
+                const createdLocation = await response.json();
+                console.log('Lieu créé:', createdLocation);
                 
                 showSuccess('Lieu créé avec succès !');
                 setTimeout(() => {
                     window.location.href = 'locations.jsp';
-                }, 2000);
+                }, 1500);
                 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -293,61 +337,191 @@
             }
         });
         
-        // Fonction pour obtenir les coordonnées GPS automatiquement
-        function getCurrentLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        document.getElementById('latitude').value = position.coords.latitude;
-                        document.getElementById('longitude').value = position.coords.longitude;
-                    },
-                    function(error) {
-                        console.log('Erreur de géolocalisation:', error);
-                    }
-                );
+        // Bouton de géolocalisation
+        document.getElementById('geoButton').addEventListener('click', function() {
+            getCurrentLocation();
+        });
+        
+        // Fonction pour obtenir les coordonnées GPS automatiquement avec Nominatim
+        async function getCurrentLocation() {
+            showLoading(true);
+            const btn = document.getElementById('geoButton');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Détection en cours...';
+            
+            try {
+                // Utiliser la fonction améliorée avec Nominatim
+                const location = await getAccurateLocation();
+                
+                console.log('Position obtenue:', location);
+                
+                // Remplir les champs
+                document.getElementById('latitude').value = location.latitude.toFixed(6);
+                document.getElementById('longitude').value = location.longitude.toFixed(6);
+                
+                // Remplir aussi l'adresse si disponible
+                if (location.city) {
+                    document.getElementById('city').value = location.city;
+                }
+                if (location.postalCode) {
+                    document.getElementById('postalCode').value = location.postalCode;
+                }
+                if (location.address && !document.getElementById('address').value) {
+                    document.getElementById('address').value = location.address;
+                }
+                
+                // Message avec source et précision
+                let successMsg = 'Position détectée avec succès !';
+                if (location.source === 'IP Address') {
+                    successMsg += '\nPosition approximative (basée sur votre IP)';
+                } else {
+                    successMsg += '\nPrécision : ' + Math.round(location.accuracy) + 'm';
+                }
+                if (location.city) {
+                    successMsg += '\nVille détectée : ' + location.city;
+                }
+                
+                showSuccess(successMsg);
+                btn.disabled = false;
+                btn.innerHTML = 'Utiliser ma position actuelle';
+                showLoading(false);
+                
+            } catch (error) {
+                console.error('Erreur de géolocalisation:', error);
+                showError('Erreur : ' + error.message + '\nVeuillez saisir les coordonnées manuellement.');
+                btn.disabled = false;
+                btn.innerHTML = 'Utiliser ma position actuelle';
+                showLoading(false);
             }
         }
         
-        // Ajouter un bouton pour la géolocalisation
-        document.addEventListener('DOMContentLoaded', function() {
-            const latField = document.getElementById('latitude');
-            const lngField = document.getElementById('longitude');
+        // Fonction de recherche d'adresse avec Nominatim
+        async function searchAddress() {
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const postalCode = document.getElementById('postalCode').value;
             
-            const geoButton = document.createElement('button');
-            geoButton.type = 'button';
-            geoButton.className = 'btn btn-secondary';
-            geoButton.style.marginTop = '5px';
-            geoButton.innerHTML = 'Utiliser ma position actuelle';
-            geoButton.onclick = getCurrentLocation;
+            if (!address && !city) {
+                showError('Veuillez saisir au moins une adresse ou une ville');
+                return;
+            }
             
-            lngField.parentNode.appendChild(geoButton);
-        });
+            const query = [address, postalCode, city].filter(x => x).join(', ');
+            
+            showLoading(true);
+            
+            try {
+                const results = await geocodeAddress(query);
+                
+                if (results.length === 0) {
+                    showError('Aucune adresse trouvée. Vérifiez votre saisie.');
+                    showLoading(false);
+                    return;
+                }
+                
+                // Prendre le premier résultat (le plus pertinent)
+                const location = results[0];
+                
+                console.log('Adresse trouvée:', location);
+                
+                // Remplir les coordonnées
+                document.getElementById('latitude').value = location.latitude.toFixed(6);
+                document.getElementById('longitude').value = location.longitude.toFixed(6);
+                
+                // Mettre à jour les champs d'adresse avec les données précises
+                if (location.city) {
+                    document.getElementById('city').value = location.city;
+                }
+                if (location.postalCode) {
+                    document.getElementById('postalCode').value = location.postalCode;
+                }
+                
+                showSuccess('Adresse trouvée : ' + location.displayName);
+                showLoading(false);
+                
+            } catch (error) {
+                console.error('Erreur recherche adresse:', error);
+                showError('Erreur lors de la recherche d\'adresse : ' + error.message);
+                showLoading(false);
+            }
+        }
+        
+        // Ancienne fonction de géolocalisation simple (fallback)
+        function getCurrentLocationSimple() {
+            if (!navigator.geolocation) {
+                showError('La géolocalisation n\'est pas supportée par ce navigateur');
+                return;
+            }
+            
+            showLoading(true);
+            const btn = document.getElementById('geoButton');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Détection en cours...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+                    document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+                    showSuccess('Position détectée avec succès !');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Utiliser ma position actuelle';
+                    showLoading(false);
+                },
+                function(error) {
+                    console.error('Erreur de géolocalisation:', error);
+                    let errorMessage = 'Impossible d\'obtenir la position.';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Permission de géolocalisation refusée.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Position indisponible.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Délai de géolocalisation dépassé.';
+                            break;
+                    }
+                    
+                    showError(errorMessage);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Utiliser ma position actuelle';
+                    showLoading(false);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
         
         function showLoading(show) {
-            const submitBtn = document.querySelector('button[type="submit"]');
+            const submitBtn = document.getElementById('submitBtn');
             if (show) {
                 submitBtn.innerHTML = '⏳ Création en cours...';
                 submitBtn.disabled = true;
             } else {
-                submitBtn.innerHTML = '✅ Créer le lieu';
+                submitBtn.innerHTML = 'Créer le lieu';
                 submitBtn.disabled = false;
             }
         }
         
         function showError(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="error">${message}</div>`;
+            container.innerHTML = '<div class="error">' + message + '</div>';
+            // Auto-hide après 5 secondes
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
         }
         
         function showSuccess(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="success">${message}</div>`;
+            container.innerHTML = '<div class="success">' + message + '</div>';
         }
+        
+        } // Fermer le bloc else
     </script>
 </body>
 </html>
-
-
-
-
-

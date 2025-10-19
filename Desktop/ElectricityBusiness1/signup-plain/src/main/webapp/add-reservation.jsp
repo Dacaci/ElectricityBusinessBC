@@ -540,7 +540,17 @@
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js"></script>
     <script>
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            return;
+        }
+        
+        // Récupérer l'ID de l'utilisateur depuis le token JWT
+        const CURRENT_USER_ID = getCurrentUserId();
+        
         let stations = [];
         let locations = [];
         
@@ -794,8 +804,8 @@
             const endDate = formData.get('endDate');
             const endTime = formData.get('endTime');
             
-            const startDateTime = startDate + 'T' + startTime + ':00';
-            const endDateTime = endDate + 'T' + endTime + ':00';
+            const startDateTime = startDate + 'T' + startTime + ':00.000';
+            const endDateTime = endDate + 'T' + endTime + ':00.000';
             
             const reservationData = {
                 stationId: parseInt(formData.get('stationId')),
@@ -851,13 +861,9 @@
             try {
                 showLoading(true);
                 
-                // L'API attend userId comme paramètre de requête
-                // TODO: Récupérer dynamiquement l'ID de l'utilisateur connecté depuis la session
-                const response = await fetch('http://localhost:8080/api/reservations?userId=8', {
+                // Utiliser l'API authentifiée (l'userId est extrait du token JWT)
+                const response = await authenticatedFetch('http://localhost:8080/api/reservations', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify(reservationData)
                 });
                 
@@ -891,7 +897,7 @@
             } else {
                 const submitBtn = document.querySelector('button[type="submit"]');
                 if (submitBtn) {
-                    submitBtn.innerHTML = '✅ Créer la réservation';
+                    submitBtn.innerHTML = 'Créer la réservation';
                     submitBtn.disabled = false;
                 }
             }

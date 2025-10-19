@@ -1,11 +1,21 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+    response.setHeader(
+        "Content-Security-Policy",
+        "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';"
+    );
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Bornes - Electricity Business</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
     <style>
         * {
             margin: 0;
@@ -298,7 +308,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔌 Gestion des Bornes</h1>
+            <h1>Gestion des Bornes</h1>
             <p>Gérez vos bornes de recharge électrique</p>
         </div>
         
@@ -318,7 +328,7 @@
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Rechercher une borne..." onkeyup="filterStations()">
-                    <button class="btn btn-secondary" onclick="refreshStations()">🔄 Actualiser</button>
+                    <button class="btn btn-secondary" onclick="refreshStations()">Actualiser</button>
                 </div>
             </div>
             
@@ -340,22 +350,51 @@
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js"></script>
     <script>
         let stations = [];
         let locations = [];
+        let isDeleting = false; // Protection contre les double-clics
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
         });
         
+        // Variables globales
+        let CURRENT_USER_ID = null;
+        
+        // Récupérer l'ID de l'utilisateur depuis le token JWT
+        if (typeof getCurrentUserId === 'function') {
+            CURRENT_USER_ID = getCurrentUserId();
+        }
+        
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            // L'utilisateur sera redirigé automatiquement par requireAuth()
+        } else {
+        
+        console.log('=== STATIONS.JSP DEBUG ===');
+        console.log('CURRENT_USER_ID:', CURRENT_USER_ID);
+        console.log('Type:', typeof CURRENT_USER_ID);
+        console.log('===========================');
+        
+        } // Fermer le bloc else
+        
+        // ========== FONCTIONS GLOBALES ==========
+        
         async function loadData() {
             try {
                 showLoading(true);
                 
+                const stationsUrl = 'http://localhost:8080/api/stations/owner/' + CURRENT_USER_ID + '?t=' + Date.now();
+                console.log('Chargement des bornes depuis:', stationsUrl);
+                console.log('CURRENT_USER_ID:', CURRENT_USER_ID);
+                
                 // Charger les bornes et les lieux en parallèle
                 const [stationsResponse, locationsResponse] = await Promise.all([
-                    fetch('http://localhost:8080/api/stations'),
+                    fetch(stationsUrl), // Mes propres bornes
                     fetch('http://localhost:8080/api/locations')
                 ]);
                 
@@ -370,9 +409,15 @@
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
                 
+                console.log('Données reçues des bornes:', stationsData);
+                console.log('Nombre de bornes reçues:', stationsData.content ? stationsData.content.length : stationsData.length);
+                
                 // L'API retourne une structure paginée {content: [...], ...}
                 stations = stationsData.content || stationsData;
                 locations = locationsData.content || locationsData;
+                
+                console.log('Stations finales:', stations);
+                console.log('Nombre de stations finales:', stations.length);
                 
                 displayStations(stations);
                 showLoading(false);
@@ -396,8 +441,8 @@
             
             container.innerHTML = stationsToShow.map(station => {
                 const location = locations.find(loc => loc.id === station.locationId);
-                const locationName = location ? location.label : 'Lieu inconnu';
-                const locationAddress = location ? location.address : '';
+                const locationName = station.locationLabel || (location ? location.label : 'Lieu inconnu');
+                const locationAddress = station.address || (location ? location.address : '');
                 const statusBadge = station.isActive ? 'status-active' : 'status-inactive';
                 const statusText = station.isActive ? 'Active' : 'Inactive';
                 const toggleBtnClass = station.isActive ? 'btn-secondary' : 'btn-success';
@@ -469,25 +514,58 @@
         }
         
         async function deleteStation(stationId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
+            console.log('deleteStation appelé avec ID:', stationId);
+            
+            // Empêcher les clics multiples
+            if (isDeleting) {
+                console.log('Suppression déjà en cours, ignoré');
                 return;
             }
             
+            if (!stationId) {
+                alert('Erreur: ID de borne manquant');
+                return;
+            }
+            
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
+                console.log('Suppression annulée par l\'utilisateur');
+                return;
+            }
+            
+            isDeleting = true; // Verrouiller
+            
             try {
-                const response = await fetch(`http://localhost:8080/api/stations/${stationId}`, {
+                const url = 'http://localhost:8080/api/stations/' + stationId;
+                console.log('URL de suppression:', url);
+                
+                const response = await fetch(url, {
                     method: 'DELETE'
                 });
                 
+                console.log('Réponse suppression, status:', response.status);
+                
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        showError('Cette borne a déjà été supprimée');
+                        isDeleting = false;
+                        setTimeout(() => loadData(), 500);
+                        return;
+                    }
+                    isDeleting = false;
                     throw new Error('Erreur lors de la suppression');
                 }
                 
                 showSuccess('Borne supprimée avec succès');
-                loadData(); // Recharger la liste
+                // Délai avant rechargement pour éviter les appels multiples
+                setTimeout(() => {
+                    loadData();
+                    isDeleting = false; // Déverrouiller après rechargement
+                }, 1000);
                 
             } catch (error) {
                 console.error('Erreur:', error);
                 showError('Erreur lors de la suppression: ' + error.message);
+                isDeleting = false; // Déverrouiller en cas d'erreur
             }
         }
         

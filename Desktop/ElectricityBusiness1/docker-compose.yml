@@ -15,10 +15,12 @@ services:
     ports: ["1026:1025", "8026:8025"]
 
   signup-app:
-    image: tomcat:10.1-jdk21
+    build:
+      context: ./signup-plain
+      dockerfile_inline: |
+        FROM tomcat:10.1-jdk21
+        COPY target/signup-plain.war /usr/local/tomcat/webapps/ROOT.war
     ports: ["8081:8080"]
-    volumes:
-      - ./signup-plain/target/signup-plain.war:/usr/local/tomcat/webapps/ROOT.war
     environment:
       - DB_URL=jdbc:postgresql://db:5432/eb
       - DB_USER=eb
@@ -31,11 +33,13 @@ services:
       - mailhog
 
   backend-app:
-    image: eclipse-temurin:17-jre
+    build:
+      context: ./backend/eb-backend
+      dockerfile_inline: |
+        FROM eclipse-temurin:17-jre
+        COPY target/eb-backend-0.0.1-SNAPSHOT.jar /app.jar
+        CMD ["java", "-jar", "/app.jar"]
     ports: ["8080:8080"]
-    volumes:
-      - ./backend/eb-backend/target/eb-backend-0.0.1-SNAPSHOT.jar:/app.jar
-    command: java -jar /app.jar
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/eb
       - SPRING_DATASOURCE_USERNAME=eb

@@ -366,7 +366,7 @@
                             <option value="past">Passées</option>
                         </select>
                     </div>
-                    <button class="btn btn-secondary" onclick="refreshReservations()">🔄 Actualiser</button>
+                    <button class="btn btn-secondary" onclick="refreshReservations()">Actualiser</button>
                 </div>
             </div>
             
@@ -410,14 +410,20 @@
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js"></script>
     <script>
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            return;
+        }
+        
         let reservations = [];
         let stations = [];
         let locations = [];
         
-        // ID de l'utilisateur connecté (pour simplifier, on utilise 1 pour le propriétaire)
-        // Dans une vraie application, on récupérerait ça depuis la session
-        const CURRENT_USER_ID = 1; // Utilisateur propriétaire connecté
+        // Récupérer l'ID de l'utilisateur depuis le token JWT
+        const CURRENT_USER_ID = getCurrentUserId();
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
@@ -629,7 +635,7 @@
             try {
                 const url = 'http://localhost:8080/api/reservations/' + reservationId + '/cancel';
                 
-                const response = await fetch(url, {
+                const response = await authenticatedFetch(url, {
                     method: 'PUT'
                 });
                 

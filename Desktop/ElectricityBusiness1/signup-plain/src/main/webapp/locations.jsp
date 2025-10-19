@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+    response.setHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -364,7 +367,7 @@
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Rechercher un lieu..." onkeyup="filterLocations()">
-                    <button class="btn btn-secondary" onclick="refreshLocations()">🔄 Actualiser</button>
+                    <button class="btn btn-secondary" onclick="refreshLocations()">Actualiser</button>
                 </div>
             </div>
             
@@ -386,15 +389,35 @@
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/jwt-utils.js"></script>
     <script>
+        // Variables globales
         let locations = [];
         let stations = [];
         let stationsByLocation = {}; // Pour grouper les stations par lieu
+        let isDeletingStation = false; // Protection contre les double-clics
+        let isDeletingLocation = false; // Protection contre les double-clics
+        let CURRENT_USER_ID = null;
         
-        // Charger les lieux et stations au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            loadLocationsAndStations();
-        });
+        // Récupérer l'ID de l'utilisateur depuis le token JWT (sera null si pas authentifié)
+        if (typeof getCurrentUserId === 'function') {
+            CURRENT_USER_ID = getCurrentUserId();
+        }
+        
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            // L'utilisateur sera redirigé automatiquement par requireAuth()
+        } else {
+        
+        console.log('=== LOCATIONS.JSP DEBUG ===');
+        console.log('CURRENT_USER_ID:', CURRENT_USER_ID);
+        console.log('Type:', typeof CURRENT_USER_ID);
+        console.log('===========================');
+        
+        } // Fermer le bloc else
+        
+        // ========== FONCTIONS GLOBALES (définies en dehors du bloc else) ==========
         
         async function loadLocationsAndStations() {
             try {
@@ -403,7 +426,7 @@
                 // Charger les lieux et stations en parallèle
                 const [locationsResponse, stationsResponse] = await Promise.all([
                     fetch('http://localhost:8080/api/locations'),
-                    fetch('http://localhost:8080/api/stations')
+                    fetch('http://localhost:8080/api/stations/owner/' + CURRENT_USER_ID) // Mes propres bornes
                 ]);
                 
                 if (!locationsResponse.ok || !stationsResponse.ok) {
@@ -414,7 +437,11 @@
                 const stationsData = await stationsResponse.json();
                 
                 // L'API retourne une structure paginée {content: [...], ...}
-                locations = locationsData.content || locationsData;
+                const allLocations = locationsData.content || locationsData;
+                locations = allLocations.filter(loc => {
+                    const ownerId = (loc.ownerId != null) ? Number(loc.ownerId) : (loc.owner && Number(loc.owner.id));
+                    return Number(ownerId) === Number(CURRENT_USER_ID);
+                });
                 stations = stationsData.content || stationsData;
                 
                 // Grouper les stations par lieu
@@ -484,6 +511,7 @@
                     '<div class="location-actions">' +
                         '<a href="add-station.jsp?locationId=' + location.id + '" class="action-link">Ajouter une borne</a>' +
                         '<a href="edit-location.jsp?id=' + location.id + '" class="action-link">Modifier ce lieu</a>' +
+                        '<a href="#" onclick="deleteLocation(' + location.id + '); return false;" class="action-link delete-link">Supprimer ce lieu</a>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -511,9 +539,17 @@
         }
         
         async function deleteStation(stationId) {
+            // Empêcher les clics multiples
+            if (isDeletingStation) {
+                console.log('Suppression de borne déjà en cours');
+                return;
+            }
+            
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
                 return;
             }
+            
+            isDeletingStation = true;
             
             try {
                 const response = await fetch('http://localhost:8080/api/stations/' + stationId, {
@@ -521,42 +557,89 @@
                 });
                 
                 if (response.ok) {
-                    alert('Borne supprimée avec succès');
-                    loadLocationsAndStations(); // Recharger les données
+                    showSuccess('Borne supprimée avec succès');
+                    setTimeout(() => {
+                        loadLocationsAndStations();
+                        isDeletingStation = false;
+                    }, 1000);
+                } else if (response.status === 404) {
+                    showError('Cette borne a déjà été supprimée');
+                    isDeletingStation = false;
+                    setTimeout(() => loadLocationsAndStations(), 500);
                 } else {
+                    isDeletingStation = false;
                     throw new Error('Erreur lors de la suppression');
                 }
             } catch (error) {
                 console.error('Erreur:', error);
-                alert('Erreur lors de la suppression de la borne: ' + error.message);
+                showError('Erreur lors de la suppression de la borne: ' + error.message);
+                isDeletingStation = false;
             }
         }
         
         async function deleteLocation(locationId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce lieu ?')) {
+            console.log('=== DELETE LOCATION ===');
+            console.log('locationId reçu:', locationId);
+            console.log('Type:', typeof locationId);
+            console.log('======================');
+            
+            // Empêcher les clics multiples
+            if (isDeletingLocation) {
+                console.log('Suppression de lieu déjà en cours');
                 return;
             }
             
+            // Vérifier si le lieu contient des bornes
+            const locationStations = stationsByLocation[locationId] || [];
+            let confirmMessage = 'Êtes-vous sûr de vouloir supprimer ce lieu ?';
+            
+            if (locationStations.length > 0) {
+                confirmMessage = 'ATTENTION : Ce lieu contient ' + locationStations.length + ' borne(s).\n\n' +
+                    'La suppression du lieu supprimera également toutes ses bornes.\n\n' +
+                    'Êtes-vous vraiment sûr de vouloir continuer ?';
+            }
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            isDeletingLocation = true;
+            
             try {
-                const response = await fetch(`http://localhost:8080/api/locations/${locationId}`, {
+                const url = 'http://localhost:8080/api/locations/' + locationId;
+                console.log('URL de suppression:', url);
+                
+                const response = await fetch(url, {
                     method: 'DELETE'
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Erreur lors de la suppression');
+                    if (response.status === 404) {
+                        showError('Ce lieu a déjà été supprimé');
+                        isDeletingLocation = false;
+                        setTimeout(() => loadLocationsAndStations(), 500);
+                        return;
+                    }
+                    const errorText = await response.text();
+                    isDeletingLocation = false;
+                    throw new Error(errorText || 'Erreur lors de la suppression');
                 }
                 
-                showSuccess('Lieu supprimé avec succès');
-                loadLocations(); // Recharger la liste
+                showSuccess('Lieu supprimé avec succès !');
+                setTimeout(() => {
+                    loadLocationsAndStations();
+                    isDeletingLocation = false;
+                }, 1000);
                 
             } catch (error) {
                 console.error('Erreur:', error);
                 showError('Erreur lors de la suppression: ' + error.message);
+                isDeletingLocation = false;
             }
         }
         
         function refreshLocations() {
-            loadLocations();
+            loadLocationsAndStations();
         }
         
         function showLoading(show) {
@@ -567,7 +650,7 @@
         
         function showError(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="error">${message}</div>`;
+            container.innerHTML = '<div class="error">' + message + '</div>';
             setTimeout(() => {
                 container.innerHTML = '';
             }, 5000);
@@ -575,16 +658,18 @@
         
         function showSuccess(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="success">${message}</div>`;
+            container.innerHTML = '<div class="success">' + message + '</div>';
             setTimeout(() => {
                 container.innerHTML = '';
             }, 3000);
         }
+        
+        // Charger les lieux et stations au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (CURRENT_USER_ID) {
+                loadLocationsAndStations();
+            }
+        });
     </script>
 </body>
 </html>
-
-
-
-
-
