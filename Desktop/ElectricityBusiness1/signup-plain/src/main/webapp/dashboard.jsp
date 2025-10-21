@@ -2,156 +2,601 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard - Electricity Business</title>
+    <title>Tableau de bord - Electricity Business</title>
+    <link rel="stylesheet" href="css/common-styles.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background-color: white; }
-        .header { background-color: white; color: #333; padding: 20px; border-bottom: 1px solid #ddd; }
-        .header h1 { margin: 0; display: inline-block; }
-        .header .user-info { float: right; margin-top: 5px; }
-        .header .user-info a { color: #007bff; text-decoration: none; margin-left: 15px; }
-        .header .user-info a:hover { text-decoration: underline; }
-        
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .welcome-card { background: white; padding: 30px; border: 1px solid #ddd; margin-bottom: 30px; }
-        .welcome-card h2 { color: #333; margin-top: 0; }
-        .welcome-card p { color: #666; font-size: 16px; line-height: 1.6; }
-        
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .feature-card { background: white; padding: 25px; border: 1px solid #ddd; text-align: center; }
-        .feature-card h3 { color: #007bff; margin-top: 0; }
-        .feature-card p { color: #666; margin-bottom: 20px; }
-        .feature-card .btn { 
-            display: inline-block; padding: 10px 20px; background-color: #007bff; 
-            color: white; text-decoration: none; border-radius: 4px; 
+        /* Styles spécifiques au dashboard uniquement */
+        .section { 
+            background: #fff; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 25px; 
+            margin-bottom: 25px;
         }
-        .feature-card .btn:hover { background-color: #0056b3; }
-        .feature-card .btn.disabled { 
-            background-color: #6c757d; cursor: not-allowed; 
+        .section-title { 
+            color: #333; 
+            font-size: 18px; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
         }
-        
-        .status-badge { 
-            display: inline-block; padding: 4px 8px; border-radius: 12px; 
-            font-size: 12px; font-weight: bold; text-transform: uppercase;
+        .filter-bar { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 15px; 
+            align-items: center;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            border: 1px solid #ddd;
         }
-        .status-active { background-color: #d4edda; color: #155724; }
+        .filter-bar label { font-size: 13px; color: #333; font-weight: 500; }
+        .filter-bar input { 
+            padding: 6px 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .locations-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+        }
+        .location-card { 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            background-color: #fff;
+        }
+        .location-card h4 { color: #333; margin-bottom: 15px; font-size: 16px; }
+        .location-card .station { 
+            background-color: #f5f5f5; 
+            padding: 10px; 
+            margin: 8px 0; 
+            border-radius: 4px;
+            border-left: 3px solid #333;
+        }
+        .location-card .station-name { font-weight: 600; color: #333; font-size: 13px; }
+        .location-card .station-rate { color: #666; font-size: 12px; margin-top: 3px; }
+        .location-actions { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .no-data { 
+            text-align: center; 
+            padding: 40px; 
+            color: #999; 
+            font-size: 14px;
+        }
+        .pagination { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px; 
+            margin-top: 20px;
+        }
+        .pagination button { 
+            padding: 6px 12px; 
+            border: 1px solid #ccc; 
+            background-color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .pagination button:hover { background-color: #f5f5f5; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination .page-info { color: #666; font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Electricity Business</h1>
+        <h1>Tableau de Bord - Electricity Business</h1>
         <div class="user-info">
-            <span id="welcomeMessage">Bienvenue, Utilisateur</span>
-            <span class="status-badge status-active">Compte Actif</span>
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
             <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
     
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link active">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link">Réserver une borne</a>
+        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte des bornes</a>
+    </nav>
+    
     <div class="container">
-        <div class="features-grid">
-            <div class="feature-card">
-                <h3>Mes Lieux de Recharge</h3>
-                <p>Gérez vos lieux de recharge électrique et ajoutez de nouveaux emplacements.</p>
-                <a href="locations.jsp" class="btn">Gérer les Lieux</a>
+        <!-- Message container -->
+        <div id="messageContainer"></div>
+        
+        <!-- Mes réservations en cours -->
+        <div class="section">
+            <h2 class="section-title">Mes réservations en cours</h2>
+            <div id="currentReservationsLoading" class="loading">Chargement...</div>
+            <div id="currentReservationsContainer" style="display: none;">
+                <table id="currentReservationsTable">
+                    <thead>
+                        <tr>
+                            <th>Date et heure début</th>
+                            <th>Date et heure fin</th>
+                            <th>Borne, Lieu, Ville</th>
+                            <th>Montant réglé</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="currentReservationsBody"></tbody>
+                </table>
+                <div id="currentReservationsEmpty" class="no-data" style="display: none;">
+                    Aucune réservation en cours
+                </div>
+            </div>
             </div>
             
-            <div class="feature-card">
-                <h3>🔌 Mes Bornes de Recharge</h3>
-                <p>Ajoutez et gérez vos bornes de recharge avec leurs tarifs horaires.</p>
-                <a href="stations.jsp" class="btn">Gérer les Bornes</a>
+        <!-- Mes réservations passées -->
+        <div class="section">
+            <h2 class="section-title">Mes réservations passées</h2>
+            <div class="filter-bar">
+                <label>Date début :</label>
+                <input type="date" id="filterDateStart">
+                <label>Date fin :</label>
+                <input type="date" id="filterDateEnd">
+                <button class="btn btn-primary" onclick="filterPastReservations()">Filtrer</button>
+                <button class="btn btn-warning" onclick="resetPastFilter()">Réinitialiser</button>
+            </div>
+            <div id="pastReservationsLoading" class="loading">Chargement...</div>
+            <div id="pastReservationsContainer" style="display: none;">
+                <table id="pastReservationsTable">
+                    <thead>
+                        <tr>
+                            <th>Date et heure début</th>
+                            <th>Date et heure fin</th>
+                            <th>Borne, Lieu, Ville</th>
+                            <th>Montant réglé</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pastReservationsBody"></tbody>
+                </table>
+                <div id="pastReservationsEmpty" class="no-data" style="display: none;">
+                    Aucune réservation passée
+                </div>
+                <div class="pagination" id="pastPagination"></div>
+            </div>
             </div>
             
-            <div class="feature-card">
-                <h3>Carte des Stations</h3>
-                <p>Trouvez les bornes de recharge disponibles près de chez vous sur la carte interactive.</p>
-                <a href="map.jsp" class="btn">Voir la Carte</a>
+        <!-- Lieux de recharge -->
+        <div class="section">
+            <h2 class="section-title">Lieux de recharge</h2>
+            <button class="btn btn-success" onclick="window.location.href='add-location.jsp'" style="margin-bottom: 15px;">
+                Ajouter un lieu
+            </button>
+            <div id="locationsLoading" class="loading">Chargement...</div>
+            <div id="locationsContainer" style="display: none;">
+                <div class="locations-grid" id="locationsGrid"></div>
+                <div id="locationsEmpty" class="no-data" style="display: none;">
+                    Aucun lieu de recharge
+                </div>
+            </div>
             </div>
             
-            <div class="feature-card">
-                <h3>Mes Réservations</h3>
-                <p>Consultez vos réservations en cours et passées.</p>
-                <a href="reservations.jsp" class="btn">Gérer les Réservations</a>
-            </div>
-            
-            <div class="feature-card">
-                <h3>Export des Données</h3>
-                <p>Téléchargez vos réservations au format Excel pour vos archives.</p>
-                <a href="http://localhost:8080/api/reservations/export.xlsx" class="btn" target="_blank">Télécharger Excel</a>
-            </div>
-            
-            <div class="feature-card">
-                <h3>Reçus PDF</h3>
-                <p>Générez des reçus PDF pour vos réservations confirmées.</p>
-                <a href="http://localhost:8080/api/reservations/1/receipt.pdf" class="btn" target="_blank">Télécharger PDF</a>
+        <!-- Demandes de réservations à traiter -->
+        <div class="section">
+            <h2 class="section-title">Demandes de réservations à traiter</h2>
+            <div id="pendingRequestsLoading" class="loading">Chargement...</div>
+            <div id="pendingRequestsContainer" style="display: none;">
+                <table id="pendingRequestsTable">
+                    <thead>
+                        <tr>
+                            <th>Date et heure début</th>
+                            <th>Date et heure fin</th>
+                            <th>Utilisateur</th>
+                            <th>Borne, Lieu</th>
+                            <th>Montant réglé</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingRequestsBody"></tbody>
+                </table>
+                <div id="pendingRequestsEmpty" class="no-data" style="display: none;">
+                    Aucune demande en attente
+                </div>
             </div>
         </div>
         
+        <!-- Demandes de réservations traitées -->
+        <div class="section">
+            <h2 class="section-title">Demandes de réservations traitées</h2>
+            <div id="treatedRequestsLoading" class="loading">Chargement...</div>
+            <div id="treatedRequestsContainer" style="display: none;">
+                <table id="treatedRequestsTable">
+                    <thead>
+                        <tr>
+                            <th>Date et heure début</th>
+                            <th>Date et heure fin</th>
+                            <th>Utilisateur</th>
+                            <th>Borne, Lieu</th>
+                            <th>Montant réglé</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="treatedRequestsBody"></tbody>
+                </table>
+                <div id="treatedRequestsEmpty" class="no-data" style="display: none;">
+                    Aucune demande traitée
+                </div>
+            </div>
+        </div>
     </div>
-</body>
+
     <!-- Scripts -->
-    <script src="js/jwt-utils.js?v=20251017"></script>
+    <script src="js/jwt-utils.js?v=20251019"></script>
     <script>
-        // Vérifier l'authentification au chargement de la page
-        if (!requireAuth()) {
-            // L'utilisateur sera redirigé automatiquement vers login.jsp
-            // par la fonction requireAuth()
-        } else {
+        console.log('=== DASHBOARD VERSION 2025-10-19 18:00 ===');
         
-        // Afficher les informations utilisateur
-        const user = getAuthUser();
-        if (user) {
-            document.getElementById('welcomeMessage').textContent = `Bienvenue, ${user.firstName} ${user.lastName}`;
+        let CURRENT_USER_ID = null;
+        let allReservations = [];
+        let allStations = [];
+        let allLocations = [];
+        let allUsers = [];
+        
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            // Redirection automatique
+        } else {
+            CURRENT_USER_ID = getCurrentUserId();
+            const user = getAuthUser();
+            if (user) {
+                document.getElementById('welcomeMessage').textContent = 'Bienvenue, ' + user.firstName + ' ' + user.lastName;
+            }
+            
+            // Charger toutes les données au démarrage
+            loadAllData();
         }
         
-        // Fonction de déconnexion directe
-        function logout() {
-            console.log('=== DÉCONNEXION DÉMARRÉE ===');
-            
-            // Afficher un message de confirmation
-            alert('Déconnexion en cours...');
-            
-            console.log('=== NETTOYAGE COMPLET ===');
-            
+        async function loadAllData() {
             try {
-                // Nettoyage manuel complet
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('authUser');
-                localStorage.removeItem('auth_token');
-                localStorage.removeItem('auth_user');
+                const [reservations, stations, locations] = await Promise.all([
+                    authenticatedFetch('http://localhost:8080/api/reservations').then(r => r.json()),
+                    authenticatedFetch('http://localhost:8080/api/stations').then(r => r.json()),
+                    authenticatedFetch('http://localhost:8080/api/locations').then(r => r.json())
+                ]);
                 
-                // Vider complètement les storages
-                localStorage.clear();
-                sessionStorage.clear();
+                allReservations = reservations.content || reservations;
+                allStations = stations.content || stations;
+                allLocations = locations.content || locations;
                 
-                console.log('Storages vidés avec succès');
-                
-                // Redirection immédiate
-                console.log('Redirection vers login...');
-                window.location.replace('/login.jsp?message=logout');
+                loadCurrentReservations();
+                loadPastReservations();
+                loadLocations();
+                loadPendingRequests();
+                loadTreatedRequests();
                 
             } catch (error) {
-                console.error('Erreur lors de la déconnexion:', error);
-                // Redirection même en cas d'erreur
-                window.location.replace('/login.jsp?message=logout');
+                console.error('Erreur:', error);
+                showError('Erreur lors du chargement des données');
             }
         }
         
-        // Vérifier la validité du token toutes les minutes
-        setInterval(() => {
-            if (!validateAuthData()) {
-                window.location.href = '/login.jsp';
+        function loadCurrentReservations() {
+            const container = document.getElementById('currentReservationsContainer');
+            const loading = document.getElementById('currentReservationsLoading');
+            const body = document.getElementById('currentReservationsBody');
+            const empty = document.getElementById('currentReservationsEmpty');
+            
+            // Réservations en cours = PENDING, CONFIRMED ou ACTIVE
+            const current = allReservations.filter(r => 
+                r.userId === CURRENT_USER_ID && 
+                ['PENDING', 'CONFIRMED', 'ACTIVE'].includes(r.status)
+            );
+            
+            loading.style.display = 'none';
+            container.style.display = 'block';
+            
+            if (current.length === 0) {
+                empty.style.display = 'block';
+                body.innerHTML = '';
+                return;
             }
-        }, 60000); // 60 secondes
+            
+            empty.style.display = 'none';
+            body.innerHTML = current.map(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                
+                return '<tr>' +
+                    '<td>' + formatDateTime(reservation.startDateTime) + '</td>' +
+                    '<td>' + formatDateTime(reservation.endDateTime) + '</td>' +
+                    '<td>' + (station?.name || 'N/A') + '<br>' + (location?.name || 'N/A') + ', ' + (location?.city || 'N/A') + '</td>' +
+                    '<td>' + (reservation.totalPrice ? reservation.totalPrice.toFixed(2) : '0.00') + ' €</td>' +
+                    '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
+                    '<td>' +
+                        (reservation.status === 'PENDING' ? '<button class="btn btn-danger" onclick="cancelReservation(' + reservation.id + ')">Annuler</button>' : '') +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
         
-        } // Fermer le bloc else
+        function loadPastReservations() {
+            const container = document.getElementById('pastReservationsContainer');
+            const loading = document.getElementById('pastReservationsLoading');
+            const body = document.getElementById('pastReservationsBody');
+            const empty = document.getElementById('pastReservationsEmpty');
+            
+            // Réservations passées = COMPLETED, CANCELLED
+            const past = allReservations.filter(r => 
+                r.userId === CURRENT_USER_ID && 
+                ['COMPLETED', 'CANCELLED'].includes(r.status)
+            );
+            
+            loading.style.display = 'none';
+            container.style.display = 'block';
+            
+            if (past.length === 0) {
+                empty.style.display = 'block';
+                body.innerHTML = '';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            body.innerHTML = past.map(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                
+                return '<tr>' +
+                    '<td>' + formatDateTime(reservation.startDateTime) + '</td>' +
+                    '<td>' + formatDateTime(reservation.endDateTime) + '</td>' +
+                    '<td>' + (station?.name || 'N/A') + '<br>' + (location?.name || 'N/A') + ', ' + (location?.city || 'N/A') + '</td>' +
+                    '<td>' + (reservation.totalPrice ? reservation.totalPrice.toFixed(2) : '0.00') + ' €</td>' +
+                    '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
+                '</tr>';
+            }).join('');
+        }
+        
+        function loadLocations() {
+            const container = document.getElementById('locationsContainer');
+            const loading = document.getElementById('locationsLoading');
+            const grid = document.getElementById('locationsGrid');
+            const empty = document.getElementById('locationsEmpty');
+            
+            const myLocations = allLocations.filter(l => l.ownerId === CURRENT_USER_ID);
+            
+            loading.style.display = 'none';
+            container.style.display = 'block';
+            
+            if (myLocations.length === 0) {
+                empty.style.display = 'block';
+                grid.innerHTML = '';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            grid.innerHTML = myLocations.map(location => {
+                const locationStations = allStations.filter(s => s.locationId === location.id);
+                
+                return '<div class="location-card">' +
+                    '<h4>' + location.name + '</h4>' +
+                    '<p style="color: #7f8c8d; font-size: 12px; margin-bottom: 10px;">' + location.address + ', ' + location.city + '</p>' +
+                    '<div>' +
+                        locationStations.map(station => 
+                            '<div class="station">' +
+                                '<div class="station-name">' + station.name + '</div>' +
+                                '<div class="station-rate">' + (station.hourlyRate ? station.hourlyRate.toFixed(2) : '0.00') + ' €/h</div>' +
+                            '</div>'
+                        ).join('') +
+                    '</div>' +
+                    '<div class="location-actions">' +
+                        '<button class="btn btn-primary" onclick="window.location.href=\'edit-location.jsp?id=' + location.id + '\'">Modifier</button>' +
+                        '<button class="btn btn-info" onclick="window.location.href=\'add-station.jsp?locationId=' + location.id + '\'">Ajouter une borne</button>' +
+                        '<button class="btn btn-danger" onclick="deleteLocation(' + location.id + ')">Supprimer</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+        
+        function loadPendingRequests() {
+            const container = document.getElementById('pendingRequestsContainer');
+            const loading = document.getElementById('pendingRequestsLoading');
+            const body = document.getElementById('pendingRequestsBody');
+            const empty = document.getElementById('pendingRequestsEmpty');
+            
+            // Demandes en attente = réservations PENDING sur MES bornes
+            const myStationIds = allStations.filter(s => {
+                const location = allLocations.find(l => l.id === s.locationId);
+                return location && location.ownerId === CURRENT_USER_ID;
+            }).map(s => s.id);
+            
+            const pending = allReservations.filter(r => 
+                r.status === 'PENDING' && 
+                myStationIds.includes(r.stationId) &&
+                r.userId !== CURRENT_USER_ID
+            );
+            
+            loading.style.display = 'none';
+            container.style.display = 'block';
+            
+            if (pending.length === 0) {
+                empty.style.display = 'block';
+                body.innerHTML = '';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            body.innerHTML = pending.map(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                
+                return '<tr>' +
+                    '<td>' + formatDateTime(reservation.startDateTime) + '</td>' +
+                    '<td>' + formatDateTime(reservation.endDateTime) + '</td>' +
+                    '<td>Utilisateur #' + reservation.userId + '</td>' +
+                    '<td>' + (station?.name || 'N/A') + '<br>' + (location?.name || 'N/A') + '</td>' +
+                    '<td>' + (reservation.totalPrice ? reservation.totalPrice.toFixed(2) : '0.00') + ' €</td>' +
+                    '<td>' +
+                        '<button class="btn btn-success" onclick="acceptReservation(' + reservation.id + ')">Accepter</button>' +
+                        '<button class="btn btn-danger" onclick="refuseReservation(' + reservation.id + ')">Refuser</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+        
+        function loadTreatedRequests() {
+            const container = document.getElementById('treatedRequestsContainer');
+            const loading = document.getElementById('treatedRequestsLoading');
+            const body = document.getElementById('treatedRequestsBody');
+            const empty = document.getElementById('treatedRequestsEmpty');
+            
+            // Demandes traitées = réservations CONFIRMED, CANCELLED, COMPLETED sur MES bornes
+            const myStationIds = allStations.filter(s => {
+                const location = allLocations.find(l => l.id === s.locationId);
+                return location && location.ownerId === CURRENT_USER_ID;
+            }).map(s => s.id);
+            
+            const treated = allReservations.filter(r => 
+                ['CONFIRMED', 'CANCELLED', 'COMPLETED'].includes(r.status) && 
+                myStationIds.includes(r.stationId) &&
+                r.userId !== CURRENT_USER_ID
+            );
+            
+            loading.style.display = 'none';
+            container.style.display = 'block';
+            
+            if (treated.length === 0) {
+                empty.style.display = 'block';
+                body.innerHTML = '';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            body.innerHTML = treated.map(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                
+                return '<tr>' +
+                    '<td>' + formatDateTime(reservation.startDateTime) + '</td>' +
+                    '<td>' + formatDateTime(reservation.endDateTime) + '</td>' +
+                    '<td>Utilisateur #' + reservation.userId + '</td>' +
+                    '<td>' + (station?.name || 'N/A') + '<br>' + (location?.name || 'N/A') + '</td>' +
+                    '<td>' + (reservation.totalPrice ? reservation.totalPrice.toFixed(2) : '0.00') + ' €</td>' +
+                    '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
+                '</tr>';
+            }).join('');
+        }
+        
+        async function acceptReservation(id) {
+            try {
+                const response = await authenticatedFetch('http://localhost:8080/api/reservations/' + id + '/confirm', {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Erreur');
+                showSuccess('Réservation acceptée');
+                loadAllData();
+            } catch (error) {
+                showError('Erreur lors de l\'acceptation');
+            }
+        }
+        
+        async function refuseReservation(id) {
+            if (!confirm('Voulez-vous refuser cette demande ?')) return;
+            try {
+                const response = await authenticatedFetch('http://localhost:8080/api/reservations/' + id + '/cancel', {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Erreur');
+                showSuccess('Réservation refusée');
+                loadAllData();
+            } catch (error) {
+                showError('Erreur lors du refus');
+            }
+        }
+        
+        async function cancelReservation(id) {
+            if (!confirm('Voulez-vous annuler cette réservation ?')) return;
+            try {
+                const response = await authenticatedFetch('http://localhost:8080/api/reservations/' + id + '/cancel', {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Erreur');
+                showSuccess('Réservation annulée');
+                loadAllData();
+            } catch (error) {
+                showError('Erreur lors de l\'annulation');
+            }
+        }
+        
+        async function deleteLocation(id) {
+            if (!confirm('Voulez-vous supprimer ce lieu ?')) return;
+            try {
+                const response = await authenticatedFetch('http://localhost:8080/api/locations/' + id, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Erreur');
+                showSuccess('Lieu supprimé');
+                loadAllData();
+            } catch (error) {
+                showError('Erreur lors de la suppression');
+            }
+        }
+        
+        function filterPastReservations() {
+            // TODO: Implémenter le filtre
+            showSuccess('Filtre appliqué');
+        }
+        
+        function resetPastFilter() {
+            document.getElementById('filterDateStart').value = '';
+            document.getElementById('filterDateEnd').value = '';
+            loadPastReservations();
+        }
+        
+        function formatDateTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'PENDING': 'En attente',
+                'CONFIRMED': 'Accepté',
+                'ACTIVE': 'En cours',
+                'COMPLETED': 'Terminé',
+                'CANCELLED': 'Annulé'
+            };
+            return statusMap[status] || status;
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = '<div class="message error">' + message + '</div>';
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+        
+        function showSuccess(message) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = '<div class="message success">' + message + '</div>';
+            setTimeout(() => container.innerHTML = '', 3000);
+        }
+        
+        function logout() {
+            console.log('=== DÉCONNEXION ===');
+            alert('Déconnexion en cours...');
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.replace('/login.jsp?message=logout');
+        }
     </script>
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-

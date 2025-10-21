@@ -5,208 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Lieu - Electricity Business</title>
+    <link rel="stylesheet" href="css/common-styles.css">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 100%;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            color: #333;
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
-        .nav {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .nav a {
-            color: #495057;
-            text-decoration: none;
-            margin-right: 20px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav a:hover, .nav a.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .content {
-            padding: 40px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .form-container {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 30px;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-        
-        .required {
-            color: #dc3545;
-        }
-        
-        .geo-button-container {
-            margin-top: 10px;
-        }
-        
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
         <div class="header">
-            <h1>Ajouter un Lieu</h1>
-            <p>Créez un nouveau lieu de recharge électrique</p>
+        <h1>Electricity Business</h1>
+        <div class="user-info">
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
-        
-        <div class="nav">
-            <a href="dashboard.jsp">Tableau de bord</a>
-            <a href="locations.jsp">Lieux</a>
-            <a href="stations.jsp">Bornes</a>
-            <a href="reservations.jsp">Réservations</a>
-            <a href="map.jsp">Carte</a>
-            <a href="logout">Déconnexion</a>
-        </div>
+    </div>
+    
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link active">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
+        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte</a>
+    </nav>
+    
+    <div class="container">
         
         <div class="content">
             <div id="messageContainer"></div>
@@ -523,5 +346,6 @@
         
         } // Fermer le bloc else
     </script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

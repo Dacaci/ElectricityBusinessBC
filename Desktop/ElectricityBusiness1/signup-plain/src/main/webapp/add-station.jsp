@@ -4,25 +4,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ajouter une borne</title>
+<title>Ajouter une Borne - Electricity Business</title>
+<link rel="stylesheet" href="css/common-styles.css">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
-<style>
-  body { font-family: Arial, sans-serif; margin: 24px; background: #fff; color: #111; }
-  .container { max-width: 720px; margin: 0 auto; }
-  h1 { margin: 0 0 16px; font-size: 22px; font-weight: 600; }
-  .row { margin-bottom: 12px; }
-  label { display: block; margin-bottom: 6px; font-weight: 600; }
-  input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-  button { padding: 10px 14px; border: 1px solid #111; background: #111; color: #fff; border-radius: 4px; cursor: pointer; }
-  button.secondary { background: #fff; color: #111; margin-left: 8px; }
-  .msg { margin-top: 14px; padding: 10px; border-radius: 4px; display: none; }
-  .msg.ok { background: #e8f5e9; border: 1px solid #c8e6c9; }
-  .msg.err { background: #ffebee; border: 1px solid #ffcdd2; }
-</style>
 </head>
 <body>
+    <div class="header">
+        <h1>Electricity Business</h1>
+        <div class="user-info">
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+        </div>
+    </div>
+    
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link active">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
+        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte</a>
+    </nav>
+
 <div class="container">
-  <h1>Ajouter une borne</h1>
+  <h2>Ajouter une borne</h2>
 
   <div class="row">
     <label for="name">Nom</label>
@@ -227,5 +235,6 @@
   
   } // Fermer le bloc else
 </script>
+<script src="js/auth.js"></script>
 </body>
 </html>

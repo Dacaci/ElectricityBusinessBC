@@ -103,6 +103,26 @@ public class StationController {
         }
     }
     
+    @PatchMapping("/{id}")
+    public ResponseEntity<StationDto> patchStation(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Object> updates) {
+        try {
+            // Si on modifie uniquement isActive
+            if (updates.containsKey("isActive") && updates.size() == 1) {
+                Boolean isActive = (Boolean) updates.get("isActive");
+                StationDto updated = isActive ? 
+                    stationService.activateStation(id) : 
+                    stationService.deactivateStation(id);
+                return ResponseEntity.ok(updated);
+            }
+            // Sinon on pourrait gérer d'autres champs partiels ici
+            return ResponseEntity.badRequest().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStation(@PathVariable Long id) {
         try {

@@ -8,357 +8,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Lieux - Electricity Business</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 100%;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            color: #333;
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
-        .nav {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .nav a {
-            color: #495057;
-            text-decoration: none;
-            margin-right: 20px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav a:hover, .nav a.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-            color: #212529;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-        }
-        
-        .search-box {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .search-box input {
-            padding: 10px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-            width: 250px;
-            transition: border-color 0.3s;
-        }
-        
-        .search-box input:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        
-        .locations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .location-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .location-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .location-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-        
-        .location-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-        
-        .location-address {
-            color: #6c757d;
-            font-size: 0.95em;
-            line-height: 1.4;
-        }
-        
-        .location-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 15px;
-        }
-        
-        .location-actions .btn {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-        
-        .no-locations {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-        
-        .no-locations h3 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        
-        /* Styles pour la nouvelle interface */
-        .location-card {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .location-header {
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .location-address {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        
-        .stations-container {
-            margin-bottom: 20px;
-        }
-        
-        .station-item {
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
-        }
-        
-        .station-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .station-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #333;
-        }
-        
-        .station-icons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .station-icons .icon {
-            font-size: 1.2em;
-            opacity: 0.7;
-        }
-        
-        .station-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .action-link {
-            color: #007bff;
-            text-decoration: none;
-            font-size: 0.9em;
-            padding: 5px 10px;
-            border-radius: 3px;
-            transition: background-color 0.3s;
-        }
-        
-        .action-link:hover {
-            background-color: #e3f2fd;
-            text-decoration: underline;
-        }
-        
-        .action-link.delete-link {
-            color: #dc3545;
-        }
-        
-        .action-link.delete-link:hover {
-            background-color: #f8d7da;
-        }
-        
-        .location-actions {
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            display: flex;
-            gap: 15px;
-        }
-        
-        .no-stations {
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            padding: 20px;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        
-        @media (max-width: 768px) {
-            .actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .search-box {
-                width: 100%;
-            }
-            
-            .search-box input {
-                width: 100%;
-            }
-            
-            .locations-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <title>Mes Lieux - Electricity Business</title>
+    <link rel="stylesheet" href="css/common-styles.css">
 </head>
 <body>
+    <div class="header">
+        <h1>Electricity Business</h1>
+        <div class="user-info">
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+        </div>
+    </div>
+    
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link active">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
+        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte</a>
+    </nav>
+    
     <div class="container">
-        <div class="header">
-            <h1>Gestion des Lieux</h1>
-            <p>Gérez vos lieux de recharge électrique</p>
-        </div>
-        
-        <div class="nav">
-            <a href="dashboard.jsp">Tableau de bord</a>
-            <a href="locations.jsp" class="active">Lieux</a>
-            <a href="stations.jsp">Bornes</a>
-            <a href="reservations.jsp">Réservations</a>
-            <a href="map.jsp">Carte</a>
-            <a href="logout">Déconnexion</a>
-        </div>
         
         <div class="content">
             <div class="actions">
@@ -671,5 +345,6 @@
             }
         });
     </script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

@@ -5,251 +5,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier une Borne - Electricity Business</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-            color: #212529;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
-        .nav {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .nav a {
-            color: #495057;
-            text-decoration: none;
-            margin-right: 20px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav a:hover, .nav a.active {
-            background-color: #ffc107;
-            color: #212529;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        .form-container {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #ffc107;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-            color: #212529;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 30px;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-        
-        .required {
-            color: #dc3545;
-        }
-        
-        .info-box {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            color: #1565c0;
-        }
-        
-        .info-box h4 {
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-        
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/common-styles.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>
+    <div class="header">
+        <h1>Electricity Business</h1>
+        <div class="user-info">
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+        </div>
+    </div>
+    
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link active">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
+        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte</a>
+    </nav>
+    
     <div class="container">
-        <div class="header">
-            <h1>Modifier une Borne</h1>
-            <p>Modifiez les informations de votre borne de recharge</p>
-        </div>
-        
-        <div class="nav">
-            <a href="dashboard.jsp">Tableau de bord</a>
-            <a href="locations.jsp">Lieux</a>
-            <a href="stations.jsp">Bornes</a>
-            <a href="reservations.jsp">Réservations</a>
-            <a href="map.jsp">Carte</a>
-            <a href="logout">Déconnexion</a>
-        </div>
-        
         <div class="content">
+            <h2>Modifier une borne</h2>
+            
             <div id="messageContainer"></div>
             
-            <div class="info-box">
-                <h4>Information importante</h4>
-                <p>Toutes les bornes utilisent le type de prise TYPE2S, compatible avec la plupart des véhicules électriques.</p>
-            </div>
-            
             <div id="loadingIndicator" class="loading">
-                <p>Chargement des informations de la borne...</p>
+                <p>Chargement des informations...</p>
             </div>
             
-            <div id="formContainer" class="form-container" style="display: none;">
+            <div id="formContainer" class="card" style="display: none;">
                 <form id="stationForm">
                     <div class="form-group">
-                        <label for="name">Nom de la borne <span class="required">*</span></label>
-                        <input type="text" id="name" name="name" required maxlength="255" 
-                               placeholder="Ex: Borne principale - Parking A">
+                        <label for="name">Nom de la borne <span style="color: #ef4444;">*</span></label>
+                        <input type="text" id="name" name="name" class="form-control" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="locationId">Lieu de recharge <span class="required">*</span></label>
-                        <select id="locationId" name="locationId" required>
+                        <label for="locationId">Lieu <span style="color: #ef4444;">*</span></label>
+                        <select id="locationId" name="locationId" class="form-control" required>
                             <option value="">Sélectionnez un lieu...</option>
                         </select>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="hourlyRate">Tarif horaire (€/h) <span class="required">*</span></label>
-                            <input type="number" id="hourlyRate" name="hourlyRate" step="0.01" min="0" required 
-                                   placeholder="Ex: 2.50">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="plugType">Type de prise</label>
-                            <input type="text" id="plugType" name="plugType" value="TYPE2S" readonly 
-                                   style="background-color: #f8f9fa; color: #6c757d;">
-                        </div>
+                    <div class="form-group">
+                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
+                        <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plugType">Type de prise</label>
+                        <input type="text" id="plugType" name="plugType" class="form-control" value="TYPE2S" readonly style="background-color: #f8f9fa; color: #6c757d;">
                     </div>
                     
                     <div class="form-group">
@@ -259,18 +70,24 @@
                         </label>
                     </div>
                     
-                    <div class="form-actions">
+                    <div class="actions">
                         <a href="stations.jsp" class="btn btn-secondary">Annuler</a>
-                        <button type="submit" class="btn">Sauvegarder</button>
+                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <script src="js/jwt-utils.js"></script>
     <script>
         let stationId = null;
         let locations = [];
+        
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            // L'utilisateur sera redirigé automatiquement
+        } else {
         
         // Récupérer l'ID de la borne depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -278,7 +95,7 @@
         
         if (!stationId) {
             showError('ID de la borne manquant');
-            setTimeout(() => {
+            setTimeout(function() {
                 window.location.href = 'stations.jsp';
             }, 2000);
         } else {
@@ -290,10 +107,8 @@
                 showLoading(true);
                 
                 // Charger la borne et les lieux en parallèle
-                const [stationResponse, locationsResponse] = await Promise.all([
-                    fetch(`http://localhost:8080/api/stations/${stationId}`),
-                    fetch('http://localhost:8080/api/locations')
-                ]);
+                const stationResponse = await authenticatedFetch('http://localhost:8080/api/stations/' + stationId);
+                const locationsResponse = await authenticatedFetch('http://localhost:8080/api/locations');
                 
                 if (!stationResponse.ok) {
                     throw new Error('Borne non trouvée');
@@ -304,7 +119,9 @@
                 }
                 
                 const station = await stationResponse.json();
-                locations = await locationsResponse.json();
+                const locationsData = await locationsResponse.json();
+                
+                locations = locationsData.content || locationsData;
                 
                 populateLocationSelect();
                 populateForm(station);
@@ -321,15 +138,16 @@
             const select = document.getElementById('locationId');
             select.innerHTML = '<option value="">Sélectionnez un lieu...</option>';
             
-            locations.forEach(location => {
+            locations.forEach(function(location) {
                 const option = document.createElement('option');
                 option.value = location.id;
-                option.textContent = `${location.label} - ${location.address}`;
+                option.textContent = location.label + ' - ' + location.address;
                 select.appendChild(option);
             });
         }
         
         function populateForm(station) {
+            console.log('Remplissage du formulaire avec:', station);
             document.getElementById('name').value = station.name || '';
             document.getElementById('locationId').value = station.locationId || '';
             document.getElementById('hourlyRate').value = station.hourlyRate || '';
@@ -346,7 +164,7 @@
                 name: formData.get('name'),
                 locationId: parseInt(formData.get('locationId')),
                 hourlyRate: parseFloat(formData.get('hourlyRate')),
-                plugType: 'TYPE2S', // Toujours TYPE2S
+                plugType: 'TYPE2S',
                 isActive: formData.get('isActive') === 'on'
             };
             
@@ -360,7 +178,7 @@
             try {
                 showLoading(true);
                 
-                const response = await fetch(`http://localhost:8080/api/stations/${stationId}`, {
+                const response = await authenticatedFetch('http://localhost:8080/api/stations/' + stationId, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -369,14 +187,14 @@
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la modification');
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Erreur lors de la modification');
                 }
                 
                 showSuccess('Borne modifiée avec succès !');
-                setTimeout(() => {
+                setTimeout(function() {
                     window.location.href = 'stations.jsp';
-                }, 2000);
+                }, 1500);
                 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -389,40 +207,25 @@
             document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
             document.getElementById('formContainer').style.display = show ? 'none' : 'block';
             
-            if (show) {
-                const submitBtn = document.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.innerHTML = '⏳ Sauvegarde en cours...';
-                    submitBtn.disabled = true;
-                }
-            } else {
-                const submitBtn = document.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.innerHTML = 'Sauvegarder';
-                    submitBtn.disabled = false;
-                }
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = show;
+                submitBtn.textContent = show ? 'Sauvegarde en cours...' : 'Sauvegarder';
             }
         }
         
         function showError(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="error">${message}</div>`;
+            container.innerHTML = '<div class="error">' + message + '</div>';
         }
         
         function showSuccess(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="success">${message}</div>`;
+            container.innerHTML = '<div class="success">' + message + '</div>';
         }
+        
+        } // Fermer le bloc else
     </script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-

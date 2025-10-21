@@ -5,341 +5,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Réservations - Electricity Business</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 100%;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            color: #333;
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        
-        .nav {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .nav a {
-            color: #495057;
-            text-decoration: none;
-            margin-right: 20px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav a:hover, .nav a.active {
-            background-color: #9C27B0;
-            color: white;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-            color: #212529;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-info {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
-        }
-        
-        .filters {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .filter-group label {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .filter-group select,
-        .filter-group input {
-            padding: 8px 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .filter-group select:focus,
-        .filter-group input:focus {
-            outline: none;
-            border-color: #9C27B0;
-        }
-        
-        .reservations-table {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            margin-top: 20px;
-        }
-        
-        .table-header {
-            background: #f8f9fa;
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .table-header h3 {
-            margin: 0;
-            color: #2c3e50;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 0.9em;
-            text-transform: uppercase;
-        }
-        
-        td {
-            color: #495057;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-confirmed {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-completed {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .reservation-actions {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        
-        .reservation-actions .btn {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        
-        .no-reservations {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-        
-        .no-reservations h3 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .pagination button {
-            padding: 8px 12px;
-            border: 1px solid #e9ecef;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .pagination button:hover:not(:disabled) {
-            background: #9C27B0;
-            color: white;
-            border-color: #9C27B0;
-        }
-        
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        @media (max-width: 768px) {
-            .actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .table-container {
-                font-size: 0.9em;
-            }
-            
-            .reservation-actions {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <title>Mes Réservations - Electricity Business</title>
+    <link rel="stylesheet" href="css/common-styles.css">
 </head>
 <body>
+    <div class="header">
+        <h1>Electricity Business</h1>
+        <div class="user-info">
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+        </div>
+    </div>
+    
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
+        <a href="reservations.jsp" class="nav-link active">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte</a>
+    </nav>
+    
     <div class="container">
-        <div class="header">
-            <h1>Gestion des Réservations</h1>
-            <p>Gérez vos réservations de bornes de recharge</p>
-        </div>
-        
-        <div class="nav">
-            <a href="dashboard.jsp">Tableau de bord</a>
-            <a href="locations.jsp">Lieux</a>
-            <a href="stations.jsp">Bornes</a>
-            <a href="reservations.jsp" class="active">Réservations</a>
-            <a href="map.jsp">Carte</a>
-            <a href="logout">Déconnexion</a>
-        </div>
         
         <div class="content">
             <div class="actions">
@@ -411,19 +101,23 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/jwt-utils.js"></script>
+    <script src="js/jwt-utils.js?v=20251019171700"></script>
     <script>
-        // Vérifier l'authentification
-        if (!requireAuth()) {
-            return;
-        }
+        console.log('=== RESERVATIONS.JSP VERSION 2025-10-19 17:17:00 CHARGÉE ===');
         
+        // Variables globales
         let reservations = [];
         let stations = [];
         let locations = [];
+        let CURRENT_USER_ID = null;
+        
+        // Vérifier l'authentification
+        if (!requireAuth()) {
+            // L'utilisateur sera redirigé automatiquement
+        } else {
         
         // Récupérer l'ID de l'utilisateur depuis le token JWT
-        const CURRENT_USER_ID = getCurrentUserId();
+        CURRENT_USER_ID = getCurrentUserId();
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
@@ -436,9 +130,9 @@
                 
                 // Charger les réservations, stations et lieux en parallèle
                 const [reservationsResponse, stationsResponse, locationsResponse] = await Promise.all([
-                    fetch('http://localhost:8080/api/reservations'),
-                    fetch('http://localhost:8080/api/stations'),
-                    fetch('http://localhost:8080/api/locations')
+                    authenticatedFetch('http://localhost:8080/api/reservations'),
+                    authenticatedFetch('http://localhost:8080/api/stations'),
+                    authenticatedFetch('http://localhost:8080/api/locations')
                 ]);
                 
                 if (!reservationsResponse.ok) {
@@ -605,7 +299,7 @@
             try {
                 const url = 'http://localhost:8080/api/reservations/' + reservationId + '/confirm';
                 
-                const response = await fetch(url, {
+                const response = await authenticatedFetch(url, {
                     method: 'PUT'
                 });
                 
@@ -661,7 +355,7 @@
             try {
                 const url = 'http://localhost:8080/api/reservations/' + reservationId + '/complete';
                 
-                const response = await fetch(url, {
+                const response = await authenticatedFetch(url, {
                     method: 'PUT'
                 });
                 
@@ -691,7 +385,7 @@
             try {
                 const url = 'http://localhost:8080/api/reservations/' + reservationId;
                 
-                const response = await fetch(url, {
+                const response = await authenticatedFetch(url, {
                     method: 'DELETE'
                 });
                 
@@ -733,7 +427,18 @@
                 container.innerHTML = '';
             }, 3000);
         }
+        
+        // Rendre les fonctions accessibles globalement pour les onclick
+        window.confirmReservation = confirmReservation;
+        window.cancelReservation = cancelReservation;
+        window.deleteReservation = deleteReservation;
+        window.completeReservation = completeReservation;
+        window.refreshReservations = refreshReservations;
+        window.filterReservations = filterReservations;
+        
+        } // Fin du bloc else
     </script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
 

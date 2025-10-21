@@ -5,406 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouvelle Réservation - Electricity Business</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: white;
-            min-height: 100vh;
-        }
-        
-        .container {
-            width: 100%;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .lightning {
-            font-size: 1.5em;
-        }
-        
-        .car {
-            font-size: 1.2em;
-        }
-        
-        .logo-text {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: #2c3e50;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: #2c3e50;
-        }
-        
-        .logout-link {
-            color: #007bff;
-            text-decoration: none;
-        }
-        
-        .logout-link:hover {
-            text-decoration: underline;
-        }
-        
-        .main-title {
-            text-align: center;
-            font-size: 2.5em;
-            margin: 40px 0;
-            color: #2c3e50;
-            font-weight: bold;
-        }
-        
-        .nav {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .nav a {
-            color: #495057;
-            text-decoration: none;
-            margin-right: 20px;
-            padding: 8px 16px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav a:hover, .nav a.active {
-            background-color: #9C27B0;
-            color: white;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        .form-container {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #9C27B0;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-        
-        .btn-reserve {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            font-size: 1.1em;
-            padding: 15px 30px;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 30px;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-        }
-        
-        .required {
-            color: #dc3545;
-        }
-        
-        .info-box {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            color: #1565c0;
-        }
-        
-        .info-box h4 {
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-        
-        .station-info {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            display: none;
-        }
-        
-        .station-info h5 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .station-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            font-size: 0.9em;
-        }
-        
-        .detail-item {
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .detail-label {
-            color: #6c757d;
-            font-weight: 500;
-        }
-        
-        .detail-value {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        
-        .price-calculation {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .price-calculation h5 {
-            color: #155724;
-            margin-bottom: 10px;
-        }
-        
-        .price-breakdown {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .total-price {
-            border-top: 1px solid #c3e6cb;
-            padding-top: 10px;
-            margin-top: 10px;
-            font-weight: 600;
-            font-size: 1.2em;
-            color: #155724;
-        }
-        
-        .station-input-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .station-input-container select {
-            flex: 1;
-        }
-        
-        .find-station-link {
-            color: #007bff;
-            text-decoration: none;
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-        
-        .find-station-link:hover {
-            text-decoration: underline;
-        }
-        
-        .datetime-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .datetime-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .datetime-group label {
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            color: #6c757d;
-        }
-        
-        .payment-section {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .payment-section h4 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #9C27B0;
-            padding-bottom: 10px;
-        }
-        
-        #cardNumber {
-            letter-spacing: 2px;
-        }
-        
-        #cvv {
-            text-align: center;
-        }
-        
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .station-details {
-                grid-template-columns: 1fr;
-            }
-            
-            .datetime-row {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .station-input-container {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .find-station-link {
-                text-align: center;
-                margin-top: 10px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .datetime-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/common-styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <span class="lightning">ELECTRIC</span>
-                    <span class="car">VEHICULE</span>
-                    <div class="logo-text">Electricity Business</div>
-                </div>
-                <div class="user-info">
-                    <span>Utilisateur connecté: Julia RIGHI</span>
-                    <a href="logout" class="logout-link">Déconnexion</a>
-                </div>
-            </div>
+    <div class="header">
+        <h1>Electricity Business</h1>
+        <div class="user-info">
+            <span id="welcomeMessage">Bienvenue</span>
+            <span class="status-badge status-active">Actif</span>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
-        
+    </div>
+    
+    <nav class="navigation">
+        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
+        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
+        <a href="locations.jsp" class="nav-link">Mes lieux</a>
+        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
+        <a href="stations.jsp" class="nav-link">Mes bornes</a>
+        <a href="add-reservation.jsp" class="nav-link active">Réserver</a>
+        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="map.jsp" class="nav-link">Carte</a>
+    </nav>
+
+    <div class="container">
         <div class="content">
             <div id="messageContainer"></div>
             
@@ -545,8 +169,8 @@
     <script>
         // Vérifier l'authentification
         if (!requireAuth()) {
-            return;
-        }
+            // L'utilisateur sera redirigé automatiquement
+        } else {
         
         // Récupérer l'ID de l'utilisateur depuis le token JWT
         const CURRENT_USER_ID = getCurrentUserId();
@@ -661,11 +285,23 @@
                 return;
             }
             
-            const activeStations = stations.filter(station => station.isActive);
-            console.log('Stations actives:', activeStations);
+            // Filtrer les stations actives ET qui n'appartiennent pas à l'utilisateur
+            const activeStations = stations.filter(station => {
+                if (!station.isActive) return false;
+                
+                // Exclure les propres stations de l'utilisateur
+                const location = locations.find(loc => loc.id === station.locationId);
+                if (location && location.ownerId === CURRENT_USER_ID) {
+                    return false; // Ne pas afficher ses propres stations
+                }
+                
+                return true;
+            });
+            
+            console.log('Stations actives (hors propres stations):', activeStations);
             
             if (activeStations.length === 0) {
-                showError('Aucune borne active disponible. Veuillez créer des bornes d\'abord.');
+                showError('Aucune borne disponible pour réservation. Vous ne pouvez pas réserver vos propres bornes.');
                 document.getElementById('formContainer').style.display = 'block';
                 return;
             }
@@ -912,7 +548,10 @@
             const container = document.getElementById('messageContainer');
             container.innerHTML = `<div class="success">${message}</div>`;
         }
+        
+        } // Fin du bloc else
     </script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
 
