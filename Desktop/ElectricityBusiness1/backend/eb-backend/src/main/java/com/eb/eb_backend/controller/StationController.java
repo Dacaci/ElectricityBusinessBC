@@ -116,6 +116,18 @@ public class StationController {
                     stationService.deactivateStation(id);
                 return ResponseEntity.ok(updated);
             }
+            // Si on modifie uniquement hourlyRate
+            if (updates.containsKey("hourlyRate") && updates.size() == 1) {
+                Object rateObj = updates.get("hourlyRate");
+                java.math.BigDecimal hourlyRate = null;
+                if (rateObj instanceof Number) {
+                    hourlyRate = java.math.BigDecimal.valueOf(((Number) rateObj).doubleValue());
+                }
+                if (hourlyRate != null) {
+                    StationDto updated = stationService.updateHourlyRate(id, hourlyRate);
+                    return ResponseEntity.ok(updated);
+                }
+            }
             // Sinon on pourrait gérer d'autres champs partiels ici
             return ResponseEntity.badRequest().build();
         } catch (IllegalArgumentException e) {

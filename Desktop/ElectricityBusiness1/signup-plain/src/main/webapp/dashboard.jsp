@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Tableau de bord - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css">
+    <link rel="stylesheet" href="css/common-styles.css?v=20251021v2">
     <style>
         /* Styles spécifiques au dashboard uniquement */
         .section { 

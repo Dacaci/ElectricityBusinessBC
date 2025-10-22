@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Lieux - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css">
+    <link rel="stylesheet" href="css/common-styles.css?v=20251021v2">
 </head>
 <body>
     <div class="header">
@@ -154,20 +154,19 @@
                 let stationsHtml = '';
                 if (locationStations.length > 0) {
                     stationsHtml = locationStations.map(station => {
-                        return '<div class="station-item">' +
-                            '<div class="station-info">' +
-                                '<div class="station-name">' + (station.name || 'Borne sans nom') + '</div>' +
-                                '<div class="station-icons">' +
-                                    '<span class="icon">PHOTO</span>' +
-                                    '<span class="icon">VIDEO</span>' +
-                                '</div>' +
+                        const statusBadge = station.isActive ? 'status-active' : 'status-inactive';
+                        const statusText = station.isActive ? 'Active' : 'Inactive';
+                        return '<div class="station-card" style="margin-bottom: 12px;">' +
+                            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">' +
+                                '<div style="font-weight: 600;">' + (station.name || 'Borne sans nom') + '</div>' +
+                                '<span class="status-badge ' + statusBadge + '">' + statusText + '</span>' +
                             '</div>' +
-                            '<div class="station-actions">' +
-                                '<a href="edit-station.jsp?id=' + station.id + '" class="action-link">Modifier</a>' +
-                                '<a href="station-rates.jsp?id=' + station.id + '" class="action-link">Définir un tarifs horaires</a>' +
-                                '<a href="#" onclick="uploadPhoto(' + station.id + ')" class="action-link">Téléverser 1 photo</a>' +
-                                '<a href="#" onclick="uploadVideo(' + station.id + ')" class="action-link">Téléverser 1 vidéo</a>' +
-                                '<a href="#" onclick="deleteStation(' + station.id + ')" class="action-link delete-link">Supprimer</a>' +
+                            '<div style="display: flex; gap: 8px; flex-wrap: wrap;">' +
+                                '<a href="edit-station.jsp?id=' + station.id + '" class="btn">Modifier</a>' +
+                                '<a href="station-rates.jsp?id=' + station.id + '" class="btn">Tarifs</a>' +
+                                '<button onclick="uploadPhoto(' + station.id + ')" class="btn">Photo</button>' +
+                                '<button onclick="uploadVideo(' + station.id + ')" class="btn">Vidéo</button>' +
+                                '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>' +
                             '</div>' +
                         '</div>';
                     }).join('');
@@ -177,15 +176,16 @@
                 
                 return '<div class="location-card">' +
                     '<div class="location-header">' +
+                        '<h3>' + (location.label || 'Lieu sans nom') + '</h3>' +
                         '<div class="location-address">' + (location.address || 'Adresse non spécifiée') + '</div>' +
                     '</div>' +
-                    '<div class="stations-container">' +
+                    '<div class="stations-container" style="margin: 16px 0;">' +
                         stationsHtml +
                     '</div>' +
                     '<div class="location-actions">' +
-                        '<a href="add-station.jsp?locationId=' + location.id + '" class="action-link">Ajouter une borne</a>' +
-                        '<a href="edit-location.jsp?id=' + location.id + '" class="action-link">Modifier ce lieu</a>' +
-                        '<a href="#" onclick="deleteLocation(' + location.id + '); return false;" class="action-link delete-link">Supprimer ce lieu</a>' +
+                        '<a href="add-station.jsp?locationId=' + location.id + '" class="btn">Ajouter borne</a>' +
+                        '<a href="edit-location.jsp?id=' + location.id + '" class="btn">Modifier lieu</a>' +
+                        '<button onclick="deleteLocation(' + location.id + '); return false;" class="btn btn-danger">Supprimer</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -314,6 +314,14 @@
         
         function refreshLocations() {
             loadLocationsAndStations();
+        }
+        
+        function uploadPhoto(stationId) {
+            showError('Fonctionnalité en cours de développement. Vous pourrez bientôt téléverser des photos de vos bornes.');
+        }
+        
+        function uploadVideo(stationId) {
+            showError('Fonctionnalité en cours de développement. Vous pourrez bientôt téléverser des vidéos de vos bornes.');
         }
         
         function showLoading(show) {

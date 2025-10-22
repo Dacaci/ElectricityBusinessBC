@@ -165,66 +165,44 @@ textarea {
     min-height: 100px;
 }
 
-/* Buttons */
+/* Buttons - Simple sans animations */
 .btn,
 button {
-    padding: 11px 20px;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
+    padding: 8px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 400;
     cursor: pointer;
-    transition: all 0.2s;
     text-decoration: none;
     display: inline-block;
-}
-
-.btn:hover,
-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    color: #475569;
 }
 
 .btn-primary,
 .btn:not([class*="btn-"]) {
-    background: #4f46e5;
-    color: #ffffff;
-    border-color: #4f46e5;
-}
-
-.btn-primary:hover,
-.btn:not([class*="btn-"]):hover {
-    background: #4338ca;
+    background: #ffffff;
+    color: #1e293b;
+    border-color: #d1d5db;
 }
 
 .btn-success {
-    background: #10b981;
-    color: #ffffff;
-    border-color: #10b981;
-}
-
-.btn-success:hover {
-    background: #059669;
+    background: #ffffff;
+    color: #059669;
+    border-color: #d1d5db;
 }
 
 .btn-danger {
-    background: #ef4444;
-    color: #ffffff;
-    border-color: #ef4444;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
+    background: #ffffff;
+    color: #dc2626;
+    border-color: #d1d5db;
 }
 
 .btn-warning {
-    background: #f59e0b;
-    color: #ffffff;
-    border-color: #f59e0b;
-}
-
-.btn-warning:hover {
-    background: #d97706;
+    background: #ffffff;
+    color: #d97706;
+    border-color: #d1d5db;
 }
 
 .btn-secondary {
@@ -233,19 +211,10 @@ button:hover {
     border-color: #d1d5db;
 }
 
-.btn-secondary:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
-}
-
 .btn-info {
-    background: #06b6d4;
-    color: #ffffff;
-    border-color: #06b6d4;
-}
-
-.btn-info:hover {
-    background: #0891b2;
+    background: #ffffff;
+    color: #0891b2;
+    border-color: #d1d5db;
 }
 
 /* Actions */
@@ -420,17 +389,9 @@ tr:hover td {
 .station-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 24px;
     margin-bottom: 20px;
-    transition: all 0.2s;
-}
-
-.location-card:hover,
-.station-card:hover {
-    border-color: #c7d2fe;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
-    transform: translateY(-2px);
 }
 
 .location-header,
@@ -440,9 +401,11 @@ tr:hover td {
     margin-bottom: 16px;
 }
 
+.location-header h3,
+.station-header h3,
 .location-title,
 .station-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #1e293b;
     margin-bottom: 6px;
@@ -451,7 +414,7 @@ tr:hover td {
 .location-address,
 .station-location {
     color: #64748b;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .location-actions,

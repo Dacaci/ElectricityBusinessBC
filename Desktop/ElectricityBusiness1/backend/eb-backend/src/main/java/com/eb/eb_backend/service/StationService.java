@@ -151,6 +151,15 @@ public class StationService {
         return new StationDto(savedStation);
     }
     
+    public StationDto updateHourlyRate(Long id, BigDecimal hourlyRate) {
+        Station station = stationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
+        
+        station.setHourlyRate(hourlyRate);
+        Station savedStation = stationRepository.save(station);
+        return new StationDto(savedStation);
+    }
+    
     @Transactional(readOnly = true)
     public List<StationLocationDto> getAllStationsForMap() {
         List<Station> stations = stationRepository.findByIsActiveTrue();
