@@ -238,7 +238,6 @@
         
         <div class="controls">
             <button onclick="getUserLocation()">Ma Position</button>
-            <button onclick="loadAllStations()">Actualiser</button>
             <button onclick="toggleNearbySearch()">Recherche Proximité</button>
         </div>
         

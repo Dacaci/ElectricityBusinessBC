@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Lieu - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css">
+    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>

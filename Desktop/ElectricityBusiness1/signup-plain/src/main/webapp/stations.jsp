@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Bornes - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251021v2">
+    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -48,7 +48,6 @@
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Rechercher une borne..." onkeyup="filterStations()">
-                    <button class="btn btn-secondary" onclick="refreshStations()">Actualiser</button>
                 </div>
             </div>
             

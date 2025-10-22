@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouvelle Réservation - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css">
+    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
 </head>
 <body>
     <div class="header">
@@ -32,11 +32,6 @@
         <div class="content">
             <div id="messageContainer"></div>
             
-            <div class="info-box">
-                <h4>Information importante</h4>
-                <p>Veuillez sélectionner une borne disponible et choisir vos créneaux de réservation. Le montant sera calculé automatiquement.</p>
-            </div>
-            
             <div id="loadingIndicator" class="loading">
                 <p>Chargement des bornes disponibles...</p>
             </div>
@@ -44,7 +39,7 @@
             <div id="formContainer" class="form-container" style="display: none;">
                 <form id="reservationForm">
                     <div class="form-group">
-                        <label for="stationId">Borne <span class="required">*</span></label>
+                        <label for="stationId">Borne </label>
                         <div class="station-input-container">
                             <input type="text" id="stationSearch" placeholder="Rechercher une borne..." oninput="filterStations()" style="display: none;">
                             <select id="stationId" name="stationId" required onchange="updateStationInfo()">
@@ -77,7 +72,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Quand ? <span class="required">*</span></label>
+                        <label>Quand ? </label>
                         <div class="datetime-row">
                             <div class="datetime-group">
                                 <label for="startDate">Date début</label>
@@ -118,13 +113,13 @@
                         <h4>💳 Informations de paiement</h4>
                         
                         <div class="form-group">
-                            <label for="cardNumber">Numéro de la carte bancaire <span class="required">*</span></label>
+                            <label for="cardNumber">Numéro de la carte bancaire </label>
                             <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="expiryMonth">Mois d'expiration <span class="required">*</span></label>
+                                <label for="expiryMonth">Mois d'expiration </label>
                                 <select id="expiryMonth" name="expiryMonth" required>
                                     <option value="">Mois</option>
                                     <option value="01">Janvier</option>
@@ -143,14 +138,14 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="expiryYear">Année d'expiration <span class="required">*</span></label>
+                                <label for="expiryYear">Année d'expiration </label>
                                 <select id="expiryYear" name="expiryYear" required>
                                     <option value="">Année</option>
                                 </select>
                             </div>
                             
                             <div class="form-group">
-                                <label for="cvv">CVV <span class="required">*</span></label>
+                                <label for="cvv">CVV </label>
                                 <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
                             </div>
                         </div>
@@ -541,12 +536,12 @@
         
         function showError(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="error">${message}</div>`;
+            container.innerHTML = '<div class="error">' + message + '</div>';
         }
         
         function showSuccess(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="success">${message}</div>`;
+            container.innerHTML = '<div class="success">' + message + '</div>';
         }
         
         } // Fin du bloc else

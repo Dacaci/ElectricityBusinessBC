@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Connexion - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css">
+    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
     <style>
         body {
             background-color: #f5f7fa;
