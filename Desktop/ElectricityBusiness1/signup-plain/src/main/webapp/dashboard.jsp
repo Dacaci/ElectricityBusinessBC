@@ -119,7 +119,10 @@
         
         <!-- Mes réservations en cours -->
         <div class="section">
-            <h2 class="section-title">Mes réservations en cours</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title" style="margin-bottom: 0;">Mes réservations en cours</h2>
+                <a href="add-reservation.jsp" class="btn btn-primary">Effectuer une réservation</a>
+            </div>
             <div id="currentReservationsLoading" class="loading">Chargement...</div>
             <div id="currentReservationsContainer" style="display: none;">
                 <table id="currentReservationsTable">
@@ -143,7 +146,10 @@
             
         <!-- Mes réservations passées -->
         <div class="section">
-            <h2 class="section-title">Mes réservations passées</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title" style="margin-bottom: 0;">Mes réservations passées</h2>
+                <a href="#" onclick="exportToExcel(); return false;" class="btn btn-info">Exporter toutes les réservations au format Excel</a>
+            </div>
             <div class="filter-bar">
                 <label>Date début :</label>
                 <input type="date" id="filterDateStart">
@@ -233,6 +239,7 @@
                 <div id="treatedRequestsEmpty" class="no-data" style="display: none;">
                     Aucune demande traitée
                 </div>
+                <div class="pagination" id="treatedPagination"></div>
             </div>
         </div>
     </div>
@@ -247,6 +254,11 @@
         let allStations = [];
         let allLocations = [];
         let allUsers = [];
+        
+        // Pagination
+        let currentPastPage = 1;
+        let currentTreatedPage = 1;
+        const itemsPerPage = 12;
         
         // Vérifier l'authentification
         if (!requireAuth()) {
@@ -330,6 +342,7 @@
             const loading = document.getElementById('pastReservationsLoading');
             const body = document.getElementById('pastReservationsBody');
             const empty = document.getElementById('pastReservationsEmpty');
+            const pagination = document.getElementById('pastPagination');
             
             // Réservations passées = COMPLETED, CANCELLED
             const past = allReservations.filter(r => 
@@ -343,11 +356,19 @@
             if (past.length === 0) {
                 empty.style.display = 'block';
                 body.innerHTML = '';
+                pagination.innerHTML = '';
                 return;
             }
             
             empty.style.display = 'none';
-            body.innerHTML = past.map(reservation => {
+            
+            // Calculer la pagination
+            const totalPages = Math.ceil(past.length / itemsPerPage);
+            const startIndex = (currentPastPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedPast = past.slice(startIndex, endIndex);
+            
+            body.innerHTML = paginatedPast.map(reservation => {
                 const station = allStations.find(s => s.id === reservation.stationId);
                 const location = allLocations.find(l => l.id === station?.locationId);
                 
@@ -359,6 +380,9 @@
                     '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
                 '</tr>';
             }).join('');
+            
+            // Générer les contrôles de pagination
+            pagination.innerHTML = generatePaginationControls(currentPastPage, totalPages, 'changePastPage');
         }
         
         function loadLocations() {
@@ -453,6 +477,7 @@
             const loading = document.getElementById('treatedRequestsLoading');
             const body = document.getElementById('treatedRequestsBody');
             const empty = document.getElementById('treatedRequestsEmpty');
+            const pagination = document.getElementById('treatedPagination');
             
             // Demandes traitées = réservations CONFIRMED, CANCELLED, COMPLETED sur MES bornes
             const myStationIds = allStations.filter(s => {
@@ -472,11 +497,19 @@
             if (treated.length === 0) {
                 empty.style.display = 'block';
                 body.innerHTML = '';
+                pagination.innerHTML = '';
                 return;
             }
             
             empty.style.display = 'none';
-            body.innerHTML = treated.map(reservation => {
+            
+            // Calculer la pagination
+            const totalPages = Math.ceil(treated.length / itemsPerPage);
+            const startIndex = (currentTreatedPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedTreated = treated.slice(startIndex, endIndex);
+            
+            body.innerHTML = paginatedTreated.map(reservation => {
                 const station = allStations.find(s => s.id === reservation.stationId);
                 const location = allLocations.find(l => l.id === station?.locationId);
                 
@@ -489,6 +522,9 @@
                     '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
                 '</tr>';
             }).join('');
+            
+            // Générer les contrôles de pagination
+            pagination.innerHTML = generatePaginationControls(currentTreatedPage, totalPages, 'changeTreatedPage');
         }
         
         async function acceptReservation(id) {
@@ -554,11 +590,92 @@
         function resetPastFilter() {
             document.getElementById('filterDateStart').value = '';
             document.getElementById('filterDateEnd').value = '';
+            currentPastPage = 1;
             loadPastReservations();
         }
         
+        function changePastPage(page) {
+            currentPastPage = page;
+            loadPastReservations();
+        }
+        
+        function changeTreatedPage(page) {
+            currentTreatedPage = page;
+            loadTreatedRequests();
+        }
+        
+        function generatePaginationControls(currentPage, totalPages, changeFunction) {
+            if (totalPages <= 1) return '';
+            
+            let html = '';
+            
+            // Bouton première page
+            html += '<button ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="' + changeFunction + '(1)">«</button>';
+            
+            // Bouton précédent
+            html += '<button ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="' + changeFunction + '(' + (currentPage - 1) + ')">‹</button>';
+            
+            // Affichage info page
+            html += '<span class="page-info">Page ' + currentPage + ' sur ' + totalPages + '</span>';
+            
+            // Bouton suivant
+            html += '<button ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="' + changeFunction + '(' + (currentPage + 1) + ')">›</button>';
+            
+            // Bouton dernière page
+            html += '<button ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="' + changeFunction + '(' + totalPages + ')">»</button>';
+            
+            return html;
+        }
+        
+        function exportToExcel() {
+            // Récupérer toutes les réservations de l'utilisateur
+            const myReservations = allReservations.filter(r => r.userId === CURRENT_USER_ID);
+            
+            if (myReservations.length === 0) {
+                showError('Aucune réservation à exporter');
+                return;
+            }
+            
+            // Créer le contenu CSV
+            let csv = 'Date et heure debut,Date et heure fin,Borne,Lieu,Ville,Montant regle,Statut\n';
+            
+            myReservations.forEach(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                
+                csv += formatDateTime(reservation.startDateTime) + ',' +
+                       formatDateTime(reservation.endDateTime) + ',' +
+                       (station?.name || 'N/A') + ',' +
+                       (location?.name || 'N/A') + ',' +
+                       (location?.city || 'N/A') + ',' +
+                       (reservation.totalPrice ? reservation.totalPrice.toFixed(2) : '0.00') + ' EUR,' +
+                       getStatusText(reservation.status) + '\n';
+            });
+            
+            // Créer un blob et télécharger
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'mes_reservations_' + new Date().getTime() + '.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showSuccess('Export réussi !');
+        }
+        
         function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return 'N/A';
+            
             const date = new Date(dateTimeStr);
+            
+            // Vérifier si la date est valide
+            if (isNaN(date.getTime())) return 'Date invalide';
+            
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
