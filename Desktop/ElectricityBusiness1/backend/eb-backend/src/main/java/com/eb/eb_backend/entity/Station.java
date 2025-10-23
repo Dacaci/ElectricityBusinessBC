@@ -11,7 +11,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "stations", 
@@ -88,4 +90,15 @@ public class Station {
     // Relations
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
+    
+    @ManyToMany
+    @JoinTable(
+        name = "station_plug_type",
+        joinColumns = @JoinColumn(name = "station_id"),
+        inverseJoinColumns = @JoinColumn(name = "plug_type_id")
+    )
+    private Set<PlugType> plugTypes = new HashSet<>();
+    
+    @OneToMany(mappedBy = "station", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Media> medias = new ArrayList<>();
 }
