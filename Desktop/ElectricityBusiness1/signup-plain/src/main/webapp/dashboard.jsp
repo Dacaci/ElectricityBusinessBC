@@ -110,6 +110,7 @@
         <a href="stations.jsp" class="nav-link">Mes bornes</a>
         <a href="add-reservation.jsp" class="nav-link">Réserver une borne</a>
         <a href="reservations.jsp" class="nav-link">Mes réservations</a>
+        <a href="vehicles.jsp" class="nav-link">Mes véhicules</a>
         <a href="map.jsp" class="nav-link">Carte des bornes</a>
     </nav>
     

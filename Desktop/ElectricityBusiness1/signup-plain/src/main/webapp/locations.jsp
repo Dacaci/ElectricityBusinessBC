@@ -204,11 +204,11 @@
         
         // Nouvelles fonctions pour les actions des stations
         function uploadPhoto(stationId) {
-            alert('Fonctionnalité de téléversement de photo pour la station ' + stationId + ' à implémenter');
+            showMediaModal(stationId, 'IMAGE');
         }
         
         function uploadVideo(stationId) {
-            alert('Fonctionnalité de téléversement de vidéo pour la station ' + stationId + ' à implémenter');
+            showMediaModal(stationId, 'VIDEO');
         }
         
         async function deleteStation(stationId) {
@@ -315,12 +315,68 @@
             loadLocationsAndStations();
         }
         
-        function uploadPhoto(stationId) {
-            showError('Fonctionnalité en cours de développement. Vous pourrez bientôt téléverser des photos de vos bornes.');
+        let currentMediaStation = null;
+        let currentMediaType = null;
+        
+        function showMediaModal(stationId, mediaType) {
+            currentMediaStation = stationId;
+            currentMediaType = mediaType;
+            
+            const modal = document.getElementById('mediaModal');
+            const modalTitle = document.getElementById('mediaModalTitle');
+            modalTitle.textContent = mediaType === 'IMAGE' ? 'Ajouter une Photo' : 'Ajouter une Vidéo';
+            
+            document.getElementById('mediaUrl').value = '';
+            document.getElementById('mediaName').value = '';
+            document.getElementById('mediaDescription').value = '';
+            
+            modal.style.display = 'block';
         }
         
-        function uploadVideo(stationId) {
-            showError('Fonctionnalité en cours de développement. Vous pourrez bientôt téléverser des vidéos de vos bornes.');
+        function closeMediaModal() {
+            document.getElementById('mediaModal').style.display = 'none';
+            currentMediaStation = null;
+            currentMediaType = null;
+        }
+        
+        async function submitMedia() {
+            const url = document.getElementById('mediaUrl').value.trim();
+            const name = document.getElementById('mediaName').value.trim();
+            const description = document.getElementById('mediaDescription').value.trim();
+            
+            if (!url || !name) {
+                showError('Veuillez remplir les champs obligatoires');
+                return;
+            }
+            
+            const mediaData = {
+                name: name,
+                url: url,
+                type: currentMediaType,
+                description: description || null,
+                stationId: currentMediaStation
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/medias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mediaData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'ajout du média');
+                }
+                
+                showSuccess('Média ajouté avec succès !');
+                closeMediaModal();
+                loadLocationsAndStations();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur lors de l\'ajout du média');
+            }
         }
         
         function showLoading(show) {
@@ -353,5 +409,69 @@
         });
     </script>
     <script src="js/auth.js"></script>
+    
+    <!-- Modal pour ajouter un média -->
+    <div id="mediaModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeMediaModal()">&times;</span>
+            <h2 id="mediaModalTitle">Ajouter un Média</h2>
+            <form onsubmit="event.preventDefault(); submitMedia();">
+                <div class="form-group">
+                    <label for="mediaName">Nom *</label>
+                    <input type="text" id="mediaName" class="form-control" required placeholder="Ex: Photo de la borne">
+                </div>
+                <div class="form-group">
+                    <label for="mediaUrl">URL *</label>
+                    <input type="url" id="mediaUrl" class="form-control" required placeholder="https://exemple.com/image.jpg">
+                    <small style="color: #64748b;">Entrez l'URL de l'image ou vidéo hébergée en ligne</small>
+                </div>
+                <div class="form-group">
+                    <label for="mediaDescription">Description</label>
+                    <textarea id="mediaDescription" class="form-control" rows="3" placeholder="Description optionnelle"></textarea>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeMediaModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <style>
+        /* Styles pour la modal */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+    </style>
 </body>
 </html>
