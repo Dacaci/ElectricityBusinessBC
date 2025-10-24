@@ -68,6 +68,8 @@
         // Variables globales
         let locations = [];
         let stations = [];
+        let medias = [];
+        let mediasByStation = {}; // Pour grouper les médias par borne
         let stationsByLocation = {}; // Pour grouper les stations par lieu
         let isDeletingStation = false; // Protection contre les double-clics
         let isDeletingLocation = false; // Protection contre les double-clics
@@ -96,10 +98,11 @@
             try {
                 showLoading(true);
                 
-                // Charger les lieux et stations en parallèle
-                const [locationsResponse, stationsResponse] = await Promise.all([
+                // Charger les lieux, stations et médias en parallèle
+                const [locationsResponse, stationsResponse, mediasResponse] = await Promise.all([
                     fetch('http://localhost:8080/api/locations'),
-                    fetch('http://localhost:8080/api/stations/owner/' + CURRENT_USER_ID) // Mes propres bornes
+                    fetch('http://localhost:8080/api/stations/owner/' + CURRENT_USER_ID), // Mes propres bornes
+                    fetch('http://localhost:8080/api/medias')
                 ]);
                 
                 if (!locationsResponse.ok || !stationsResponse.ok) {
@@ -108,6 +111,13 @@
                 
                 const locationsData = await locationsResponse.json();
                 const stationsData = await stationsResponse.json();
+                
+                // Charger les médias (peut échouer sans bloquer)
+                if (mediasResponse.ok) {
+                    medias = await mediasResponse.json();
+                } else {
+                    medias = [];
+                }
                 
                 // L'API retourne une structure paginée {content: [...], ...}
                 const allLocations = locationsData.content || locationsData;
@@ -125,6 +135,17 @@
                         stationsByLocation[locationId] = [];
                     }
                     stationsByLocation[locationId].push(station);
+                });
+                
+                // Grouper les médias par station
+                mediasByStation = {};
+                medias.forEach(media => {
+                    if (media.stationId) {
+                        if (!mediasByStation[media.stationId]) {
+                            mediasByStation[media.stationId] = [];
+                        }
+                        mediasByStation[media.stationId].push(media);
+                    }
                 });
                 
                 displayLocationsWithStations(locations);
@@ -155,11 +176,39 @@
                     stationsHtml = locationStations.map(station => {
                         const statusBadge = station.isActive ? 'status-active' : 'status-inactive';
                         const statusText = station.isActive ? 'Active' : 'Inactive';
+                        const stationMedias = mediasByStation[station.id] || [];
+                        
+                        let mediasHtml = '';
+                        if (stationMedias.length > 0) {
+                            mediasHtml = '<div class="media-gallery" style="margin: 12px 0;">' +
+                                stationMedias.map(media => {
+                                    if (media.type === 'IMAGE') {
+                                        return '<div class="media-item">' +
+                                            '<img src="' + media.url + '" alt="' + (media.name || 'Photo') + '" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px;">' +
+                                            '<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">' +
+                                                '<span style="font-size: 12px; color: #64748b;">' + (media.name || 'Photo') + '</span>' +
+                                                '<button onclick="deleteMedia(' + media.id + ')" class="btn-icon" title="Supprimer">×</button>' +
+                                            '</div>' +
+                                        '</div>';
+                                    } else {
+                                        return '<div class="media-item">' +
+                                            '<div style="width: 100%; height: 120px; background: #f1f5f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 40px;">🎥</div>' +
+                                            '<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">' +
+                                                '<a href="' + media.url + '" target="_blank" style="font-size: 12px; color: #3b82f6;">' + (media.name || 'Vidéo') + '</a>' +
+                                                '<button onclick="deleteMedia(' + media.id + ')" class="btn-icon" title="Supprimer">×</button>' +
+                                            '</div>' +
+                                        '</div>';
+                                    }
+                                }).join('') +
+                            '</div>';
+                        }
+                        
                         return '<div class="station-card" style="margin-bottom: 12px;">' +
                             '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">' +
                                 '<div style="font-weight: 600;">' + (station.name || 'Borne sans nom') + '</div>' +
                                 '<span class="status-badge ' + statusBadge + '">' + statusText + '</span>' +
                             '</div>' +
+                            mediasHtml +
                             '<div style="display: flex; gap: 8px; flex-wrap: wrap;">' +
                                 '<a href="edit-station.jsp?id=' + station.id + '" class="btn">Modifier</a>' +
                                 '<a href="station-rates.jsp?id=' + station.id + '" class="btn">Tarifs</a>' +
@@ -313,6 +362,28 @@
         
         function refreshLocations() {
             loadLocationsAndStations();
+        }
+        
+        async function deleteMedia(mediaId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce média ?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/medias/' + mediaId, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la suppression');
+                }
+                
+                showSuccess('Média supprimé avec succès !');
+                loadLocationsAndStations();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur lors de la suppression du média');
+            }
         }
         
         let currentMediaStation = null;
@@ -471,6 +542,37 @@
         
         .close:hover {
             color: #333;
+        }
+        
+        /* Styles pour la galerie de médias */
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        
+        .media-item {
+            position: relative;
+        }
+        
+        .btn-icon {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon:hover {
+            background: #dc2626;
         }
     </style>
 </body>
