@@ -499,8 +499,15 @@
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la création de la réservation');
+                    let errorMessage = 'Erreur lors de la création de la réservation';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData || errorMessage;
+                    } catch (e) {
+                        const errorText = await response.text();
+                        errorMessage = errorText || errorMessage;
+                    }
+                    throw new Error(errorMessage);
                 }
                 
                 showSuccess('Réservation créée avec succès !');
@@ -522,7 +529,7 @@
             if (show) {
                 const submitBtn = document.querySelector('button[type="submit"]');
                 if (submitBtn) {
-                    submitBtn.innerHTML = '⏳ Création en cours...';
+                    submitBtn.innerHTML = 'Création en cours...';
                     submitBtn.disabled = true;
                 }
             } else {
