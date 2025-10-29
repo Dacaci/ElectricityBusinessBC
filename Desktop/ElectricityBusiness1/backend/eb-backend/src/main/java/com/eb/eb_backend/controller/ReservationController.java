@@ -33,30 +33,19 @@ public class ReservationController {
             @Valid @RequestBody CreateReservationDto createReservationDto,
             HttpServletRequest request) {
         try {
-            System.out.println("=== CREATE RESERVATION DEBUG ===");
-            System.out.println("Received DTO: " + createReservationDto);
-            
             Long userId = securityUtil.getCurrentUserId(request);
-            System.out.println("Extracted userId: " + userId);
             
             if (userId == null) {
-                System.out.println("ERROR: userId is null");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié");
             }
             
             ReservationDto reservationDto = reservationService.createReservation(userId, createReservationDto);
-            System.out.println("Reservation created successfully: " + reservationDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
             
         } catch (IllegalArgumentException e) {
-            System.err.println("IllegalArgumentException: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
             
         } catch (Exception e) {
-            System.err.println("Unexpected exception: " + e.getClass().getName());
-            System.err.println("Message: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors de la création de la réservation: " + e.getMessage());
         }

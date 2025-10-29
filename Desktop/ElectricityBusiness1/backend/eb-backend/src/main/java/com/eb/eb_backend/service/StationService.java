@@ -50,13 +50,11 @@ public class StationService {
         station.setLocation(location);
         station.setName(stationDto.getName());
         station.setHourlyRate(stationDto.getHourlyRate());
-        station.setPlugType(stationDto.getPlugType());
+        // plugType géré via relation Many-to-Many avec plugTypes
         station.setIsActive(stationDto.getIsActive() != null ? stationDto.getIsActive() : true);
         station.setStatus(stationDto.getStatus() != null ? stationDto.getStatus() : com.eb.eb_backend.entity.StationStatus.ACTIVE);
         station.setPower(stationDto.getPower());
-        station.setCity(stationDto.getCity());
-        station.setLatitude(stationDto.getLatitude());
-        station.setLongitude(stationDto.getLongitude());
+        // city, latitude, longitude viennent de location
         station.setInstructions(stationDto.getInstructions());
         station.setOnFoot(stationDto.getOnFoot() != null ? stationDto.getOnFoot() : false);
         
@@ -119,7 +117,7 @@ public class StationService {
         
         station.setName(stationDto.getName());
         station.setHourlyRate(stationDto.getHourlyRate());
-        station.setPlugType(stationDto.getPlugType());
+        // plugType géré via relation Many-to-Many avec plugTypes
         station.setIsActive(stationDto.getIsActive());
         
         Station savedStation = stationRepository.save(station);
@@ -241,10 +239,17 @@ public class StationService {
             java.time.LocalDateTime endTime) {
         
         // Récupérer toutes les stations de la ville avec status ACTIVE
+        // City vient maintenant de location.addressEntity.city
         List<Station> stationsInCity = stationRepository.findAll().stream()
-                .filter(station -> city.equalsIgnoreCase(station.getCity()) 
-                        && station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE
-                        && station.getIsActive())
+                .filter(station -> {
+                    String stationCity = station.getLocation() != null && 
+                                        station.getLocation().getAddressEntity() != null 
+                                        ? station.getLocation().getAddressEntity().getCity() 
+                                        : null;
+                    return stationCity != null && city.equalsIgnoreCase(stationCity)
+                            && station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE
+                            && station.getIsActive();
+                })
                 .collect(Collectors.toList());
         
         // Filtrer les stations qui n'ont pas de réservations conflictuelles

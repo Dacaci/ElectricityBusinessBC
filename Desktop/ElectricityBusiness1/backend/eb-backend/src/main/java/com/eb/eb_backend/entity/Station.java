@@ -48,12 +48,6 @@ public class Station {
     @Column(name = "hourly_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal hourlyRate = BigDecimal.ZERO;
     
-    @NotBlank(message = "Le type de prise est obligatoire")
-    @Pattern(regexp = "^(TYPE2S)$", 
-             message = "Seul le type TYPE2S est supporté")
-    @Column(name = "plug_type", nullable = false, length = 50)
-    private String plugType = "TYPE2S";
-    
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
     
@@ -63,15 +57,6 @@ public class Station {
     
     @Column(name = "power", precision = 10, scale = 2)
     private BigDecimal power;
-    
-    @Column(name = "city", length = 255)
-    private String city;
-    
-    @Column(name = "latitude", precision = 10, scale = 6)
-    private BigDecimal latitude;
-    
-    @Column(name = "longitude", precision = 10, scale = 6)
-    private BigDecimal longitude;
     
     @Column(name = "instructions", columnDefinition = "TEXT")
     private String instructions;

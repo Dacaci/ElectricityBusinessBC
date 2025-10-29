@@ -34,10 +34,6 @@ public class Location {
     @Column(name = "label", nullable = false, length = 255)
     private String label;
     
-    @NotBlank(message = "L'adresse est obligatoire")
-    @Column(name = "address", nullable = false, columnDefinition = "TEXT")
-    private String address;
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id")
     private Address addressEntity;

@@ -35,19 +35,44 @@ public class StationLocationDto {
         this.id = station.getId();
         this.name = station.getName();
         this.hourlyRate = station.getHourlyRate();
-        this.plugType = station.getPlugType();
+        // plugType depuis la relation Many-to-Many (prendre le premier si disponible)
+        this.plugType = !station.getPlugTypes().isEmpty() 
+                ? station.getPlugTypes().iterator().next().getName()
+                : "Non défini";
         this.isActive = station.getIsActive();
         
         // Coordonnées depuis la location
-        this.latitude = station.getLocation().getLatitude();
-        this.longitude = station.getLocation().getLongitude();
-        this.address = station.getLocation().getAddress();
-        this.locationLabel = station.getLocation().getLabel();
-        this.locationDescription = station.getLocation().getDescription();
+        if (station.getLocation() != null) {
+            this.latitude = station.getLocation().getLatitude();
+            this.longitude = station.getLocation().getLongitude();
+            this.locationLabel = station.getLocation().getLabel();
+            this.locationDescription = station.getLocation().getDescription();
+            
+            // Adresse depuis addressEntity de location
+            if (station.getLocation().getAddressEntity() != null) {
+                this.address = station.getLocation().getAddressEntity().getFullAddress();
+            } else {
+                this.address = (this.latitude != null && this.longitude != null)
+                        ? "Lat: " + this.latitude + ", Long: " + this.longitude
+                        : "Adresse non disponible";
+            }
+        } else {
+            // Pas de location associée
+            this.latitude = null;
+            this.longitude = null;
+            this.locationLabel = "Non définie";
+            this.locationDescription = "";
+            this.address = "Adresse non disponible";
+        }
         
         // Propriétaire
-        this.ownerId = station.getOwner().getId();
-        this.ownerName = station.getOwner().getFullName();
+        if (station.getOwner() != null) {
+            this.ownerId = station.getOwner().getId();
+            this.ownerName = station.getOwner().getFullName();
+        } else {
+            this.ownerId = null;
+            this.ownerName = "Propriétaire inconnu";
+        }
     }
     
     // Méthodes utilitaires
@@ -59,6 +84,13 @@ public class StationLocationDto {
         return hourlyRate + " €/h";
     }
 }
+
+
+
+
+
+
+
 
 
 

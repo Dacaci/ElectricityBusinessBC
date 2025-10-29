@@ -24,22 +24,11 @@ public class StationDto {
     @DecimalMin(value = "0.0", message = "Le tarif horaire doit être positif")
     private BigDecimal hourlyRate;
     
-    @NotBlank(message = "Le type de prise est obligatoire")
-    @Pattern(regexp = "^(TYPE2S)$", 
-             message = "Seul le type TYPE2S est supporté")
-    private String plugType;
-    
     private Boolean isActive = true;
     
     private StationStatus status = StationStatus.ACTIVE;
     
     private BigDecimal power;
-    
-    private String city;
-    
-    private BigDecimal latitude;
-    
-    private BigDecimal longitude;
     
     private String instructions;
     
@@ -53,13 +42,10 @@ public class StationDto {
         this.id = station.getId();
         this.name = station.getName();
         this.hourlyRate = station.getHourlyRate();
-        this.plugType = station.getPlugType();
+        // plugType, city, latitude, longitude sont maintenant dans location/plugTypes
         this.isActive = station.getIsActive();
         this.status = station.getStatus();
         this.power = station.getPower();
-        this.city = station.getCity();
-        this.latitude = station.getLatitude();
-        this.longitude = station.getLongitude();
         this.instructions = station.getInstructions();
         this.onFoot = station.getOnFoot();
         this.ownerId = station.getOwner().getId();

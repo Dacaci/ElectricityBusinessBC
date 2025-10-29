@@ -47,9 +47,11 @@ public class AuthService implements UserDetailsService {
     public LoginResponse login(LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
+        
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Email ou mot de passe incorrect");
         }
+        
         UserDto userDto = new UserDto(user);
         String token = jwtUtil.generateToken(user.getEmail(), java.util.Map.of("uid", user.getId()));
         return new LoginResponse(token, userDto);

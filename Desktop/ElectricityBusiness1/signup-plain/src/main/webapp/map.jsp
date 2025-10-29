@@ -1,6 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="com.eb.signup.user.User" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+    response.setHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; font-src 'self' data:;");
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -248,18 +251,9 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Configuration de la carte
-        const map = L.map('map').setView([48.8566, 2.3522], 10); // Paris par défaut
-        
-        // Ajouter les tuiles OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        
-        // Groupe de marqueurs pour les stations
-        const stationsLayer = L.layerGroup().addTo(map);
-        
         // Variables globales
+        let map;
+        let stationsLayer;
         let userLocation = null;
         let nearbyMode = false;
         
@@ -267,6 +261,14 @@
         const stationIcon = L.divIcon({
             className: 'station-marker',
             html: '<div style="background-color: #007bff; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        
+        // Icône pour les stations OpenChargeMap (verte)
+        const ocmStationIcon = L.divIcon({
+            className: 'ocm-station-marker',
+            html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
             iconSize: [20, 20],
             iconAnchor: [10, 10]
         });
@@ -288,7 +290,6 @@
                 
                 const data = await response.json();
                 const stations = Array.isArray(data) ? data : (data.content || []);
-                console.log('Stations chargées:', stations);
                 
                 if (stations.length === 0) {
                     alert('Aucune station disponible. Créez d\'abord une borne de recharge !');
@@ -296,15 +297,12 @@
                     return;
                 }
                 
-                // L'API /stations/map retourne déjà latitude et longitude
                 stations.forEach(station => {
                     if (station.latitude && station.longitude) {
                         const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
                             .bindPopup(createStationPopup(station));
                         
                         stationsLayer.addLayer(marker);
-                    } else {
-                        console.warn('Station sans coordonnées:', station);
                     }
                 });
                 
@@ -324,7 +322,6 @@
                 
                 showLoading(false);
             } catch (error) {
-                console.error('Erreur lors du chargement des stations:', error);
                 showLoading(false);
                 alert('Erreur lors du chargement des stations: ' + error.message);
             }
@@ -333,20 +330,12 @@
         // Obtenir la position de l'utilisateur
         function getUserLocation() {
             if (navigator.geolocation) {
-                console.log('Demande de géolocalisation en cours...');
                 showLoading(true);
                 
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         userLocation = [position.coords.latitude, position.coords.longitude];
                         
-                        console.log('Position obtenue:', {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            precision: position.coords.accuracy + 'm'
-                        });
-                        
-                        // Ajouter un marqueur pour la position de l'utilisateur
                         const userMarker = L.marker(userLocation, {
                             icon: L.divIcon({
                                 className: 'user-marker',
@@ -357,7 +346,6 @@
                         }).bindPopup('Votre position').addTo(map);
                         
                         // Centrer la carte sur la position de l'utilisateur avec animation
-                        console.log('Centrage de la carte sur:', userLocation);
                         map.flyTo(userLocation, 14, {
                             duration: 1.5
                         });
@@ -385,7 +373,6 @@
                             default:
                                 errorMessage += 'Erreur inconnue.';
                         }
-                        console.error(errorMessage, error);
                         alert(errorMessage);
                     },
                     {
@@ -403,12 +390,10 @@
         async function loadNearbyStations(lat, lng, radius = 10, keepMapPosition = false) {
             // Vérifier que les coordonnées sont valides
             if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-                console.warn('Coordonnées invalides, chargement de toutes les stations');
                 loadAllStations(keepMapPosition);
                 return;
             }
             
-            console.log(`Chargement des stations dans un rayon de ${radius}km autour de [${lat}, ${lng}]`);
             showLoading(true);
             stationsLayer.clearLayers();
             
@@ -423,12 +408,9 @@
                 const stations = Array.isArray(data) ? data : (data.content || []);
                 
                 if (!Array.isArray(stations)) {
-                    console.error('Format de données invalide:', data);
                     showLoading(false);
                     return;
                 }
-                
-                console.log(`${stations.length} stations trouvées à proximité`);
                 
                 stations.forEach(station => {
                     if (station.latitude && station.longitude) {
@@ -441,19 +423,12 @@
                 
                 showLoading(false);
             } catch (error) {
-                console.error('Erreur lors du chargement des stations proches:', error);
                 showLoading(false);
-                // En cas d'erreur, charger toutes les stations sans recentrer
-                console.warn('Fallback: chargement de toutes les stations');
                 loadAllStations(true);
             }
         }
         
-        // Créer le popup pour une station
         function createStationPopup(station) {
-            // Debug: afficher la station dans la console
-            console.log('Données de la station pour le popup:', station);
-            
             const address = station.address || 'Adresse non disponible';
             const rate = station.hourlyRate ? station.hourlyRate + '€/h' : 'N/A';
             const label = station.locationLabel || 'Lieu non spécifié';
@@ -469,6 +444,25 @@
                 '</div>';
         }
         
+        // Créer un popup pour les stations OpenChargeMap
+        function createOCMStationPopup(station) {
+            const addr = station.AddressInfo || {};
+            const address = addr.AddressLine1 || 'Adresse non disponible';
+            const town = addr.Town || '';
+            const country = addr.Country ? addr.Country.Title : 'France';
+            const connections = station.Connections || [];
+            const connectionTypes = connections.length > 0 
+                ? connections.map(c => c.ConnectionType ? c.ConnectionType.Title : 'N/A').join(', ')
+                : 'Type non spécifié';
+            
+            return '<div class="station-popup">' +
+                '<h3 style="color: #28a745;">' + (addr.Title || 'Station de recharge') + '</h3>' +
+                '<p><strong>Adresse:</strong> ' + address + (town ? ', ' + town : '') + '</p>' +
+                '<p><strong>Pays:</strong> ' + country + '</p>' +
+                '<p><strong>Type de prise:</strong> ' + connectionTypes + '</p>' +
+                '<p><em style="color: #666;">Données OpenChargeMap</em></p>' +
+                '</div>';
+        }
         
         // Basculer le mode recherche à proximité
         function toggleNearbySearch() {
@@ -493,10 +487,189 @@
             document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
         
+        
+        // Créer le popup pour une station OpenChargeMap
+        function createOCMStationPopup(station) {
+            const addr = station.AddressInfo;
+            const title = addr ? addr.Title : 'Station OpenChargeMap';
+            const address = addr ? (addr.AddressLine1 || addr.Town) : 'Non disponible';
+            const town = addr && addr.Town ? addr.Town : '';
+            
+            return '<div class="station-popup">' +
+                '<h3>' + title + '</h3>' +
+                '<p><strong>Source:</strong> OpenChargeMap</p>' +
+                '<p><strong>Adresse:</strong> ' + address + '</p>' +
+                (town ? '<p><strong>Ville:</strong> ' + town + '</p>' : '') +
+                '</div>';
+        }
+        
+        function loadOCMBoundingBox() {
+            let lat = 48.8566;
+            let lng = 2.3522;
+            
+            try {
+                const bounds = map.getBounds();
+                if (bounds && bounds.isValid()) {
+                    const center = bounds.getCenter();
+                    if (center && typeof center.lat === 'number' && typeof center.lng === 'number') {
+                        lat = center.lat;
+                        lng = center.lng;
+                    }
+                }
+            } catch (e) {
+                // Ignorer les erreurs
+            }
+            
+            const url = `http://localhost:8080/api/stations/external?latitude=${lat}&longitude=${lng}&distance=50&maxResults=100`;
+            showLoading(true);
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const stations = Array.isArray(data) ? data : [];
+                    
+                    stationsLayer.eachLayer(layer => {
+                        if (layer.options && layer.options.icon === ocmStationIcon) {
+                            stationsLayer.removeLayer(layer);
+                        }
+                    });
+                    
+                    // Ajouter les stations OCM à la carte
+                    stations.forEach(station => {
+                        // Gérer les deux formats possibles (backend standardisé ou format OpenChargeMap brut)
+                        const lat = station.latitude || (station.AddressInfo && station.AddressInfo.Latitude);
+                        const lng = station.longitude || (station.AddressInfo && station.AddressInfo.Longitude);
+                        
+                        if (lat && lng) {
+                            const marker = L.marker([lat, lng], { icon: ocmStationIcon })
+                                .bindPopup(createOCMStationPopup(station));
+                            
+                            stationsLayer.addLayer(marker);
+                        }
+                    });
+                    
+                    showLoading(false);
+                })
+                .catch(error => {
+                    showLoading(false);
+                });
+        }
+        
         // Charger les stations au démarrage
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser la carte Leaflet
+            map = L.map('map').setView([48.8566, 2.3522], 10); // Paris par défaut
+            
+            // Ajouter les tuiles OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Groupe de marqueurs pour les stations
+            stationsLayer = L.layerGroup().addTo(map);
+            
             loadAllStations();
             setupSearchForm();
+            
+            // Fonction pour charger les stations selon la zone visible
+            function loadStationsForCurrentView() {
+                if (!map || !map.getCenter) {
+                    setTimeout(loadStationsForCurrentView, 500);
+                    return;
+                }
+                
+                let lat = 48.8566;
+                let lng = 2.3522;
+                let zoom = 10;
+                
+                try {
+                    const center = map.getCenter();
+                    const newZoom = map.getZoom();
+                    
+                    if (center && typeof center.lat === 'number' && typeof center.lng === 'number') {
+                        lat = center.lat;
+                        lng = center.lng;
+                    }
+                    
+                    if (typeof newZoom === 'number' && !isNaN(newZoom)) {
+                        zoom = newZoom;
+                    }
+                } catch (e) {
+                    // Ignorer les erreurs
+                }
+                
+                let distance = 10;
+                let maxResults = 100;
+                
+                if (zoom < 8) {
+                    distance = 500;
+                    maxResults = 2000;
+                } else if (zoom < 10) {
+                    distance = 200;
+                    maxResults = 1000;
+                } else if (zoom < 12) {
+                    distance = 100;
+                    maxResults = 500;
+                } else {
+                    distance = 50;
+                    maxResults = 200;
+                }
+                
+                const url = 'http://localhost:8080/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
+                
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erreur HTTP: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const stations = Array.isArray(data) ? data : [];
+                        
+                        // Ajouter les stations OCM à la carte
+                        stations.forEach(station => {
+                            const lat = station.latitude || (station.AddressInfo && station.AddressInfo.Latitude);
+                            const lng = station.longitude || (station.AddressInfo && station.AddressInfo.Longitude);
+                            
+                            if (lat && lng) {
+                                const marker = L.marker([lat, lng], { 
+                                    icon: L.divIcon({
+                                        className: 'ocm-station-marker',
+                                        html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+                                        iconSize: [20, 20],
+                                        iconAnchor: [10, 10]
+                                    })
+                                }).bindPopup('Station OpenChargeMap');
+                                
+                                stationsLayer.addLayer(marker);
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        // Erreur silencieuse
+                    });
+            }
+            
+            setTimeout(() => {
+                loadStationsForCurrentView();
+            }, 3000);
+            
+            map.on('moveend', loadStationsForCurrentView);
+            
+            let lastZoom = map.getZoom() || 10;
+            map.on('zoomend', function() {
+                const currentZoom = map.getZoom() || 10;
+                if (Math.abs(currentZoom - lastZoom) >= 2) {
+                    lastZoom = currentZoom;
+                    loadStationsForCurrentView();
+                }
+            });
         });
         
         function setupSearchForm() {
@@ -515,7 +688,6 @@
             const endDate = formData.get('endDate');
             const endTime = formData.get('endTime');
             
-            console.log('Recherche avec:', { location, startDate, startTime, endDate, endTime });
             
             // Pour l'instant, on recharge toutes les stations
             // Dans une vraie implémentation, on filtrerait par date/heure

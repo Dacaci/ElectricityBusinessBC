@@ -44,7 +44,12 @@ public class ReceiptService {
                 y = writeLine(cs, 72, y, "ID réservation: " + r.getId());
                 y = writeLine(cs, 72, y, "Client: " + r.getUser().getFirstName() + " " + r.getUser().getLastName() + " (" + r.getUser().getEmail() + ")");
                 y = writeLine(cs, 72, y, "Station: " + r.getStation().getName());
-                y = writeLine(cs, 72, y, "Adresse: " + r.getStation().getLocation().getAddress());
+                // Adresse depuis addressEntity de location
+                String address = r.getStation().getLocation().getAddressEntity() != null
+                        ? r.getStation().getLocation().getAddressEntity().getFullAddress()
+                        : "Lat: " + r.getStation().getLocation().getLatitude() + 
+                          ", Long: " + r.getStation().getLocation().getLongitude();
+                y = writeLine(cs, 72, y, "Adresse: " + address);
                 y = writeLine(cs, 72, y, "Période: " + r.getStartTime().format(dtf) + " -> " + r.getEndTime().format(dtf));
                 y = writeLine(cs, 72, y, "Durée (h): " + r.getDurationInHours());
                 y = writeLine(cs, 72, y, "Tarif horaire: " + r.getStation().getHourlyRate() + " €");

@@ -43,7 +43,11 @@ public class ReservationDto {
         
         this.stationId = reservation.getStation().getId();
         this.stationName = reservation.getStation().getName();
-        this.locationAddress = reservation.getStation().getLocation().getAddress();
+        // Adresse depuis addressEntity de location
+        this.locationAddress = reservation.getStation().getLocation().getAddressEntity() != null
+                ? reservation.getStation().getLocation().getAddressEntity().getFullAddress()
+                : "Lat: " + reservation.getStation().getLocation().getLatitude() + 
+                  ", Long: " + reservation.getStation().getLocation().getLongitude();
         this.stationHourlyRate = reservation.getStation().getHourlyRate();
         
         this.startTime = reservation.getStartTime();

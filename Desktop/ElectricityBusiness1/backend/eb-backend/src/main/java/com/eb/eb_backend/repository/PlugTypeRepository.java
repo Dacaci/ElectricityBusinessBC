@@ -11,3 +11,19 @@ public interface PlugTypeRepository extends JpaRepository<PlugType, Long> {
     Optional<PlugType> findByName(String name);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

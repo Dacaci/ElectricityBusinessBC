@@ -170,7 +170,7 @@
             showLoading(true);
             const btn = document.getElementById('geoButton');
             btn.disabled = true;
-            btn.innerHTML = '⏳ Détection en cours...';
+            btn.innerHTML = 'Détection en cours...';
             
             try {
                 // Utiliser la fonction améliorée avec Nominatim
@@ -279,7 +279,7 @@
             showLoading(true);
             const btn = document.getElementById('geoButton');
             btn.disabled = true;
-            btn.innerHTML = '⏳ Détection en cours...';
+            btn.innerHTML = 'Détection en cours...';
             
             navigator.geolocation.getCurrentPosition(
                 function(position) {
@@ -322,7 +322,7 @@
         function showLoading(show) {
             const submitBtn = document.getElementById('submitBtn');
             if (show) {
-                submitBtn.innerHTML = '⏳ Création en cours...';
+                submitBtn.innerHTML = 'Création en cours...';
                 submitBtn.disabled = true;
             } else {
                 submitBtn.innerHTML = 'Créer le lieu';

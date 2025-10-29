@@ -34,32 +34,56 @@ public class VerifyServlet extends HttpServlet {
   @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     var email = req.getParameter("email");
     var inputCode = req.getParameter("code");
-    if (email == null || inputCode == null) { resp.sendError(400, "Paramètres manquants"); return; }
+    
+    resp.setContentType("text/html; charset=UTF-8");
+    
+    if (email == null || inputCode == null) { 
+      resp.setStatus(400);
+      resp.getWriter().write("Paramètres manquants");
+      return; 
+    }
 
     try {
       var u = userDao.findByEmail(email);
-      if (u == null) { resp.sendError(404, "Utilisateur introuvable"); return; }
+      if (u == null) { 
+        resp.setStatus(404);
+        resp.getWriter().write("Utilisateur introuvable"); 
+        return; 
+      }
 
       var record = codeDao.findActiveByUser(u.getId());
-      if (record == null) { resp.sendError(410, "Code expiré ou déjà utilisé"); return; }
+      if (record == null) { 
+        resp.setStatus(410);
+        resp.getWriter().write("Code expiré ou déjà utilisé"); 
+        return; 
+      }
 
       // Anti brute-force
       if (record.getAttemptCount() != null && record.getAttemptCount() >= 5) {
-        resp.sendError(429, "Trop d'essais"); return;
+        resp.setStatus(429);
+        resp.getWriter().write("Trop d'essais"); 
+        return;
       }
 
       // Incrémente d'abord
       codeDao.incrementAttempt(record.getId());
 
       boolean ok = org.mindrot.jbcrypt.BCrypt.checkpw(inputCode, record.getCodeHash());
-      if (!ok) { resp.sendError(401, "Code invalide"); return; }
+      if (!ok) { 
+        resp.setStatus(401);
+        resp.getWriter().write("Code invalide"); 
+        return; 
+      }
 
       codeDao.markUsed(record.getId());
       userDao.activate(u.getId());
-      resp.setContentType("text/plain; charset=UTF-8");
-      resp.getWriter().write(" Compte activé ! Vous pouvez vous connecter (dans l'app principale).");
+      
+      // Rediriger vers la page de succès
+      resp.sendRedirect("verify-success.jsp");
     } catch (Exception e) {
-      throw new ServletException(e);
+      e.printStackTrace();
+      resp.setStatus(500);
+      resp.getWriter().write("Erreur serveur: " + e.getMessage());
     }
   }
   

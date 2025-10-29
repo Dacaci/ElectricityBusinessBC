@@ -29,7 +29,7 @@ public class LocationService {
         Location location = new Location();
         location.setOwner(owner);
         location.setLabel(locationDto.getLabel());
-        location.setAddress(locationDto.getAddress());
+        // L'adresse sera gérée via addressEntity si nécessaire
         location.setLatitude(locationDto.getLatitude());
         location.setLongitude(locationDto.getLongitude());
         location.setDescription(locationDto.getDescription());
@@ -76,7 +76,7 @@ public class LocationService {
                 .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + id));
         
         location.setLabel(locationDto.getLabel());
-        location.setAddress(locationDto.getAddress());
+        // L'adresse sera gérée via addressEntity si nécessaire
         location.setLatitude(locationDto.getLatitude());
         location.setLongitude(locationDto.getLongitude());
         location.setDescription(locationDto.getDescription());

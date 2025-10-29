@@ -2,6 +2,7 @@ package com.eb.eb_backend.controller;
 
 import com.eb.eb_backend.dto.StationDto;
 import com.eb.eb_backend.dto.StationLocationDto;
+import com.eb.eb_backend.service.OpenChargeMapService;
 import com.eb.eb_backend.service.StationService;
 import com.eb.eb_backend.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -23,6 +25,7 @@ public class StationController {
     
     private final StationService stationService;
     private final SecurityUtil securityUtil;
+    private final OpenChargeMapService openChargeMapService;
     
     @PostMapping
     public ResponseEntity<StationDto> createStation(
@@ -37,6 +40,31 @@ public class StationController {
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @GetMapping("/external/france")
+    public ResponseEntity<List<Map<String, Object>>> getFranceStationsFromOCM() {
+        try {
+            List<Map<String, Object>> stations = openChargeMapService.getAllFranceStations();
+            return ResponseEntity.ok(stations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/external")
+    public ResponseEntity<List<Map<String, Object>>> getStationsFromOCM(
+            @RequestParam BigDecimal latitude,
+            @RequestParam BigDecimal longitude,
+            @RequestParam(required = false, defaultValue = "10") Integer distance,
+            @RequestParam(required = false, defaultValue = "100") Integer maxResults) {
+        try {
+            List<Map<String, Object>> stations = openChargeMapService.getChargingStations(
+                latitude, longitude, distance, maxResults);
+            return ResponseEntity.ok(stations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
