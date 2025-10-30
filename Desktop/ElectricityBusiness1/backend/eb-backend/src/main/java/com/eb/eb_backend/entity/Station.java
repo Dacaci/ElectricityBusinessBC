@@ -63,6 +63,13 @@ public class Station {
     
     @Column(name = "on_foot")
     private Boolean onFoot = false;
+
+    // Coordonnées spécifiques à la borne (optionnelles). Si null, hérite de Location
+    @Column(name = "latitude", precision = 10, scale = 8)
+    private BigDecimal latitude;
+
+    @Column(name = "longitude", precision = 11, scale = 8)
+    private BigDecimal longitude;
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

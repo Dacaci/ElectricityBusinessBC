@@ -37,6 +37,10 @@ public class StationDto {
     private Long ownerId;
     private Long locationId;
     
+    // Coordonnées spécifiques à la borne (optionnelles). Si null -> hérite du lieu
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    
     // Constructeur pour conversion depuis l'entité
     public StationDto(Station station) {
         this.id = station.getId();
@@ -50,5 +54,7 @@ public class StationDto {
         this.onFoot = station.getOnFoot();
         this.ownerId = station.getOwner().getId();
         this.locationId = station.getLocation().getId();
+        this.latitude = station.getLatitude();
+        this.longitude = station.getLongitude();
     }
 }

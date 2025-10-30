@@ -94,12 +94,7 @@
             // L'utilisateur sera redirigé automatiquement par requireAuth()
         } else {
         
-        console.log('=== STATIONS.JSP DEBUG ===');
-        console.log('CURRENT_USER_ID:', CURRENT_USER_ID);
-        console.log('Type:', typeof CURRENT_USER_ID);
-        console.log('===========================');
-        
-        } // Fermer le bloc else
+                                        } // Fermer le bloc else
         
         // ========== FONCTIONS GLOBALES ==========
         
@@ -108,10 +103,7 @@
                 showLoading(true);
                 
                 const stationsUrl = 'http://localhost:8080/api/stations/owner/' + CURRENT_USER_ID + '?t=' + Date.now();
-                console.log('Chargement des bornes depuis:', stationsUrl);
-                console.log('CURRENT_USER_ID:', CURRENT_USER_ID);
-                
-                // Charger les bornes et les lieux en parallèle
+                                                // Charger les bornes et les lieux en parallèle
                 const [stationsResponse, locationsResponse] = await Promise.all([
                     fetch(stationsUrl), // Mes propres bornes
                     fetch('http://localhost:8080/api/locations')
@@ -128,22 +120,15 @@
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
                 
-                console.log('Données reçues des bornes:', stationsData);
-                console.log('Nombre de bornes reçues:', stationsData.content ? stationsData.content.length : stationsData.length);
-                
-                // L'API retourne une structure paginée {content: [...], ...}
+                                                // L'API retourne une structure paginée {content: [...], ...}
                 stations = stationsData.content || stationsData;
                 locations = locationsData.content || locationsData;
                 
-                console.log('Stations finales:', stations);
-                console.log('Nombre de stations finales:', stations.length);
-                
-                displayStations(stations);
+                                                displayStations(stations);
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement: ' + error.message);
+                                showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
         }
@@ -229,18 +214,14 @@
                 loadData(); // Recharger la liste
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la modification: ' + error.message);
+                                showError('Erreur lors de la modification: ' + error.message);
             }
         }
         
         async function deleteStation(stationId) {
-            console.log('deleteStation appelé avec ID:', stationId);
-            
-            // Empêcher les clics multiples
+                        // Empêcher les clics multiples
             if (isDeleting) {
-                console.log('Suppression déjà en cours, ignoré');
-                return;
+                                return;
             }
             
             if (!stationId) {
@@ -249,23 +230,18 @@
             }
             
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
-                console.log('Suppression annulée par l\'utilisateur');
-                return;
+                                return;
             }
             
             isDeleting = true; // Verrouiller
             
             try {
                 const url = 'http://localhost:8080/api/stations/' + stationId;
-                console.log('URL de suppression:', url);
-                
-                const response = await fetch(url, {
+                                const response = await fetch(url, {
                     method: 'DELETE'
                 });
                 
-                console.log('Réponse suppression, status:', response.status);
-                
-                if (!response.ok) {
+                                if (!response.ok) {
                     if (response.status === 404) {
                         showError('Cette borne a déjà été supprimée');
                         isDeleting = false;
@@ -284,8 +260,7 @@
                 }, 1000);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression: ' + error.message);
+                                showError('Erreur lors de la suppression: ' + error.message);
                 isDeleting = false; // Déverrouiller en cas d'erreur
             }
         }

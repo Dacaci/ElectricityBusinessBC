@@ -13,9 +13,7 @@ const USER_AGENT = 'ElectricityBusiness/1.0'; // Requis par Nominatim
  * @returns {Promise<Object>} - Les coordonnées et informations
  */
 async function geocodeAddress(address) {
-    console.log('Geocoding address:', address);
-    
-    try {
+        try {
         const url = NOMINATIM_BASE_URL + '/search?' + new URLSearchParams({
             q: address,
             format: 'json',
@@ -52,8 +50,7 @@ async function geocodeAddress(address) {
         }));
         
     } catch (error) {
-        console.error('Erreur geocoding:', error);
-        throw error;
+                throw error;
     }
 }
 
@@ -64,9 +61,7 @@ async function geocodeAddress(address) {
  * @returns {Promise<Object>} - L'adresse
  */
 async function reverseGeocode(latitude, longitude) {
-    console.log('Reverse geocoding:', latitude, longitude);
-    
-    try {
+        try {
         const url = NOMINATIM_BASE_URL + '/reverse?' + new URLSearchParams({
             lat: latitude,
             lon: longitude,
@@ -96,8 +91,7 @@ async function reverseGeocode(latitude, longitude) {
         };
         
     } catch (error) {
-        console.error('Erreur reverse geocoding:', error);
-        throw error;
+                throw error;
     }
 }
 
@@ -106,9 +100,7 @@ async function reverseGeocode(latitude, longitude) {
  * @returns {Promise<Object>} - Position et informations
  */
 async function getAccurateLocation() {
-    console.log('=== GET ACCURATE LOCATION ===');
-    
-    // 1. Essayer d'abord le GPS/Wi-Fi du navigateur
+        // 1. Essayer d'abord le GPS/Wi-Fi du navigateur
     try {
         const position = await new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
@@ -135,9 +127,7 @@ async function getAccurateLocation() {
             timestamp: new Date(position.timestamp)
         };
         
-        console.log('Position GPS obtenue:', location);
-        
-        // Obtenir l'adresse correspondante
+                // Obtenir l'adresse correspondante
         try {
             const addressInfo = await reverseGeocode(location.latitude, location.longitude);
             location.address = addressInfo.address;
@@ -145,15 +135,12 @@ async function getAccurateLocation() {
             location.postalCode = addressInfo.postalCode;
             location.displayName = addressInfo.displayName;
         } catch (e) {
-            console.warn('Reverse geocoding échoué:', e);
-        }
+                    }
         
         return location;
         
     } catch (gpsError) {
-        console.warn('GPS non disponible:', gpsError.message);
-        
-        // 2. Fallback : Géolocalisation par IP (moins précis mais fonctionnel)
+                // 2. Fallback : Géolocalisation par IP (moins précis mais fonctionnel)
         try {
             // Utiliser un service gratuit de géolocalisation IP
             const ipResponse = await fetch('https://ipapi.co/json/');
@@ -171,12 +158,10 @@ async function getAccurateLocation() {
                 warning: 'Position approximative basée sur votre adresse IP'
             };
             
-            console.log('Position IP obtenue:', location);
-            return location;
+                        return location;
             
         } catch (ipError) {
-            console.error('Géolocalisation IP échouée:', ipError);
-            throw new Error('Impossible d\'obtenir votre position. Veuillez saisir les coordonnées manuellement.');
+                        throw new Error('Impossible d\'obtenir votre position. Veuillez saisir les coordonnées manuellement.');
         }
     }
 }
@@ -192,9 +177,7 @@ async function searchAddressSuggestions(query, countryCode = 'fr') {
         return [];
     }
     
-    console.log('Recherche de suggestions pour:', query);
-    
-    try {
+        try {
         const url = NOMINATIM_BASE_URL + '/search?' + new URLSearchParams({
             q: query,
             format: 'json',
@@ -226,8 +209,7 @@ async function searchAddressSuggestions(query, countryCode = 'fr') {
         }));
         
     } catch (error) {
-        console.error('Erreur recherche suggestions:', error);
-        return [];
+                return [];
     }
 }
 

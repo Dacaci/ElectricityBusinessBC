@@ -37,29 +37,19 @@ function getAuthUser() {
  * Supprime les données d'authentification
  */
 function clearAuthData() {
-    console.log('clearAuthData() appelée');
-    console.log('Clés à supprimer:', JWT_TOKEN_KEY, JWT_USER_KEY);
-    console.log('Valeurs avant suppression:', localStorage.getItem(JWT_TOKEN_KEY), localStorage.getItem(JWT_USER_KEY));
-    
     localStorage.removeItem(JWT_TOKEN_KEY);
     localStorage.removeItem(JWT_USER_KEY);
     
     // Nettoyer aussi les anciennes clés au cas où
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
-    
-    console.log('Valeurs après suppression:', localStorage.getItem(JWT_TOKEN_KEY), localStorage.getItem(JWT_USER_KEY));
-    console.log('clearAuthData() terminée');
 }
 
 /**
  * Force la déconnexion complète
  */
 function forceLogout() {
-    console.log('=== FORCE LOGOUT ===');
-    console.log('localStorage avant:', localStorage);
-    
-    clearAuthData();
+            clearAuthData();
     
     // Vider complètement le localStorage
     localStorage.clear();
@@ -67,13 +57,9 @@ function forceLogout() {
     // Vider aussi sessionStorage
     sessionStorage.clear();
     
-    console.log('localStorage après:', localStorage);
-    console.log('sessionStorage après:', sessionStorage);
-    
-    // Attendre un peu avant la redirection
+            // Attendre un peu avant la redirection
     setTimeout(() => {
-        console.log('Redirection vers login...');
-        window.location.href = '/login.jsp?message=logout';
+                window.location.href = '/login.jsp?message=logout';
     }, 100);
 }
 
@@ -87,19 +73,16 @@ function isAuthenticated() {
     
     // Vérifier que le token et l'utilisateur existent
     if (!token || !user) {
-        console.log('isAuthenticated: Token ou user manquant');
-        return false;
+                return false;
     }
     
     // Vérifier la validité du token directement
     if (isTokenExpired(token)) {
-        console.log('isAuthenticated: Token expiré');
-        clearAuthData();
+                clearAuthData();
         return false;
     }
     
-    console.log('isAuthenticated: Utilisateur authentifié');
-    return true;
+        return true;
 }
 
 /**
@@ -195,8 +178,7 @@ function decodeJwtPayload(token) {
         const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
         return JSON.parse(decoded);
     } catch (error) {
-        console.error('Erreur lors du décodage du token JWT:', error);
-        return null;
+                return null;
     }
 }
 
@@ -224,17 +206,14 @@ function validateAuthData() {
     
     // Vérifier que le token et l'utilisateur existent
     if (!token || !user) {
-        console.log('validateAuthData: Token ou user manquant');
-        return false;
+                return false;
     }
     
     // Vérifier si le token est expiré
     if (isTokenExpired(token)) {
-        console.log('validateAuthData: Token JWT expiré, déconnexion automatique');
-        clearAuthData();
+                clearAuthData();
         return false;
     }
     
-    console.log('validateAuthData: Données d\'authentification valides');
-    return true;
+        return true;
 }

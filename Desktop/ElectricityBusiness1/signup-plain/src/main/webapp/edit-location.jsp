@@ -121,15 +121,13 @@
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement: ' + error.message);
+                                showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
         }
         
         function populateForm(location) {
-            console.log('Remplissage du formulaire avec:', location);
-            document.getElementById('label').value = location.label || '';
+                        document.getElementById('label').value = location.label || '';
             document.getElementById('address').value = location.address || '';
             document.getElementById('description').value = location.description || '';
             document.getElementById('latitude').value = location.latitude || '';
@@ -181,8 +179,7 @@
                 }, 1500);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la modification: ' + error.message);
+                                showError('Erreur lors de la modification: ' + error.message);
                 showLoading(false);
             }
         });

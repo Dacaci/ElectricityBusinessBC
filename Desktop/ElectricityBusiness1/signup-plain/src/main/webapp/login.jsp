@@ -131,8 +131,7 @@
     <script src="js/jwt-utils.js"></script>
     <script>
         if (isAuthenticated()) {
-            console.log('Utilisateur déjà connecté, redirection vers dashboard');
-            window.location.href = '/dashboard.jsp';
+                        window.location.href = '/dashboard.jsp';
         }
         
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -166,8 +165,7 @@
                 }
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur de connexion: ' + error.message);
+                                alert('Erreur de connexion: ' + error.message);
             }
         });
     </script>

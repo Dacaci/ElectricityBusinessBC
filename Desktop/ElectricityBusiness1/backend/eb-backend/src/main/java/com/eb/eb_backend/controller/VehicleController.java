@@ -23,6 +23,15 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
     
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<VehicleDto>> getVehiclesByUser(@PathVariable Long userId) {
+        try {
+            return ResponseEntity.ok(vehicleService.getVehiclesByUser(userId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<VehicleDto> getVehicleById(@PathVariable Long id) {
         try {

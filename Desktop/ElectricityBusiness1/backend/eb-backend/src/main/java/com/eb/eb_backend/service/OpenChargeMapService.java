@@ -1,6 +1,5 @@
 package com.eb.eb_backend.service;
 
-import com.eb.eb_backend.dto.StationLocationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,14 +44,15 @@ public class OpenChargeMapService {
             String url = builder.toUriString();
             log.info("Appel à OpenChargeMap: {}", url);
             
-            // L'API OpenChargeMap retourne directement un tableau
-            List<Map<String, Object>> stations = restTemplate.getForObject(url, List.class);
+            // L'API OpenChargeMap retourne {value: [...], Count: ...}
+            OpenChargeMapResponse apiResponse = restTemplate.getForObject(url, OpenChargeMapResponse.class);
             
-            if (stations != null) {
+            if (apiResponse != null && apiResponse.getValue() != null) {
+                List<Map<String, Object>> stations = apiResponse.getValue();
                 log.info("Nombre de stations récupérées depuis OpenChargeMap: {}", stations.size());
                 return stations;
             } else {
-                log.warn("Aucune station récupérée depuis OpenChargeMap");
+                log.warn("Aucune station récupérée depuis OpenChargeMap ou format de réponse inattendu");
                 return new ArrayList<>();
             }
             

@@ -113,8 +113,7 @@
                 displayPlugTypes(plugTypes);
                 showLoading(false);
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement: ' + error.message);
+                                showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
         }
@@ -184,8 +183,7 @@
                 loadPlugTypes();
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur: ' + error.message);
+                                showError('Erreur: ' + error.message);
             }
         }
 
@@ -206,8 +204,7 @@
                 showSuccess('Type de prise supprimé avec succès !');
                 loadPlugTypes();
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression');
+                                showError('Erreur lors de la suppression');
             }
         }
 

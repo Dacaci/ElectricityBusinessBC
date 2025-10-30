@@ -53,13 +53,17 @@
   </div>
 
   <div class="row">
+    <label><input id="customPosition" type="checkbox"> Position spécifique à la borne</label>
+  </div>
+
+  <div class="row">
     <label for="latitude">Latitude</label>
-    <input id="latitude" type="number" step="0.000001" placeholder="48.8566">
+    <input id="latitude" type="number" step="0.000001" placeholder="48.8566" style="display:none;">
   </div>
 
   <div class="row">
     <label for="longitude">Longitude</label>
-    <input id="longitude" type="number" step="0.000001" placeholder="2.3522">
+    <input id="longitude" type="number" step="0.000001" placeholder="2.3522" style="display:none;">
   </div>
 
   <div class="row">
@@ -95,11 +99,17 @@
     loadLocations();
     document.getElementById('submitBtn').addEventListener('click', onSubmit);
     document.getElementById('geoBtn').addEventListener('click', useGeolocation);
+    const custom = document.getElementById('customPosition');
+    custom.addEventListener('change', () => {
+      const show = custom.checked;
+      document.getElementById('latitude').style.display = show ? '' : 'none';
+      document.getElementById('longitude').style.display = show ? '' : 'none';
+    });
   });
 
   async function loadLocations() {
     try {
-      const res = await fetch('http://localhost:8080/api/locations');
+      const res = await authenticatedFetch('http://localhost:8080/api/locations/owner/' + CURRENT_USER_ID + '/active');
       if (!res.ok) throw new Error('Erreur chargement lieux');
       const data = await res.json();
       const locations = Array.isArray(data) ? data : (data.content || []);
@@ -109,43 +119,51 @@
         // Afficher tous les lieux (le backend vérifie la propriété lors de la création)
         const opt = document.createElement('option');
         opt.value = String(loc.id);
-        opt.textContent = (loc.label || 'Lieu') + (loc.address ? ' - ' + loc.address : '');
+        const lat = loc.latitude != null ? Number(loc.latitude).toFixed(6) : '—';
+        const lng = loc.longitude != null ? Number(loc.longitude).toFixed(6) : '—';
+        opt.textContent = (loc.label || 'Lieu') + ` (lat:${lat}, lng:${lng})`;
         select.appendChild(opt);
       }
+      select.addEventListener('change', () => {
+        const sel = select.value;
+        const found = locations.find(l => String(l.id) === sel);
+        if (found) {
+          // Si position spécifique non cochée, masquer les champs
+          const custom = document.getElementById('customPosition').checked;
+          if (!custom) {
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+          }
+        }
+      });
     } catch (e) {
       showMsg('Erreur lors du chargement des lieux', true);
-      console.error(e);
     }
   }
 
   async function onSubmit(e) {
     e.preventDefault();
-    console.log('onSubmit appelé');
     const name = document.getElementById('name').value.trim();
     const locationIdStr = document.getElementById('locationId').value;
-    console.log('Nom:', name, 'LocationId:', locationIdStr);
     if (!name || !locationIdStr) {
       showMsg('Nom et Lieu sont obligatoires', true);
       return;
     }
 
+    const custom = document.getElementById('customPosition').checked;
     const payload = {
-      // Rend le nom unique pour éviter l'exception "Une borne avec ce nom existe déjà"
       name: name + ' - ' + Date.now(),
       locationId: parseInt(locationIdStr, 10),
       power: parseFloat(document.getElementById('power').value) || null,
       city: document.getElementById('city').value || null,
-      latitude: toNum(document.getElementById('latitude').value),
-      longitude: toNum(document.getElementById('longitude').value),
+      latitude: custom ? toNum(document.getElementById('latitude').value) : null,
+      longitude: custom ? toNum(document.getElementById('longitude').value) : null,
       instructions: document.getElementById('instructions').value || null,
       onFoot: document.getElementById('onFoot').checked,
       plugType: 'TYPE2S',
       hourlyRate: 2.0,
       isActive: true
     };
-
-    console.log('Payload:', payload);
-    console.log('URL:', 'http://localhost:8080/api/stations?userId=' + CURRENT_USER_ID + '&ownerId=' + CURRENT_USER_ID);
     
     try {
       const res = await authenticatedFetch('http://localhost:8080/api/stations', {
@@ -153,12 +171,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      
-      console.log('Réponse reçue, status:', res.status);
 
       if (!res.ok) {
         const txt = await res.text();
-        console.error('Erreur API', res.status, txt);
         if (res.status === 400) {
           if (txt && txt.includes("n'appartient pas au propriétaire")) {
             showMsg('Le lieu sélectionné n\'appartient pas à votre compte.', true);
@@ -168,7 +183,6 @@
             showMsg('Une borne avec ce nom existe déjà. Réessayez avec un autre nom.', true);
             return;
           }
-          // Message générique si le backend ne renvoie pas le détail
           showMsg('Création impossible (400). Vérifiez que le lieu vous appartient et que le nom est unique.', true);
           return;
         }
@@ -179,7 +193,6 @@
       showMsg('Borne créée avec succès.', false);
       setTimeout(() => { window.location.href = 'stations.jsp'; }, 1200);
     } catch (e) {
-      console.error(e);
       showMsg('Erreur réseau. Veuillez réessayer.', true);
     }
   }
@@ -195,8 +208,6 @@
     try {
       // Utiliser la fonction améliorée avec Nominatim
       const location = await getAccurateLocation();
-      
-      console.log('Position obtenue:', location);
       
       // Remplir les champs
       document.getElementById('latitude').value = location.latitude.toFixed(6);
@@ -221,7 +232,6 @@
       showMsg(successMsg, false);
       
     } catch (error) {
-      console.error('Erreur géolocalisation:', error);
       showMsg('Erreur: ' + error.message, true);
     }
   }

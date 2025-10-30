@@ -41,10 +41,10 @@ public class StationLocationDto {
                 : "Non défini";
         this.isActive = station.getIsActive();
         
-        // Coordonnées depuis la location
+        // Coordonnées: privilégier celles de la borne si présentes, sinon celles du lieu
         if (station.getLocation() != null) {
-            this.latitude = station.getLocation().getLatitude();
-            this.longitude = station.getLocation().getLongitude();
+            this.latitude = station.getLatitude() != null ? station.getLatitude() : station.getLocation().getLatitude();
+            this.longitude = station.getLongitude() != null ? station.getLongitude() : station.getLocation().getLongitude();
             this.locationLabel = station.getLocation().getLabel();
             this.locationDescription = station.getLocation().getDescription();
             

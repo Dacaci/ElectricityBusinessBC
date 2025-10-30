@@ -98,8 +98,7 @@
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement: ' + error.message);
+                                showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
         }
@@ -146,8 +145,7 @@
                 }, 1500);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la modification: ' + error.message);
+                                showError('Erreur lors de la modification: ' + error.message);
                 showLoading(false);
             }
         });

@@ -42,6 +42,16 @@ public class VehicleService {
         return new VehicleDto(vehicle);
     }
     
+    @Transactional(readOnly = true)
+    public List<VehicleDto> getVehiclesByUser(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + userId));
+        
+        return vehicleRepository.findByUsers(user).stream()
+            .map(VehicleDto::new)
+            .collect(Collectors.toList());
+    }
+    
     @Transactional
     public VehicleDto createVehicle(VehicleDto vehicleDto, Long userId) {
         // Vérifier que la plaque n'existe pas déjà

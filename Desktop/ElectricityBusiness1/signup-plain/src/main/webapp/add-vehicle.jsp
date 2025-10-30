@@ -108,8 +108,7 @@
                 plugTypes = await response.json();
                 displayPlugTypes();
             } catch (error) {
-                console.error('Erreur:', error);
-                document.getElementById('plugTypesLoading').style.display = 'none';
+                                document.getElementById('plugTypesLoading').style.display = 'none';
                 showError('Erreur lors du chargement des types de prises');
             }
         }
@@ -184,8 +183,7 @@
                 }, 1500);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de l\'ajout du véhicule: ' + error.message);
+                                showError('Erreur lors de l\'ajout du véhicule: ' + error.message);
             }
         }
 

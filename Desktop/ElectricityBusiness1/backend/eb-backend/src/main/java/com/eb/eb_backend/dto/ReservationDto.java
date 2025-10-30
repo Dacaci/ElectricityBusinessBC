@@ -24,6 +24,10 @@ public class ReservationDto {
     private String locationAddress;
     private BigDecimal stationHourlyRate;
     
+    private Long vehicleId;
+    private String vehicleLicensePlate;
+    private String vehicleBrandModel;
+    
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal totalAmount;
@@ -49,6 +53,13 @@ public class ReservationDto {
                 : "Lat: " + reservation.getStation().getLocation().getLatitude() + 
                   ", Long: " + reservation.getStation().getLocation().getLongitude();
         this.stationHourlyRate = reservation.getStation().getHourlyRate();
+        
+        // Informations du véhicule si présent
+        if (reservation.getVehicle() != null) {
+            this.vehicleId = reservation.getVehicle().getId();
+            this.vehicleLicensePlate = reservation.getVehicle().getLicensePlate();
+            this.vehicleBrandModel = reservation.getVehicle().getBrand() + " " + reservation.getVehicle().getModel();
+        }
         
         this.startTime = reservation.getStartTime();
         this.endTime = reservation.getEndTime();

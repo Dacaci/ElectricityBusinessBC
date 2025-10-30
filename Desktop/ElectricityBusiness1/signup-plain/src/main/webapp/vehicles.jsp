@@ -79,8 +79,7 @@
                 displayVehicles(vehicles);
                 showLoading(false);
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement des véhicules: ' + error.message);
+                                showError('Erreur lors du chargement des véhicules: ' + error.message);
                 showLoading(false);
             }
         }
@@ -144,8 +143,7 @@
                 showSuccess('Véhicule supprimé avec succès !');
                 loadVehicles();
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression du véhicule');
+                                showError('Erreur lors de la suppression du véhicule');
             }
         }
 

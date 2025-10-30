@@ -75,6 +75,14 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="vehicleId">Véhicule (optionnel)</label>
+                        <select id="vehicleId" name="vehicleId">
+                            <option value="">Aucun véhicule</option>
+                        </select>
+                        <small style="color: #666; display: block; margin-top: 5px;">Sélectionnez votre véhicule pour vérifier la compatibilité des prises</small>
+                    </div>
+                    
+                    <div class="form-group">
                         <label>Quand ? </label>
                         <div class="datetime-row">
                             <div class="datetime-group">
@@ -113,7 +121,7 @@
                     </div>
                     
                     <div class="payment-section">
-                        <h4>💳 Informations de paiement</h4>
+                        <h4>Informations de paiement</h4>
                         
                         <div class="form-group">
                             <label for="cardNumber">Numéro de la carte bancaire </label>
@@ -173,8 +181,14 @@
         // Récupérer l'ID de l'utilisateur depuis le token JWT
         const CURRENT_USER_ID = getCurrentUserId();
         
+        if (!CURRENT_USER_ID) {
+            alert('Erreur d\'authentification. Veuillez vous reconnecter.');
+            window.location.href = 'login.jsp';
+        }
+        
         let stations = [];
         let locations = [];
+        let vehicles = [];
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
@@ -223,18 +237,28 @@
         
         function filterStations() {
             // Fonction pour filtrer les stations (à implémenter si nécessaire)
-            console.log('Filtrage des stations...');
         }
         
         async function loadData() {
             try {
                 showLoading(true);
                 
-                // Charger les stations et les lieux en parallèle
-                const [stationsResponse, locationsResponse] = await Promise.all([
+                const userId = getCurrentUserId();
+                const vehiclesUrl = 'http://localhost:8080/api/vehicles/user/' + userId;
+                
+                // Charger les stations, les lieux et les véhicules en parallèle
+                const fetchPromises = [
                     fetch('http://localhost:8080/api/stations'),
                     fetch('http://localhost:8080/api/locations')
-                ]);
+                ];
+                
+                if (userId) {
+                    fetchPromises.push(fetch(vehiclesUrl));
+                } else {
+                    fetchPromises.push(Promise.resolve({ ok: false }));
+                }
+                
+                const [stationsResponse, locationsResponse, vehiclesResponse] = await Promise.all(fetchPromises);
                 
                 if (!stationsResponse.ok) {
                     throw new Error('Erreur lors du chargement des bornes');
@@ -246,19 +270,23 @@
                 
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
+                let vehiclesData = [];
+                
+                // Charger les véhicules si la requête réussit
+                if (vehiclesResponse.ok) {
+                    vehiclesData = await vehiclesResponse.json();
+                }
                 
                 // Gérer la pagination
                 stations = stationsData.content || stationsData;
                 locations = locationsData.content || locationsData;
-                
-                console.log('Stations chargées:', stations);
-                console.log('Locations chargées:', locations);
+                vehicles = Array.isArray(vehiclesData) ? vehiclesData : (vehiclesData.content || []);
                 
                 populateStationSelect();
+                populateVehicleSelect();
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur:', error);
                 showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
@@ -268,17 +296,12 @@
             const select = document.getElementById('stationId');
             select.innerHTML = '<option value="">Sélectionnez une borne...</option>';
             
-            console.log('Nombre de stations:', stations.length);
-            console.log('Nombre de locations:', locations.length);
-            
             if (!Array.isArray(stations)) {
-                console.error('Stations n\'est pas un tableau:', stations);
                 showError('Erreur: Les données des bornes sont invalides');
                 return;
             }
             
             if (!Array.isArray(locations)) {
-                console.error('Locations n\'est pas un tableau:', locations);
                 showError('Erreur: Les données des lieux sont invalides');
                 return;
             }
@@ -296,8 +319,6 @@
                 return true;
             });
             
-            console.log('Stations actives (hors propres stations):', activeStations);
-            
             if (activeStations.length === 0) {
                 showError('Aucune borne disponible pour réservation. Vous ne pouvez pas réserver vos propres bornes.');
                 document.getElementById('formContainer').style.display = 'block';
@@ -305,24 +326,12 @@
             }
             
             activeStations.forEach(station => {
-                console.log('Traitement station:', station);
-                console.log('  - ID:', station.id);
-                console.log('  - Name:', station.name);
-                console.log('  - HourlyRate:', station.hourlyRate);
-                console.log('  - LocationId:', station.locationId);
-                
                 const location = locations.find(loc => loc.id === station.locationId);
-                console.log('Location trouvée:', location);
-                if (location) {
-                    console.log('  - Location label:', location.label);
-                }
-                
                 const locationName = location ? location.label : 'Lieu inconnu';
                 
                 const option = document.createElement('option');
                 option.value = station.id;
                 
-                // Construction du texte étape par étape pour debug
                 let optionText = '';
                 if (station.name) {
                     optionText += station.name;
@@ -342,14 +351,34 @@
                 
                 optionText += '€/h)';
                 
-                console.log('  - Texte option finale:', optionText);
-                
                 option.textContent = optionText;
                 option.dataset.station = JSON.stringify(station);
                 select.appendChild(option);
             });
             
             document.getElementById('formContainer').style.display = 'block';
+        }
+        
+        function populateVehicleSelect() {
+            const select = document.getElementById('vehicleId');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Aucun véhicule</option>';
+            
+            if (!Array.isArray(vehicles) || vehicles.length === 0) {
+                select.innerHTML = '<option value="">Aucun véhicule enregistré</option>';
+                return;
+            }
+            
+            vehicles.forEach((vehicle) => {
+                const option = document.createElement('option');
+                option.value = vehicle.id;
+                option.textContent = vehicle.brand + ' ' + vehicle.model + ' - ' + vehicle.licensePlate;
+                select.appendChild(option);
+            });
+            
+            if (currentValue) {
+                select.value = currentValue;
+            }
         }
         
         function updateStationInfo() {
@@ -374,19 +403,13 @@
         }
         
         function calculatePrice() {
-            console.log('=== calculatePrice appelée ===');
             const startDate = document.getElementById('startDate').value;
             const startTime = document.getElementById('startTime').value;
             const endDate = document.getElementById('endDate').value;
             const endTime = document.getElementById('endTime').value;
             const stationId = document.getElementById('stationId').value;
             
-            console.log('StartDate:', startDate, 'StartTime:', startTime);
-            console.log('EndDate:', endDate, 'EndTime:', endTime);
-            console.log('StationId:', stationId);
-            
             if (!startDate || !startTime || !endDate || !endTime || !stationId) {
-                console.log('Données manquantes pour calculer le prix');
                 document.getElementById('priceCalculation').style.display = 'none';
                 return;
             }
@@ -394,20 +417,14 @@
             const start = new Date(startDate + 'T' + startTime);
             const end = new Date(endDate + 'T' + endTime);
             
-            console.log('Start DateTime:', start);
-            console.log('End DateTime:', end);
-            
             if (end <= start) {
-                console.log('Date de fin avant ou égale à la date de début');
                 document.getElementById('priceCalculation').style.display = 'none';
                 return;
             }
             
             const station = stations.find(s => s.id == stationId);
-            console.log('Station trouvée:', station);
             
             if (!station) {
-                console.error('Station non trouvée avec ID:', stationId);
                 return;
             }
             
@@ -415,15 +432,10 @@
             const durationHours = durationMs / (1000 * 60 * 60);
             const totalPrice = durationHours * station.hourlyRate;
             
-            console.log('Durée (heures):', durationHours);
-            console.log('Tarif horaire:', station.hourlyRate);
-            console.log('Prix total:', totalPrice);
-            
             document.getElementById('duration').textContent = durationHours.toFixed(2) + ' heures';
             document.getElementById('hourlyRate').textContent = station.hourlyRate + ' €/h';
             document.getElementById('totalPrice').textContent = totalPrice.toFixed(2) + ' €';
             
-            console.log('Affichage du bloc de calcul');
             document.getElementById('priceCalculation').style.display = 'block';
         }
         
@@ -443,6 +455,7 @@
             
             const reservationData = {
                 stationId: parseInt(formData.get('stationId')),
+                vehicleId: formData.get('vehicleId') ? parseInt(formData.get('vehicleId')) : null,
                 startTime: startDateTime,
                 endTime: endDateTime
             };
@@ -470,8 +483,6 @@
                 showError('Le CVV doit contenir 3 ou 4 chiffres');
                 return;
             }
-            
-            console.log('Données de réservation envoyées:', reservationData);
             
             // Validation côté client
             if (!reservationData.stationId || !reservationData.startTime || !reservationData.endTime) {
@@ -503,11 +514,11 @@
                 
                 if (!response.ok) {
                     let errorMessage = 'Erreur lors de la création de la réservation';
+                    const errorText = await response.text();
                     try {
-                        const errorData = await response.json();
-                        errorMessage = errorData || errorMessage;
+                        const errorData = JSON.parse(errorText);
+                        errorMessage = errorData.message || errorData || errorMessage;
                     } catch (e) {
-                        const errorText = await response.text();
                         errorMessage = errorText || errorMessage;
                     }
                     throw new Error(errorMessage);
@@ -519,7 +530,6 @@
                 }, 2000);
                 
             } catch (error) {
-                console.error('Erreur:', error);
                 showError('Erreur lors de la création: ' + error.message);
                 showLoading(false);
             }

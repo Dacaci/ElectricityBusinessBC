@@ -10,6 +10,8 @@
     <title>Carte des Stations - Electricity Business</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -250,10 +252,12 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script>
         // Variables globales
         let map;
         let stationsLayer;
+        let ocmClusterLayer;
         let userLocation = null;
         let nearbyMode = false;
         
@@ -533,13 +537,10 @@
                 .then(data => {
                     const stations = Array.isArray(data) ? data : [];
                     
-                    stationsLayer.eachLayer(layer => {
-                        if (layer.options && layer.options.icon === ocmStationIcon) {
-                            stationsLayer.removeLayer(layer);
-                        }
-                    });
+                    // Purger la couche OCM avant d'ajouter
+                    ocmClusterLayer.clearLayers();
                     
-                    // Ajouter les stations OCM à la carte
+                    // Ajouter les stations OCM à la carte (cluster)
                     stations.forEach(station => {
                         // Gérer les deux formats possibles (backend standardisé ou format OpenChargeMap brut)
                         const lat = station.latitude || (station.AddressInfo && station.AddressInfo.Latitude);
@@ -549,7 +550,7 @@
                             const marker = L.marker([lat, lng], { icon: ocmStationIcon })
                                 .bindPopup(createOCMStationPopup(station));
                             
-                            stationsLayer.addLayer(marker);
+                            ocmClusterLayer.addLayer(marker);
                         }
                     });
                     
@@ -570,8 +571,14 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
             
-            // Groupe de marqueurs pour les stations
-            stationsLayer = L.layerGroup().addTo(map);
+            // Groupe de marqueurs
+            stationsLayer = L.layerGroup().addTo(map); // bornes internes
+            ocmClusterLayer = L.markerClusterGroup({
+                maxClusterRadius: 60,
+                disableClusteringAtZoom: 16,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false
+            }).addTo(map); // bornes OpenChargeMap
             
             loadAllStations();
             setupSearchForm();
@@ -632,22 +639,18 @@
                     .then(data => {
                         const stations = Array.isArray(data) ? data : [];
                         
-                        // Ajouter les stations OCM à la carte
+                        // Purger la couche OCM avant d'ajouter
+                        ocmClusterLayer.clearLayers();
+                        
+                        // Ajouter les stations OCM à la carte (cluster)
                         stations.forEach(station => {
                             const lat = station.latitude || (station.AddressInfo && station.AddressInfo.Latitude);
                             const lng = station.longitude || (station.AddressInfo && station.AddressInfo.Longitude);
                             
                             if (lat && lng) {
-                                const marker = L.marker([lat, lng], { 
-                                    icon: L.divIcon({
-                                        className: 'ocm-station-marker',
-                                        html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
-                                        iconSize: [20, 20],
-                                        iconAnchor: [10, 10]
-                                    })
-                                }).bindPopup('Station OpenChargeMap');
-                                
-                                stationsLayer.addLayer(marker);
+                                const marker = L.marker([lat, lng], { icon: ocmStationIcon })
+                                    .bindPopup(createOCMStationPopup(station));
+                                ocmClusterLayer.addLayer(marker);
                             }
                         });
                     })

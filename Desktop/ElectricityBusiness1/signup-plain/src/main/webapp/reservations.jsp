@@ -105,9 +105,7 @@
     <!-- Scripts -->
     <script src="js/jwt-utils.js?v=20251019171700"></script>
     <script>
-        console.log('=== RESERVATIONS.JSP VERSION 2025-10-19 17:17:00 CHARGÉE ===');
-        
-        // Variables globales
+                // Variables globales
         let reservations = [];
         let stations = [];
         let locations = [];
@@ -130,9 +128,10 @@
             try {
                 showLoading(true);
                 
-                // Charger les réservations, stations et lieux en parallèle
+                                const reservationsUrl = CURRENT_USER_ID ? 'http://localhost:8080/api/reservations/user/' + CURRENT_USER_ID : 'http://localhost:8080/api/reservations';
+                                // Charger les réservations, stations et lieux en parallèle
                 const [reservationsResponse, stationsResponse, locationsResponse] = await Promise.all([
-                    authenticatedFetch('http://localhost:8080/api/reservations'),
+                    authenticatedFetch(reservationsUrl),
                     authenticatedFetch('http://localhost:8080/api/stations'),
                     authenticatedFetch('http://localhost:8080/api/locations')
                 ]);
@@ -162,8 +161,7 @@
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement: ' + error.message);
+                                showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
         }
@@ -313,8 +311,7 @@
                 loadData();
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la confirmation: ' + error.message);
+                                showError('Erreur lors de la confirmation: ' + error.message);
             }
         }
         
@@ -343,8 +340,7 @@
                 loadData();
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de l\'annulation: ' + error.message);
+                                showError('Erreur lors de l\'annulation: ' + error.message);
             }
         }
         
@@ -369,8 +365,7 @@
                 loadData();
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la finalisation: ' + error.message);
+                                showError('Erreur lors de la finalisation: ' + error.message);
             }
         }
         
@@ -399,8 +394,7 @@
                 loadData();
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression: ' + error.message);
+                                showError('Erreur lors de la suppression: ' + error.message);
             }
         }
         

@@ -85,12 +85,7 @@
             // L'utilisateur sera redirigé automatiquement par requireAuth()
         } else {
         
-        console.log('=== LOCATIONS.JSP DEBUG ===');
-        console.log('CURRENT_USER_ID:', CURRENT_USER_ID);
-        console.log('Type:', typeof CURRENT_USER_ID);
-        console.log('===========================');
-        
-        } // Fermer le bloc else
+                                        } // Fermer le bloc else
         
         // ========== FONCTIONS GLOBALES (définies en dehors du bloc else) ==========
         
@@ -152,8 +147,7 @@
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement des données: ' + error.message);
+                                showError('Erreur lors du chargement des données: ' + error.message);
                 showLoading(false);
             }
         }
@@ -263,8 +257,7 @@
         async function deleteStation(stationId) {
             // Empêcher les clics multiples
             if (isDeletingStation) {
-                console.log('Suppression de borne déjà en cours');
-                return;
+                                return;
             }
             
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
@@ -293,22 +286,15 @@
                     throw new Error('Erreur lors de la suppression');
                 }
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression de la borne: ' + error.message);
+                                showError('Erreur lors de la suppression de la borne: ' + error.message);
                 isDeletingStation = false;
             }
         }
         
         async function deleteLocation(locationId) {
-            console.log('=== DELETE LOCATION ===');
-            console.log('locationId reçu:', locationId);
-            console.log('Type:', typeof locationId);
-            console.log('======================');
-            
-            // Empêcher les clics multiples
+                                                            // Empêcher les clics multiples
             if (isDeletingLocation) {
-                console.log('Suppression de lieu déjà en cours');
-                return;
+                                return;
             }
             
             // Vérifier si le lieu contient des bornes
@@ -329,9 +315,7 @@
             
             try {
                 const url = 'http://localhost:8080/api/locations/' + locationId;
-                console.log('URL de suppression:', url);
-                
-                const response = await fetch(url, {
+                                const response = await fetch(url, {
                     method: 'DELETE'
                 });
                 
@@ -354,8 +338,7 @@
                 }, 1000);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression: ' + error.message);
+                                showError('Erreur lors de la suppression: ' + error.message);
                 isDeletingLocation = false;
             }
         }
@@ -381,8 +364,7 @@
                 showSuccess('Média supprimé avec succès !');
                 loadLocationsAndStations();
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la suppression du média');
+                                showError('Erreur lors de la suppression du média');
             }
         }
         
@@ -445,8 +427,7 @@
                 closeMediaModal();
                 loadLocationsAndStations();
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de l\'ajout du média');
+                                showError('Erreur lors de l\'ajout du média');
             }
         }
         

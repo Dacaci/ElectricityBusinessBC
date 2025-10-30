@@ -1,23 +1,17 @@
 // Fonction de déconnexion
 function logout() {
-    console.log('=== DÉCONNEXION DÉMARRÉE ===');
-    alert('Déconnexion en cours...');
+        alert('Déconnexion en cours...');
     
-    console.log('=== NETTOYAGE COMPLET ===');
-    try {
+        try {
         localStorage.removeItem('authToken');
         localStorage.removeItem('authUser');
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
         localStorage.clear();
         sessionStorage.clear();
-        console.log('Storages vidés avec succès');
-        
-        console.log('Redirection vers login...');
-        window.location.replace('/login.jsp?message=logout');
+                        window.location.replace('/login.jsp?message=logout');
     } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error);
-        window.location.replace('/login.jsp?message=logout');
+                window.location.replace('/login.jsp?message=logout');
     }
 }
 
@@ -30,8 +24,7 @@ function getCurrentUserInfo() {
             return user;
         }
     } catch (error) {
-        console.error('Erreur lors de la récupération des infos utilisateur:', error);
-    }
+            }
     return null;
 }
 

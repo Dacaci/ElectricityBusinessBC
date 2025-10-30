@@ -101,9 +101,7 @@
         // Récupérer l'ID de l'utilisateur depuis le token JWT
         const CURRENT_USER_ID = getCurrentUserId();
         
-        console.log('User ID connecté:', CURRENT_USER_ID);
-        
-        document.getElementById('locationForm').addEventListener('submit', async function(e) {
+                document.getElementById('locationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
@@ -130,32 +128,24 @@
             try {
                 showLoading(true);
                 
-                console.log('Création du lieu avec les données:', locationData);
-                
-                const response = await authenticatedFetch('http://localhost:8080/api/locations', {
+                                const response = await authenticatedFetch('http://localhost:8080/api/locations', {
                     method: 'POST',
                     body: JSON.stringify(locationData)
                 });
                 
-                console.log('Réponse API status:', response.status);
-                
-                if (!response.ok) {
+                                if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('Erreur API:', errorText);
-                    throw new Error(errorText || 'Erreur lors de la création du lieu');
+                                        throw new Error(errorText || 'Erreur lors de la création du lieu');
                 }
                 
                 const createdLocation = await response.json();
-                console.log('Lieu créé:', createdLocation);
-                
-                showSuccess('Lieu créé avec succès !');
+                                showSuccess('Lieu créé avec succès !');
                 setTimeout(() => {
                     window.location.href = 'locations.jsp';
                 }, 1500);
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors de la création: ' + error.message);
+                                showError('Erreur lors de la création: ' + error.message);
                 showLoading(false);
             }
         });
@@ -176,9 +166,7 @@
                 // Utiliser la fonction améliorée avec Nominatim
                 const location = await getAccurateLocation();
                 
-                console.log('Position obtenue:', location);
-                
-                // Remplir les champs
+                                // Remplir les champs
                 document.getElementById('latitude').value = location.latitude.toFixed(6);
                 document.getElementById('longitude').value = location.longitude.toFixed(6);
                 
@@ -210,8 +198,7 @@
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur de géolocalisation:', error);
-                showError('Erreur : ' + error.message + '\nVeuillez saisir les coordonnées manuellement.');
+                                showError('Erreur : ' + error.message + '\nVeuillez saisir les coordonnées manuellement.');
                 btn.disabled = false;
                 btn.innerHTML = 'Utiliser ma position actuelle';
                 showLoading(false);
@@ -245,9 +232,7 @@
                 // Prendre le premier résultat (le plus pertinent)
                 const location = results[0];
                 
-                console.log('Adresse trouvée:', location);
-                
-                // Remplir les coordonnées
+                                // Remplir les coordonnées
                 document.getElementById('latitude').value = location.latitude.toFixed(6);
                 document.getElementById('longitude').value = location.longitude.toFixed(6);
                 
@@ -263,8 +248,7 @@
                 showLoading(false);
                 
             } catch (error) {
-                console.error('Erreur recherche adresse:', error);
-                showError('Erreur lors de la recherche d\'adresse : ' + error.message);
+                                showError('Erreur lors de la recherche d\'adresse : ' + error.message);
                 showLoading(false);
             }
         }
@@ -291,8 +275,7 @@
                     showLoading(false);
                 },
                 function(error) {
-                    console.error('Erreur de géolocalisation:', error);
-                    let errorMessage = 'Impossible d\'obtenir la position.';
+                                        let errorMessage = 'Impossible d\'obtenir la position.';
                     
                     switch(error.code) {
                         case error.PERMISSION_DENIED:

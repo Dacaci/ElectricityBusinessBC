@@ -27,6 +27,7 @@ public class StationService {
     private final StationRepository stationRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final com.eb.eb_backend.repository.PlugTypeRepository plugTypeRepository;
     
     public StationDto createStation(Long ownerId, StationDto stationDto) {
         User owner = userRepository.findById(ownerId)
@@ -54,11 +55,20 @@ public class StationService {
         station.setIsActive(stationDto.getIsActive() != null ? stationDto.getIsActive() : true);
         station.setStatus(stationDto.getStatus() != null ? stationDto.getStatus() : com.eb.eb_backend.entity.StationStatus.ACTIVE);
         station.setPower(stationDto.getPower());
-        // city, latitude, longitude viennent de location
+        // Coordonnées spécifiques à la borne (optionnelles). Si null, la carte utilisera celles du lieu
+        station.setLatitude(stationDto.getLatitude());
+        station.setLongitude(stationDto.getLongitude());
         station.setInstructions(stationDto.getInstructions());
         station.setOnFoot(stationDto.getOnFoot() != null ? stationDto.getOnFoot() : false);
         
         Station savedStation = stationRepository.save(station);
+        // Assigner TYPE2S par défaut si aucune prise renseignée
+        if (savedStation.getPlugTypes() == null || savedStation.getPlugTypes().isEmpty()) {
+            plugTypeRepository.findByName("TYPE2S").ifPresent(pt -> {
+                savedStation.getPlugTypes().add(pt);
+                stationRepository.save(savedStation);
+            });
+        }
         return new StationDto(savedStation);
     }
     

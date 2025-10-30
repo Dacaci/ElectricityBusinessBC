@@ -251,9 +251,7 @@
     <!-- Scripts -->
     <script src="js/jwt-utils.js?v=20251019"></script>
     <script>
-        console.log('=== DASHBOARD VERSION 2025-10-19 18:00 ===');
-        
-        let CURRENT_USER_ID = null;
+                let CURRENT_USER_ID = null;
         let allReservations = [];
         let allStations = [];
         let allLocations = [];
@@ -297,8 +295,7 @@
                 loadTreatedRequests();
                 
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur lors du chargement des données');
+                                showError('Erreur lors du chargement des données');
             }
         }
         
@@ -712,8 +709,7 @@
         }
         
         function logout() {
-            console.log('=== DÉCONNEXION ===');
-            alert('Déconnexion en cours...');
+                        alert('Déconnexion en cours...');
             localStorage.clear();
             sessionStorage.clear();
             window.location.replace('/login.jsp?message=logout');
