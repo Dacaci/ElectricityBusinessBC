@@ -36,3 +36,9 @@ logging:
 jwt:
   secret: mySecretKey123456789012345678901234567890
   expiration: 86400000 # 24 hours in milliseconds
+
+# OpenChargeMap API (lecture seule)
+openchargemap:
+  api:
+    url: https://api.openchargemap.io/v3/poi
+    key: # Vide par défaut - configurer via variable d'environnement en production

@@ -22,6 +22,9 @@ public class OpenChargeMapService {
     @Value("${openchargemap.api.url:https://api.openchargemap.io/v3/poi}")
     private String apiUrl;
     
+    @Value("${openchargemap.api.key:}")
+    private String apiKey;
+    
     /**
      * Récupère les bornes de recharge depuis OpenChargeMap dans une zone géographique
      * 
@@ -38,21 +41,23 @@ public class OpenChargeMapService {
                     .queryParam("latitude", latitude)
                     .queryParam("longitude", longitude)
                     .queryParam("distance", distance != null ? distance : 10)
-                    .queryParam("maxresults", maxResults != null ? Math.min(maxResults, 10000) : 10000)
-                    .queryParam("key", "bf16e0f8-2117-4dd4-b2a9-f5cdfcaa7eb4");
+                    .queryParam("maxresults", maxResults != null ? Math.min(maxResults, 10000) : 10000);
+            
+            // Ajouter la clé API seulement si elle est configurée
+            if (apiKey != null && !apiKey.isEmpty()) {
+                builder.queryParam("key", apiKey);
+            }
             
             String url = builder.toUriString();
-            log.info("Appel à OpenChargeMap: {}", url);
             
-            // L'API OpenChargeMap retourne {value: [...], Count: ...}
-            OpenChargeMapResponse apiResponse = restTemplate.getForObject(url, OpenChargeMapResponse.class);
+            // L'API OpenChargeMap retourne directement un tableau
+            List<Map<String, Object>> stations = restTemplate.getForObject(url, List.class);
             
-            if (apiResponse != null && apiResponse.getValue() != null) {
-                List<Map<String, Object>> stations = apiResponse.getValue();
+            if (stations != null) {
                 log.info("Nombre de stations récupérées depuis OpenChargeMap: {}", stations.size());
                 return stations;
             } else {
-                log.warn("Aucune station récupérée depuis OpenChargeMap ou format de réponse inattendu");
+                log.warn("Aucune station récupérée depuis OpenChargeMap");
                 return new ArrayList<>();
             }
             
