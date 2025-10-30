@@ -217,3 +217,35 @@ function validateAuthData() {
     
         return true;
 }
+
+/**
+ * Démarre la surveillance automatique de l'expiration du token
+ * Vérifie toutes les minutes si le token est expiré
+ */
+function startTokenExpirationMonitoring() {
+    setInterval(function() {
+        const token = getAuthToken();
+        if (token && isTokenExpired(token)) {
+            alert('Votre session a expiré. Vous allez être déconnecté.');
+            forceLogout();
+        }
+    }, 60000); // Vérifier toutes les minutes
+}
+
+/**
+ * Démarre automatiquement la surveillance de l'expiration du token quand le script est chargé
+ * Si on est sur une page protégée (pas login ou register), on démarre la surveillance
+ */
+(function() {
+    const currentPath = window.location.pathname;
+    const publicPages = ['/login.jsp', '/register.jsp', '/verify-success.jsp'];
+    const isPublicPage = publicPages.some(page => currentPath.includes(page));
+    
+    if (!isPublicPage) {
+        // Vérifier si un token existe avant de démarrer la surveillance
+        const token = getAuthToken();
+        if (token) {
+            startTokenExpirationMonitoring();
+        }
+    }
+})();

@@ -35,7 +35,7 @@ logging:
 # JWT Configuration
 jwt:
   secret: mySecretKey123456789012345678901234567890
-  expiration: 86400000 # 24 hours in milliseconds
+  expiration: 7200000 # 2 hours in milliseconds
 
 # OpenChargeMap API (lecture seule)
 openchargemap:

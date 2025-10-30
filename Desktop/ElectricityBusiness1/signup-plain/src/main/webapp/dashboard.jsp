@@ -272,6 +272,9 @@
                 document.getElementById('welcomeMessage').textContent = 'Bienvenue, ' + user.firstName + ' ' + user.lastName;
             }
             
+            // Démarrer la surveillance de l'expiration du token
+            startTokenExpirationMonitoring();
+            
             // Charger toutes les données au démarrage
             loadAllData();
         }
