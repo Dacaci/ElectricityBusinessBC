@@ -56,14 +56,14 @@
     <label><input id="customPosition" type="checkbox"> Position spécifique à la borne</label>
   </div>
 
-  <div class="row">
+  <div id="latitudeRow" class="row" style="display:none;">
     <label for="latitude">Latitude</label>
-    <input id="latitude" type="number" step="0.000001" placeholder="48.8566" style="display:none;">
+    <input id="latitude" type="number" step="0.000001" placeholder="48.8566">
   </div>
 
-  <div class="row">
+  <div id="longitudeRow" class="row" style="display:none;">
     <label for="longitude">Longitude</label>
-    <input id="longitude" type="number" step="0.000001" placeholder="2.3522" style="display:none;">
+    <input id="longitude" type="number" step="0.000001" placeholder="2.3522">
   </div>
 
   <div class="row">
@@ -102,8 +102,12 @@
     const custom = document.getElementById('customPosition');
     custom.addEventListener('change', () => {
       const show = custom.checked;
-      document.getElementById('latitude').style.display = show ? '' : 'none';
-      document.getElementById('longitude').style.display = show ? '' : 'none';
+      document.getElementById('latitudeRow').style.display = show ? '' : 'none';
+      document.getElementById('longitudeRow').style.display = show ? '' : 'none';
+      if (!show) {
+        document.getElementById('latitude').value = '';
+        document.getElementById('longitude').value = '';
+      }
     });
   });
 
@@ -208,6 +212,11 @@
     try {
       // Utiliser la fonction améliorée avec Nominatim
       const location = await getAccurateLocation();
+      
+      // Cocher automatiquement la case "Position spécifique"
+      document.getElementById('customPosition').checked = true;
+      document.getElementById('latitudeRow').style.display = '';
+      document.getElementById('longitudeRow').style.display = '';
       
       // Remplir les champs
       document.getElementById('latitude').value = location.latitude.toFixed(6);
