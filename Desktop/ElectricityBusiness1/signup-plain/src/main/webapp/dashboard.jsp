@@ -100,7 +100,6 @@
         <h1>Tableau de Bord - Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <span class="status-badge status-active">Actif</span>
             <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
@@ -271,9 +270,6 @@
             if (user) {
                 document.getElementById('welcomeMessage').textContent = 'Bienvenue, ' + user.firstName + ' ' + user.lastName;
             }
-            
-            // Démarrer la surveillance de l'expiration du token
-            startTokenExpirationMonitoring();
             
             // Charger toutes les données au démarrage
             loadAllData();

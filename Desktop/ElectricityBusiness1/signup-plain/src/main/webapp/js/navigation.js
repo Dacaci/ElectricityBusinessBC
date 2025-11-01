@@ -30,7 +30,6 @@ function renderHeader() {
         '<h1>Electricity Business</h1>' +
         '<div class="user-info">' +
             '<span>' + userName + '</span>' +
-            '<span class="status-badge status-active">Actif</span>' +
             '<a href="#" onclick="logout(); return false;">Déconnexion</a>' +
         '</div>' +
     '</div>';

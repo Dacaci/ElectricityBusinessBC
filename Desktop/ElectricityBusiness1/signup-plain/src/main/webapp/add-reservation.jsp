@@ -15,7 +15,6 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <span class="status-badge status-active">Actif</span>
             <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
