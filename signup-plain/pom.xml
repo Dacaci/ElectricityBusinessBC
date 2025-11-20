@@ -1,0 +1,117 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.eb</groupId>
+  <artifactId>signup-plain</artifactId>
+  <version>1.0.0</version>
+  <packaging>war</packaging>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <!-- API Servlet pour Tomcat 10+ (Jakarta) -->
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JDBC + pool + driver Postgres -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>5.1.0</version>
+    </dependency>
+
+    <!-- Hash mot de passe et code -->
+    <dependency>
+      <groupId>org.mindrot</groupId>
+      <artifactId>jbcrypt</artifactId>
+      <version>0.4</version>
+    </dependency>
+
+    <!-- Envoi d'e-mail -->
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+
+    <!-- JSTL pour JSP -->
+    <dependency>
+      <groupId>jakarta.servlet.jsp.jstl</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.web</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>signup-plain</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+      
+      <!-- Plugin Cargo pour déployer sur Tomcat -->
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven3-plugin</artifactId>
+        <version>1.10.10</version>
+        <configuration>
+          <container>
+            <containerId>tomcat10x</containerId>
+            <type>installed</type>
+            <home>${env.CATALINA_HOME}</home>
+          </container>
+          <configuration>
+            <type>existing</type>
+            <home>${env.CATALINA_HOME}</home>
+          </configuration>
+          <deployables>
+            <deployable>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>${project.artifactId}</artifactId>
+              <type>war</type>
+              <properties>
+                <context>signup-plain</context>
+              </properties>
+            </deployable>
+          </deployables>
+        </configuration>
+      </plugin>
+      
+      <!-- Plugin Jetty comme alternative -->
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>11.0.18</version>
+        <configuration>
+          <httpConnector>
+            <port>8081</port>
+          </httpConnector>
+          <webApp>
+            <contextPath>/signup-plain</contextPath>
+          </webApp>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

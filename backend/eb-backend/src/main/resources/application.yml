@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: electricity-business-api
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5433/eb
+    username: eb
+    password: eb
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.eb.eb_backend: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: DEBUG
+
+# JWT Configuration
+jwt:
+  secret: mySecretKey123456789012345678901234567890
+  expiration: 7200000 # 2 hours in milliseconds
+
+# OpenChargeMap API (lecture seule)
+openchargemap:
+  api:
+    url: https://api.openchargemap.io/v3/poi
+    key: bf16e0f8-2117-4dd4-b2a9-f5cdfcaa7eb4
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

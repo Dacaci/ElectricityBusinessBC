@@ -1,0 +1,7 @@
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" version="6.0">
+
+  <context-param><param-name>DB_URL</param-name><param-value>jdbc:postgresql://localhost:5432/eb</param-value></context-param>
+  <context-param><param-name>DB_USER</param-name><param-value>eb</param-value></context-param>
+  <context-param><param-name>DB_PASS</param-name><param-value>eb</param-value></context-param>
+
+</web-app>

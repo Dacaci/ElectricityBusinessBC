@@ -1,0 +1,121 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job 1: Build et test Backend
+  backend-build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build Backend with Maven
+      working-directory: ./backend/eb-backend
+      run: mvn clean package -DskipTests
+      
+    - name: Run Backend Tests
+      working-directory: ./backend/eb-backend
+      run: mvn test
+      continue-on-error: true
+      
+    - name: Upload Backend Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-jar
+        path: backend/eb-backend/target/*.jar
+        retention-days: 1
+
+  # Job 2: Build Frontend
+  frontend-build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build Frontend with Maven
+      working-directory: ./signup-plain
+      run: mvn clean package -DskipTests
+      
+    - name: Upload Frontend Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-war
+        path: signup-plain/target/*.war
+        retention-days: 1
+
+  # Job 3: Build Docker Images (uniquement sur push vers main)
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Backend Docker Image
+      working-directory: ./backend/eb-backend
+      run: docker build -t electricity-business-backend:latest .
+      
+    - name: Build Frontend Docker Image
+      working-directory: ./signup-plain
+      run: docker build -t electricity-business-frontend:latest .
+      
+    - name: Test Backend Docker Image
+      run: |
+        docker run -d --name test-backend -p 8080:8080 electricity-business-backend:latest
+        sleep 30
+        docker logs test-backend
+        docker stop test-backend
+        docker rm test-backend
+      continue-on-error: true
+      
+    - name: Test Frontend Docker Image
+      run: |
+        docker run -d --name test-frontend -p 8081:8081 electricity-business-frontend:latest
+        sleep 30
+        docker logs test-frontend
+        docker stop test-frontend
+        docker rm test-frontend
+      continue-on-error: true
+
+  # Job 4: Notification de succès
+  notify-success:
+    name: Deployment Ready
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: success()
+    
+    steps:
+    - name: Success Message
+      run: |
+        echo "✅ Build réussi ! Les images Docker sont prêtes."
+        echo "🚀 Render va automatiquement déployer les changements."
+

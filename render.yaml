@@ -1,0 +1,57 @@
+services:
+  # Backend Service
+  - type: web
+    name: electricity-business-backend
+    runtime: docker
+    dockerfilePath: ./backend/eb-backend/Dockerfile
+    dockerContext: ./backend/eb-backend
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: electricity-business-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: electricity-business-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: electricity-business-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OPENCHARGEMAP_API_KEY
+        value: bf16e0f8-2117-4dd4-b2a9-f5cdfcaa7eb4
+      - key: MAIL_HOST
+        value: sandbox.smtp.mailtrap.io
+      - key: MAIL_PORT
+        value: 2525
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+
+  # Frontend Service
+  - type: web
+    name: electricity-business-frontend
+    runtime: docker
+    dockerfilePath: ./signup-plain/Dockerfile
+    dockerContext: ./signup-plain
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: electricity-business-backend
+          property: url
+    autoDeploy: true
+
+databases:
+  - name: electricity-business-db
+    databaseName: electricity_business
+    user: eb_user
+    plan: free
+
