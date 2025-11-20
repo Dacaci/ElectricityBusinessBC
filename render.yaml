@@ -46,7 +46,7 @@ services:
         fromService:
           type: web
           name: electricity-business-backend
-          property: url
+          property: host
     autoDeploy: true
 
 databases:
