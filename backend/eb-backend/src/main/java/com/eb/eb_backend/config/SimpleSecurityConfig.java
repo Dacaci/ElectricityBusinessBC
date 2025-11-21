@@ -33,6 +33,8 @@ public class SimpleSecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Autoriser explicitement OPTIONS (preflight CORS) - doit être avant anyRequest()
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                // Autoriser les endpoints d'authentification
+                .requestMatchers("/api/auth/**").permitAll()
                 // Pour les tests, on permet tout
                 .anyRequest().permitAll()
             )
