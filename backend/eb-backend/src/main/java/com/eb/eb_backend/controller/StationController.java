@@ -60,8 +60,13 @@ public class StationController {
             @RequestParam(required = false, defaultValue = "10") Integer distance,
             @RequestParam(required = false, defaultValue = "100") Integer maxResults) {
         try {
+            // Limiter maxResults pour éviter les problèmes de mémoire
+            int limitedMaxResults = Math.min(maxResults != null ? maxResults : 100, 200);
+            // Limiter aussi la distance pour éviter trop de résultats
+            int limitedDistance = Math.min(distance != null ? distance : 10, 50);
+            
             List<Map<String, Object>> stations = openChargeMapService.getChargingStations(
-                latitude, longitude, distance, maxResults);
+                latitude, longitude, limitedDistance, limitedMaxResults);
             return ResponseEntity.ok(stations);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

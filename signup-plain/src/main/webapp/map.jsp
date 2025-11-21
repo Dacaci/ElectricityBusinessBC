@@ -612,18 +612,19 @@
                 let distance = 10;
                 let maxResults = 100;
                 
+                // Limiter les valeurs pour éviter les problèmes de mémoire côté serveur
                 if (zoom < 8) {
-                    distance = 500;
-                    maxResults = 2000;
-                } else if (zoom < 10) {
-                    distance = 200;
-                    maxResults = 1000;
-                } else if (zoom < 12) {
-                    distance = 100;
-                    maxResults = 500;
-                } else {
                     distance = 50;
                     maxResults = 200;
+                } else if (zoom < 10) {
+                    distance = 30;
+                    maxResults = 150;
+                } else if (zoom < 12) {
+                    distance = 20;
+                    maxResults = 100;
+                } else {
+                    distance = 10;
+                    maxResults = 50;
                 }
                 
                 const apiBase = window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080';

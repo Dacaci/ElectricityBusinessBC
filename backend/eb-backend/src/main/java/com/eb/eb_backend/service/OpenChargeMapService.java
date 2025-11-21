@@ -37,11 +37,16 @@ public class OpenChargeMapService {
     public List<Map<String, Object>> getChargingStations(BigDecimal latitude, BigDecimal longitude, 
                                                           Integer distance, Integer maxResults) {
         try {
+            // Limiter maxResults pour éviter les problèmes de mémoire (max 200)
+            int limitedMaxResults = Math.min(maxResults != null ? maxResults : 100, 200);
+            // Limiter aussi la distance (max 50 km)
+            int limitedDistance = Math.min(distance != null ? distance : 10, 50);
+            
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(apiUrl)
                     .queryParam("latitude", latitude)
                     .queryParam("longitude", longitude)
-                    .queryParam("distance", distance != null ? distance : 10)
-                    .queryParam("maxresults", maxResults != null ? Math.min(maxResults, 10000) : 10000);
+                    .queryParam("distance", limitedDistance)
+                    .queryParam("maxresults", limitedMaxResults);
             
             // Ajouter la clé API seulement si elle est configurée
             if (apiKey != null && !apiKey.isEmpty()) {
