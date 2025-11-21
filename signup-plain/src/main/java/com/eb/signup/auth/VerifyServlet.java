@@ -16,7 +16,7 @@ public class VerifyServlet extends HttpServlet {
   @Override public void init() {
     // Créer la DataSource directement
     var cfg = new com.zaxxer.hikari.HikariConfig();
-    cfg.setJdbcUrl(envOr("DB_URL", "jdbc:postgresql://172.17.0.1:5432/eb"));
+    cfg.setJdbcUrl(getDbUrl());
     cfg.setUsername(envOr("DB_USER", "eb"));
     cfg.setPassword(envOr("DB_PASS", "eb"));
     cfg.setDriverClassName("org.postgresql.Driver");
@@ -90,5 +90,22 @@ public class VerifyServlet extends HttpServlet {
   private static String envOr(String key, String defVal) {
     var v = System.getenv(key);
     return (v == null || v.isBlank()) ? defVal : v;
+  }
+  
+  private static String getDbUrl() {
+    // Utiliser DB_URL directement s'il existe
+    String dbUrl = System.getenv("DB_URL");
+    if (dbUrl != null && !dbUrl.isBlank()) {
+      // S'assurer que l'URL commence par jdbc: si nécessaire
+      if (!dbUrl.startsWith("jdbc:")) {
+        return "jdbc:" + dbUrl;
+      }
+      return dbUrl;
+    }
+    // Sinon construire depuis les variables séparées
+    String host = envOr("DB_HOST", "172.17.0.1");
+    String port = envOr("DB_PORT", "5432");
+    String name = envOr("DB_NAME", "eb");
+    return String.format("jdbc:postgresql://%s:%s/%s", host, port, name);
   }
 }

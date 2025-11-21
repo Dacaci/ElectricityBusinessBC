@@ -55,6 +55,26 @@ services:
           type: web
           name: electricity-business-backend
           property: host
+      - key: DB_HOST
+        fromDatabase:
+          name: electricity-business-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: electricity-business-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: electricity-business-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: electricity-business-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: electricity-business-db
+          property: password
     autoDeploy: true
 
 databases:
