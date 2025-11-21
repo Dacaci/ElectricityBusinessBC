@@ -8,10 +8,26 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: DATABASE_URL
+      - key: DATABASE_HOST
         fromDatabase:
           name: electricity-business-db
-          property: connectionString
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: electricity-business-db
+          property: port
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: electricity-business-db
+          property: database
+      - key: DATABASE_USER
+        fromDatabase:
+          name: electricity-business-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: electricity-business-db
+          property: password
       - key: JWT_SECRET
         generateValue: true
       - key: OPENCHARGEMAP_API_KEY
