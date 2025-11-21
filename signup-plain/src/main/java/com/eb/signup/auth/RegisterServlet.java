@@ -143,7 +143,7 @@ public class RegisterServlet extends HttpServlet {
     // Sinon construire depuis les variables séparées
     String host = envOr("DB_HOST", "172.17.0.1");
     String port = envOr("DB_PORT", "5432");
-    String name = envOr("DB_NAME", "eb");
+    String name = envOr("DB_NAME", "electricity_business_avmm");
     return String.format("jdbc:postgresql://%s:%s/%s", host, port, name);
   }
 }
