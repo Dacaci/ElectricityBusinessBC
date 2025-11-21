@@ -147,7 +147,7 @@
             console.log('🔄 Login avec:', email);
             
             try {
-                const response = await fetch(apiBaseUrl + '/api/auth/login', {
+                const response = await fetch(window.API_BASE_URL + '/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
