@@ -138,11 +138,8 @@
 
     <script src="js/config.js"></script>
     <script>
-        // Utiliser la configuration globale depuis window.BACKEND_URL (injecté par backend-config.jsp)
-        const API_BASE_URL = window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080';
-        
-        console.log('🔧 Backend URL:', API_BASE_URL);
-        
+        // API_BASE_URL est déjà défini dans config.js comme window.API_BASE_URL
+        // On l'utilise directement sans redéclaration
         async function handleLogin() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -150,7 +147,7 @@
             console.log('🔄 Login avec:', email);
             
             try {
-                const response = await fetch(API_BASE_URL + '/api/auth/login', {
+                const response = await fetch(apiBaseUrl + '/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
