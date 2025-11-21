@@ -138,8 +138,7 @@ async function authenticatedFetch(url, options = {}) {
     
     const response = await fetch(url, {
         ...options,
-        headers,
-        credentials: 'include'
+        headers
     });
     
     // Si la réponse est 401 (Unauthorized), déconnecter l'utilisateur
