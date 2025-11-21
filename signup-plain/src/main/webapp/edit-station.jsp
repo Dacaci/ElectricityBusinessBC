@@ -1,4 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="includes/backend-config.jsp" %>
+<%
+    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
+    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
+        backendUrlForCsp = "http://localhost:8080";
+    }
+%>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier une Borne - Electricity Business</title>
     <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 https://electricity-business-backend-z373.onrender.com; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 <%= backendUrlForCsp %>; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>
     <div class="header">
