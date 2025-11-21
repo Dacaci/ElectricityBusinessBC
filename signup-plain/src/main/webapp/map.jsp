@@ -517,7 +517,8 @@
                 // Ignorer les erreurs
             }
             
-            const url = `${window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080'}/api/stations/external?latitude=${lat}&longitude=${lng}&distance=50&maxResults=100`;
+            // Limiter les valeurs pour éviter les problèmes de mémoire
+            const url = `${window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080'}/api/stations/external?latitude=${lat}&longitude=${lng}&distance=20&maxResults=100`;
             showLoading(true);
             
             fetch(url)
