@@ -2,8 +2,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="includes/backend-config.jsp" %>
 <%
-    String backendUrl = (String) request.getAttribute("BACKEND_URL");
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrl + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
+    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
+    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
+    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
+        backendUrlForCsp = "http://localhost:8080";
+    }
+    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
     response.setHeader("Content-Security-Policy", csp);
 %>
 <!DOCTYPE html>
@@ -16,7 +20,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 <%= backendUrl %>; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 <%= backendUrlForCsp %>; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>
     <div class="header">

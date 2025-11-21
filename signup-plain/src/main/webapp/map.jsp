@@ -3,8 +3,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ include file="includes/backend-config.jsp" %>
 <%
-    String backendUrl = (String) request.getAttribute("BACKEND_URL");
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrl + " https://unpkg.com https://api.openchargemap.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; font-src 'self' data:;";
+    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
+    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
+    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
+        backendUrlForCsp = "http://localhost:8080";
+    }
+    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + " https://unpkg.com https://api.openchargemap.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; font-src 'self' data:;";
     response.setHeader("Content-Security-Policy", csp);
 %>
 <!DOCTYPE html>

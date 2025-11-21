@@ -1,8 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ include file="includes/backend-config.jsp" %>
 <%
-    String backendUrl = (String) request.getAttribute("BACKEND_URL");
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrl + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
+    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
+    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
+    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
+        backendUrlForCsp = "http://localhost:8080";
+    }
+    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
     response.setHeader("Content-Security-Policy", csp);
 %>
 <!DOCTYPE html>
