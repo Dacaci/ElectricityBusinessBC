@@ -31,7 +31,7 @@ public class SimpleSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Autoriser explicitement OPTIONS (preflight CORS)
+                // Autoriser explicitement OPTIONS (preflight CORS) - doit être avant anyRequest()
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 // Pour les tests, on permet tout
                 .anyRequest().permitAll()
@@ -44,8 +44,9 @@ public class SimpleSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Autoriser toutes les origines avec pattern (nécessaire pour Spring Security)
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Autoriser toutes les origines (pour le déploiement sur Render)
+        // Utiliser setAllowedOrigins avec * (compatible avec allowCredentials false)
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
