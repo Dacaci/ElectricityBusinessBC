@@ -1,6 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ include file="includes/backend-config.jsp" %>
 <%
-    response.setHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 https://electricity-business-backend-z373.onrender.com; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
+    String backendUrl = (String) request.getAttribute("BACKEND_URL");
+    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrl + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
+    response.setHeader("Content-Security-Policy", csp);
 %>
 <!DOCTYPE html>
 <html>
@@ -128,11 +131,10 @@
         </div>
     </div>
 
+    <script src="js/config.js"></script>
     <script>
-        // Version ultra-simple sans dépendances
-        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? 'http://localhost:8080'
-            : 'https://electricity-business-backend-z373.onrender.com';
+        // Utiliser la configuration globale depuis window.BACKEND_URL (injecté par backend-config.jsp)
+        const API_BASE_URL = window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080';
         
         console.log('🔧 Backend URL:', API_BASE_URL);
         

@@ -1,8 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="com.eb.signup.user.User" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="includes/backend-config.jsp" %>
 <%
-    response.setHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 https://electricity-business-backend-z373.onrender.com https://unpkg.com https://api.openchargemap.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; font-src 'self' data:;");
+    String backendUrl = (String) request.getAttribute("BACKEND_URL");
+    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrl + " https://unpkg.com https://api.openchargemap.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; font-src 'self' data:;";
+    response.setHeader("Content-Security-Policy", csp);
 %>
 <!DOCTYPE html>
 <html>
@@ -288,7 +291,7 @@
             const currentZoom = keepMapPosition ? map.getZoom() : null;
             
             try {
-                const response = await fetch('https://electricity-business-backend-z373.onrender.com/api/stations/map');
+                const response = await fetch((window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080') + '/api/stations/map');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -404,7 +407,7 @@
             stationsLayer.clearLayers();
             
             try {
-                const response = await fetch(`https://electricity-business-backend-z373.onrender.com/api/stations/nearby?latitude=${lat}&longitude=${lng}&radiusKm=${radius}`);
+                const response = await fetch(`${window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080'}/api/stations/nearby?latitude=${lat}&longitude=${lng}&radiusKm=${radius}`);
                 
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
@@ -510,7 +513,7 @@
                 // Ignorer les erreurs
             }
             
-            const url = `https://electricity-business-backend-z373.onrender.com/api/stations/external?latitude=${lat}&longitude=${lng}&distance=50&maxResults=100`;
+            const url = `${window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080'}/api/stations/external?latitude=${lat}&longitude=${lng}&distance=50&maxResults=100`;
             showLoading(true);
             
             fetch(url)
@@ -619,7 +622,8 @@
                     maxResults = 200;
                 }
                 
-                const url = 'https://electricity-business-backend-z373.onrender.com/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
+                const apiBase = window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080';
+                const url = apiBase + '/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
                 
                 fetch(url)
                     .then(response => {
