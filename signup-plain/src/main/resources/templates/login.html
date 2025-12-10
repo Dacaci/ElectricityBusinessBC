@@ -138,6 +138,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',  // IMPORTANT: Pour recevoir le cookie HTTPOnly
                     body: JSON.stringify({ 
                         email: email, 
                         password: password 
@@ -166,13 +167,17 @@
                 
                 const data = await response.json();
                 
-                if (data.token) {
-                    localStorage.setItem('authToken', data.token);
+                // Avec les cookies HTTPOnly, le token n'est plus dans la réponse JSON
+                // Il est automatiquement stocké dans un cookie par le serveur
+                if (data.user) {
+                    // Stocker seulement les infos utilisateur (le token est dans le cookie HTTPOnly)
                     localStorage.setItem('authUser', JSON.stringify(data.user));
+                    console.log('✅ Connexion réussie ! Cookie JWT reçu automatiquement.');
                     alert('Connexion réussie !');
                     window.location.href = '/dashboard';
                 } else {
-                    alert('Erreur: Pas de token');
+                    alert('Erreur: Données utilisateur manquantes');
+                    console.error('Réponse du serveur:', data);
                 }
                 
             } catch (error) {
