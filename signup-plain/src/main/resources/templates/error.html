@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur - Electricity Business</title>
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .error-code {
+            font-size: 72px;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .error-description {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .error-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .error-actions a {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .error-actions a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code" th:text="${errorCode}">404</div>
+        <h1 class="error-message" th:text="${errorMessage}">Page non trouvée</h1>
+        <p class="error-description" th:text="${errorDescription}">La page que vous recherchez n'existe pas.</p>
+        <div class="error-actions">
+            <a th:href="@{/}">Accueil</a>
+            <a th:href="@{/login}">Connexion</a>
+        </div>
+    </div>
+</body>
+</html>
+

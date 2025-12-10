@@ -1,38 +1,33 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-%>
+
+<div th:replace="~{includes/backend-config :: backend-config}"></div>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarifs de la Borne - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 <%= backendUrlForCsp %>; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 ; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>
     <div class="header">
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link active">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">RÃ©server</a>
-        <a href="reservations.jsp" class="nav-link">Mes rÃ©servations</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link active">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
     
     <div class="container">
@@ -53,13 +48,13 @@
                 
                 <form id="ratesForm">
                     <div class="form-group">
-                        <label for="hourlyRate">Tarif horaire (â‚¬/h) <span style="color: #ef4444;">*</span></label>
+                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
                         <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
-                        <small style="color: #64748b;">Le tarif actuel est appliquÃ© Ã  toutes les nouvelles rÃ©servations</small>
+                        <small style="color: #64748b;">Le tarif actuel est appliqué à toutes les nouvelles réservations</small>
                     </div>
                     
                     <div class="actions" style="margin-top: 24px;">
-                        <a href="locations.jsp" class="btn btn-secondary">Retour</a>
+                        <a th:href="@{/locations}" class="btn btn-secondary">Retour</a>
                         <button type="submit" class="btn btn-primary">Enregistrer le tarif</button>
                     </div>
                 </form>
@@ -67,24 +62,24 @@
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
         let stationId = null;
         
-        // VÃ©rifier l'authentification
+        // Vérifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirigÃ© automatiquement
+            // L'utilisateur sera redirigé automatiquement
         } else {
         
-        // RÃ©cupÃ©rer l'ID de la borne depuis l'URL
+        // Récupérer l'ID de la borne depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         stationId = urlParams.get('id');
         
         if (!stationId) {
             showError('ID de la borne manquant');
             setTimeout(function() {
-                window.location.href = 'locations.jsp';
+                window.location.href = '//locations'';
             }, 2000);
         } else {
             loadStation();
@@ -97,7 +92,7 @@
                 const response = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId);
                 
                 if (!response.ok) {
-                    throw new Error('Borne non trouvÃ©e');
+                    throw new Error('Borne non trouvée');
                 }
                 
                 const station = await response.json();
@@ -146,9 +141,9 @@
                     throw new Error('Erreur lors de la modification du tarif');
                 }
                 
-                showSuccess('Tarif modifiÃ© avec succÃ¨s !');
+                showSuccess('Tarif modifié avec succès !');
                 setTimeout(function() {
-                    window.location.href = 'locations.jsp';
+                    window.location.href = '//locations'';
                 }, 1500);
                 
             } catch (error) {
@@ -174,7 +169,7 @@
         
         } // Fermer le bloc else
     </script>
-    <script src="js/auth.js"></script>
+    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>
 

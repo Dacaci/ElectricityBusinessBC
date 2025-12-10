@@ -1,20 +1,10 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
-    // On récupère juste la valeur depuis l'attribut pour la CSP
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080"; // fallback
-    }
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
-    response.setHeader("Content-Security-Policy", csp);
-%>
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
     <style>
         body {
             background-color: #f5f7fa;
@@ -98,29 +88,25 @@
     </style>
 </head>
 <body>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
+    
     <div class="login-container">
         <div class="login-header">
             <h1>Electricity Business</h1>
             <p>Connectez-vous à votre compte</p>
         </div>
         
-        <% if (request.getAttribute("error") != null) { %>
-            <div class="message error">
-                <%= request.getAttribute("error") %>
-            </div>
-        <% } %>
+        <div th:if="${error != null}" class="message error" th:text="${error}"></div>
         
-        <% if ("logout".equals(request.getParameter("message"))) { %>
-            <div class="message success">
-                Déconnexion réussie. À bientôt !
-            </div>
-        <% } %>
+        <div th:if="${param.message != null and param.message[0] == 'logout'}" class="message success">
+            Déconnexion réussie. À bientôt !
+        </div>
         
         <form id="loginForm" onsubmit="return false;">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" class="form-control" required 
-                       value="<%= request.getParameter("email") != null ? request.getParameter("email") : "" %>">
+                       th:value="${param.email != null ? param.email[0] : ''}">
             </div>
             
             <div class="form-group">
@@ -132,11 +118,11 @@
         </form>
         
         <div class="links">
-            <a href="register.jsp">Créer un compte</a>
+            <a th:href="@{/register}">Créer un compte</a>
         </div>
     </div>
 
-    <script src="js/config.js"></script>
+    <script th:src="@{/js/config.js}"></script>
     <script>
         // API_BASE_URL est déjà défini dans config.js comme window.API_BASE_URL
         // On l'utilise directement sans redéclaration
@@ -184,7 +170,7 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
                     alert('Connexion réussie !');
-                    window.location.href = '/dashboard.jsp';
+                    window.location.href = '/dashboard';
                 } else {
                     alert('Erreur: Pas de token');
                 }

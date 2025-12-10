@@ -1,21 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-%>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Lieu - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' <%= backendUrlForCsp %> http://localhost:8080 https://nominatim.openstreetmap.org; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
 </head>
 <body>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
+    
         <div class="header">
         <h1>Electricity Business</h1>
         <div class="user-info">
@@ -25,14 +18,14 @@
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link active">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
-        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link active">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
     
     <div class="container">
@@ -87,7 +80,7 @@
                     </div>
                     
                     <div class="form-actions">
-                        <a href="locations.jsp" class="btn btn-secondary">Annuler</a>
+                        <a th:href="@{/locations}" class="btn btn-secondary">Annuler</a>
                         <button type="submit" class="btn" id="submitBtn">Créer le lieu</button>
                     </div>
                 </form>
@@ -96,9 +89,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js"></script>
-    <script src="js/nominatim-utils.js"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
+    <script th:src="@{/js/nominatim-utils.js}"></script>
     <script>
         // Vérifier l'authentification
         if (!requireAuth()) {
@@ -148,7 +141,7 @@
                 const createdLocation = await response.json();
                                 showSuccess('Lieu créé avec succès !');
                 setTimeout(() => {
-                    window.location.href = 'locations.jsp';
+                    window.location.href = '/locations';
                 }, 1500);
                 
             } catch (error) {
@@ -336,6 +329,6 @@
         
         } // Fermer le bloc else
     </script>
-    <script src="js/auth.js"></script>
+    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>

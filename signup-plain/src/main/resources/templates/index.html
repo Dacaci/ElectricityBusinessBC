@@ -1,6 +1,5 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Electricity Business - Accueil</title>
     <style>
@@ -33,19 +32,19 @@
             <div class="nav-card">
                 <h3>S'inscrire</h3>
                 <p>Créez votre compte pour accéder à la plateforme</p>
-                <a href="register">S'inscrire</a>
+                <a th:href="@{/register}">S'inscrire</a>
             </div>
             
             <div class="nav-card">
                 <h3>Vérifier le compte</h3>
                 <p>Activez votre compte avec le code reçu par email</p>
-                <a href="verify">Vérifier</a>
+                <a th:href="@{/verify}">Vérifier</a>
             </div>
             
             <div class="nav-card">
                 <h3>Se connecter</h3>
                 <p>Accédez à votre tableau de bord</p>
-                <a href="login">Se connecter</a>
+                <a th:href="@{/login}">Se connecter</a>
             </div>
         </div>
         

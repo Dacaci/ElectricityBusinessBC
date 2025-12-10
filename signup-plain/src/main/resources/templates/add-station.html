@@ -1,19 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-%>
+
+<div th:replace="~{includes/backend-config :: backend-config}"></div>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ajouter une Borne - Electricity Business</title>
-<link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 <%= backendUrlForCsp %> https://nominatim.openstreetmap.org; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+<link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080  https://nominatim.openstreetmap.org; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>
     <div class="header">
@@ -25,14 +20,14 @@
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link active">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
-        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link active">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
 
 <div class="container">
@@ -90,9 +85,9 @@
 </div>
 
 <!-- Scripts -->
-<script src="js/config.js"></script>
-<script src="js/jwt-utils.js"></script>
-<script src="js/nominatim-utils.js"></script>
+<script th:src="@{/js/config.js}"></script>
+<script th:src="@{/js/jwt-utils.js}"></script>
+<script th:src="@{/js/nominatim-utils.js}"></script>
 <script>
   // Vérifier l'authentification
   if (!requireAuth()) {
@@ -130,8 +125,8 @@
         // Afficher tous les lieux (le backend vérifie la propriété lors de la création)
         const opt = document.createElement('option');
         opt.value = String(loc.id);
-        const lat = loc.latitude != null ? Number(loc.latitude).toFixed(6) : '—';
-        const lng = loc.longitude != null ? Number(loc.longitude).toFixed(6) : '—';
+        const lat = loc.latitude != null ? Number(loc.latitude).toFixed(6) : '?';
+        const lng = loc.longitude != null ? Number(loc.longitude).toFixed(6) : '?';
         opt.textContent = (loc.label || 'Lieu') + ` (lat:${lat}, lng:${lng})`;
         select.appendChild(opt);
       }
@@ -202,7 +197,7 @@
       }
 
       showMsg('Borne créée avec succès.', false);
-      setTimeout(() => { window.location.href = 'stations.jsp'; }, 1200);
+      setTimeout(() => { window.location.href = '/stations'; }, 1200);
     } catch (e) {
       showMsg('Erreur réseau. Veuillez réessayer.', true);
     }
@@ -261,6 +256,6 @@
   
   } // Fermer le bloc else
 </script>
-<script src="js/auth.js"></script>
+<script th:src="@{/js/auth.js}"></script>
 </body>
 </html>

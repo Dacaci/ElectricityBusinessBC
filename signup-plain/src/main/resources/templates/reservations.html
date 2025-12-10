@@ -1,21 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
-    response.setHeader("Content-Security-Policy", csp);
-%>
+﻿
+
+<div th:replace="~{includes/backend-config :: backend-config}"></div>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Réservations - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
 <body>
     <div class="header">
@@ -27,14 +20,14 @@
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
-        <a href="reservations.jsp" class="nav-link active">Mes réservations</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link active">Mes réservations</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
     
     <div class="container">
@@ -42,7 +35,7 @@
         <div class="content">
             <div class="actions">
                 <div>
-                    <a href="add-reservation.jsp" class="btn">Nouvelle réservation</a>
+                    <a th:href="@{/add-reservation}" class="btn">Nouvelle réservation</a>
                 </div>
                 <div class="filters">
                     <div class="filter-group">
@@ -102,14 +95,14 @@
             <div id="noReservationsMessage" class="no-reservations" style="display: none;">
                 <h3>Aucune réservation trouvée</h3>
                 <p>Commencez par créer votre première réservation.</p>
-                <a href="add-reservation.jsp" class="btn" style="margin-top: 15px;">Nouvelle réservation</a>
+                <a th:href="@{/add-reservation}" class="btn" style="margin-top: 15px;">Nouvelle réservation</a>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js?v=20251019171700"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js?v=20251019171700}"></script>
     <script>
                 // Variables globales
         let reservations = [];
@@ -194,17 +187,17 @@
                 
                 return `
                     <tr>
-                        <td>#\${reservation.id}</td>
-                        <td>\${userFirstName} \${userLastName}</td>
-                        <td>\${stationName}</td>
-                        <td>\${locationLabel}</td>
-                        <td>\${formatDateTime(reservation.startTime)}</td>
-                        <td>\${formatDateTime(reservation.endTime)}</td>
-                        <td><span class="status-badge status-\${reservation.status.toLowerCase()}">\${getStatusLabel(reservation.status)}</span></td>
-                        <td>\${reservation.totalAmount} €</td>
+                        <td>#${reservation.id}</td>
+                        <td>${userFirstName} ${userLastName}</td>
+                        <td>${stationName}</td>
+                        <td>${locationLabel}</td>
+                        <td>${formatDateTime(reservation.startTime)}</td>
+                        <td>${formatDateTime(reservation.endTime)}</td>
+                        <td><span class="status-badge status-${reservation.status.toLowerCase()}">${getStatusLabel(reservation.status)}</span></td>
+                        <td>${reservation.totalAmount} €</td>
                         <td>
                             <div class="reservation-actions">
-                                \${getActionButtons(reservation)}
+                                ${getActionButtons(reservation)}
                             </div>
                         </td>
                     </tr>
@@ -416,7 +409,7 @@
         
         function showError(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="error">${message}</div>`;
+            container.innerHTML = '<div class="error">' + message + '</div>';
             setTimeout(() => {
                 container.innerHTML = '';
             }, 5000);
@@ -424,7 +417,7 @@
         
         function showSuccess(message) {
             const container = document.getElementById('messageContainer');
-            container.innerHTML = `<div class="success">${message}</div>`;
+            container.innerHTML = '<div class="success">' + message + '</div>';
             setTimeout(() => {
                 container.innerHTML = '';
             }, 3000);
@@ -440,11 +433,7 @@
         
         } // Fin du bloc else
     </script>
-    <script src="js/auth.js"></script>
+    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>
-
-
-
-
 

@@ -1,19 +1,8 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
-    response.setHeader("Content-Security-Policy", csp);
-%>
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Tableau de bord - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
     <style>
         /* Styles spécifiques au dashboard uniquement */
         .section { 
@@ -103,6 +92,8 @@
     </style>
 </head>
 <body>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
+    
     <div class="header">
         <h1>Tableau de Bord - Electricity Business</h1>
         <div class="user-info">
@@ -112,15 +103,15 @@
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link active">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">Réserver une borne</a>
-        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
-        <a href="vehicles.jsp" class="nav-link">Mes véhicules</a>
-        <a href="map.jsp" class="nav-link">Carte des bornes</a>
+        <a th:href="@{/dashboard}" class="nav-link active">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver une borne</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/vehicles}" class="nav-link">Mes véhicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
     
     <div class="container">
@@ -131,7 +122,7 @@
         <div class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 class="section-title" style="margin-bottom: 0;">Mes réservations en cours</h2>
-                <a href="add-reservation.jsp" class="btn btn-primary">Effectuer une réservation</a>
+                <a th:href="@{/add-reservation}" class="btn btn-primary">Effectuer une réservation</a>
             </div>
             <div id="currentReservationsLoading" class="loading">Chargement...</div>
             <div id="currentReservationsContainer" style="display: none;">
@@ -194,7 +185,7 @@
         <!-- Lieux de recharge -->
         <div class="section">
             <h2 class="section-title">Lieux de recharge</h2>
-            <button class="btn btn-success" onclick="window.location.href='add-location.jsp'" style="margin-bottom: 15px;">
+            <button class="btn btn-success" onclick="window.location.href='/add-location'" style="margin-bottom: 15px;">
                 Ajouter un lieu
             </button>
             <div id="locationsLoading" class="loading">Chargement...</div>
@@ -257,8 +248,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js?v=20251019"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
                 let CURRENT_USER_ID = null;
         let allReservations = [];
@@ -446,8 +437,8 @@
                         ).join('') +
                     '</div>' +
                     '<div class="location-actions">' +
-                        '<button class="btn btn-primary" onclick="window.location.href=\'edit-location.jsp?id=' + location.id + '\'">Modifier</button>' +
-                        '<button class="btn btn-info" onclick="window.location.href=\'add-station.jsp?locationId=' + location.id + '\'">Ajouter une borne</button>' +
+                        '<button class="btn btn-primary" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier</button>' +
+                        '<button class="btn btn-info" onclick="window.location.href=\'/add-station?locationId=' + location.id + '\'">Ajouter une borne</button>' +
                         '<button class="btn btn-danger" onclick="deleteLocation(' + location.id + ')">Supprimer</button>' +
                     '</div>' +
                 '</div>';
@@ -733,7 +724,7 @@
                         alert('Déconnexion en cours...');
             localStorage.clear();
             sessionStorage.clear();
-            window.location.replace('/login.jsp?message=logout');
+            window.location.replace('/login?message=logout');
         }
     </script>
 </body>

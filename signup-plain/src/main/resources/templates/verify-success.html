@@ -1,11 +1,10 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vérification réussie - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251026">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
     <style>
         .success-container {
             max-width: 500px;
@@ -69,7 +68,7 @@
     <script>
         // Rediriger automatiquement après 3 secondes
         setTimeout(function() {
-            window.location.href = 'login.jsp';
+            window.location.href = '/login';
         }, 3000);
     </script>
 </head>
@@ -85,9 +84,8 @@
             <span class="progress-dot"></span>
         </p>
         <p style="margin-top: 30px;">
-            <a href="login.jsp" style="color: #3498db; text-decoration: none;">Cliquez ici si la redirection ne fonctionne pas</a>
+            <a th:href="@{/login}" style="color: #3498db; text-decoration: none;">Cliquez ici si la redirection ne fonctionne pas</a>
         </p>
     </div>
 </body>
 </html>
-

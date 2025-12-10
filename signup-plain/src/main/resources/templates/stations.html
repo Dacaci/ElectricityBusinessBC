@@ -1,26 +1,18 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
-    response.setHeader("Content-Security-Policy", csp);
-%>
+
+
+<div th:replace="~{includes/backend-config :: backend-config}"></div>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Bornes - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 <%= backendUrlForCsp %>; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 ; script-src 'self' 'unsafe-inline' 'unsafe-eval';">
 </head>
 <body>
     <div class="header">
@@ -32,14 +24,14 @@
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link active">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">Réserver</a>
-        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link active">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
     
     <div class="container">
@@ -47,7 +39,7 @@
         <div class="content">
             <div class="actions">
                 <div>
-                    <a href="add-station.jsp" class="btn">Ajouter une borne</a>
+                    <a th:href="@{/add-station}" class="btn">Ajouter une borne</a>
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Rechercher une borne..." onkeyup="filterStations()">
@@ -67,14 +59,14 @@
             <div id="noStationsMessage" class="no-stations" style="display: none;">
                 <h3>Aucune borne trouvée</h3>
                 <p>Commencez par ajouter votre première borne de recharge.</p>
-                <a href="add-station.jsp" class="btn" style="margin-top: 15px;">Ajouter une borne</a>
+                <a th:href="@{/add-station}" class="btn" style="margin-top: 15px;">Ajouter une borne</a>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
         let stations = [];
         let locations = [];
@@ -176,7 +168,7 @@
                         '</div>' +
                     '</div>' +
                     '<div class="station-actions">' +
-                        '<a href="edit-station.jsp?id=' + station.id + '" class="btn btn-warning">Modifier</a>' +
+                        '<a href="/edit-station?id=' + station.id + '" class="btn btn-warning">Modifier</a>' +
                         '<button onclick="toggleStationStatus(' + station.id + ', ' + station.isActive + ')" class="btn ' + toggleBtnClass + '">' + toggleBtnText + '</button>' +
                         '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>' +
                     '</div>' +
@@ -295,11 +287,7 @@
             }, 3000);
         }
     </script>
-    <script src="js/auth.js"></script>
+    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>
-
-
-
-
 

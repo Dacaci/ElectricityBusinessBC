@@ -39,3 +39,6 @@ public interface PlugTypeRepository extends JpaRepository<PlugType, Long> {
 
 
 
+
+
+

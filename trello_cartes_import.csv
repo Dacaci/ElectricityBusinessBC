@@ -1,0 +1,25 @@
+Nom de la liste,Nom de la carte,Description,Étiquettes
+BACKLOG,Intégration carte Leaflet,"Afficher une carte interactive avec toutes les bornes disponibles autour d'une position, avec marqueurs cliquables.",Priorité Moyenne | Front-end | Carte
+BACKLOG,Génération de reçus PDF,"Permettre la génération et le téléchargement de reçus PDF pour les réservations.",Priorité Moyenne | Back-end | Export
+BACKLOG,Export Excel des réservations,"Permettre l'export Excel des réservations pour analyse ou archivage.",Priorité Moyenne | Back-end | Export
+BACKLOG,Tests unitaires,"Écrire des tests unitaires pour les services métier et la logique critique.",Priorité Basse | Test | Back-end
+À FAIRE,Maquettage Figma,"Créer les maquettes Figma pour définir l'interface utilisateur avant le développement, conformément au cahier des charges.",Priorité Haute | Documentation
+À FAIRE,Modélisation Merise (MCD MLD MPD),"Réaliser la modélisation Merise complète : MCD (Modèle Conceptuel de Données), MLD (Modèle Logique de Données), et MPD (Modèle Physique de Données).",Priorité Haute | Documentation | Base de données
+À FAIRE,Inscription utilisateur (Servlets Java sans framework),"Développer le module d'inscription utilisateur en Servlets Java pur, sans framework Spring, conformément au cahier des charges.",Priorité Haute | Back-end | Authentification
+À FAIRE,Validation de compte par email,"Mettre en place un système de validation de compte par email avec code de vérification, comme exigé dans le cahier des charges.",Priorité Haute | Back-end | Authentification
+À FAIRE,Connexion et authentification JWT,"Implémenter la connexion utilisateur avec authentification JWT (JSON Web Tokens) stateless.",Priorité Haute | Back-end | Sécurité | Authentification
+À FAIRE,Tableau de bord utilisateur,"Créer le tableau de bord utilisateur qui centralise les informations principales et les actions rapides.",Priorité Haute | Front-end | Dashboard
+À FAIRE,Gestion des lieux (CRUD),"Permettre aux utilisateurs de créer, lire, modifier et supprimer leurs lieux (emplacements où se trouvent les bornes).",Priorité Haute | Front-end | Back-end | Gestion Lieux/Bornes
+À FAIRE,Gestion des bornes (CRUD),"Permettre aux utilisateurs de créer, lire, modifier et supprimer leurs bornes de recharge.",Priorité Haute | Front-end | Back-end | Gestion Lieux/Bornes
+À FAIRE,Système de réservations (Cœur métier),"Implémenter le système de réservations, cœur métier de l'application. Les utilisateurs peuvent réserver des créneaux sur des bornes disponibles.",Priorité Haute | Front-end | Back-end | Réservations
+À FAIRE,Configuration Docker,"Containeriser l'application avec Docker pour garantir la reproductibilité entre dev et prod.",Priorité Moyenne | DevOps
+À FAIRE,Migrations Flyway,"Versionner le schéma de base de données avec Flyway pour un déploiement automatique et reproductible.",Priorité Moyenne | Base de données | DevOps
+À FAIRE,Déploiement sur Render.com,"Déployer l'application sur Render.com avec déploiement continu depuis Git.",Priorité Moyenne | DevOps
+À FAIRE,Documentation technique complète,"Rédiger la documentation technique complète du projet pour le dossier projet.",Priorité Moyenne | Documentation
+À FAIRE,Documentation API avec Swagger/OpenAPI,"Documenter l'API REST avec Swagger/OpenAPI pour une utilisation facile par d'autres développeurs.",Priorité Moyenne | Documentation | Back-end
+
+
+
+
+
+

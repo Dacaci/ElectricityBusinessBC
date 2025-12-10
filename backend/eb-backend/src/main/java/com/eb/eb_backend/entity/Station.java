@@ -58,7 +58,6 @@ public class Station {
     @Column(name = "on_foot")
     private Boolean onFoot = false;
 
-    // Coordonnées spécifiques à la borne (optionnelles). Si null, hérite de Location
     @Column(name = "latitude", precision = 10, scale = 8)
     private BigDecimal latitude;
 

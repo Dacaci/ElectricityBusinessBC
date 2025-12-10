@@ -41,3 +41,18 @@ node_modules/
 *.drawio
 *.puml
 *.mmd
+
+# Scripts de conversion et utilitaires
+*.ps1
+*.py
+*.sh
+*.bat
+*.cmd
+
+# Fichiers SVG (maquettes - à ignorer sauf si nécessaire)
+*.svg
+
+# Fichiers compilés
+*.class
+*.jar
+!target/*.jar

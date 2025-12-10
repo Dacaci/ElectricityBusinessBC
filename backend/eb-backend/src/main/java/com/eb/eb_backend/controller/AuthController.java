@@ -21,13 +21,19 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             LoginResponse response = authService.login(loginRequest);
             return ResponseEntity.ok(response);
+        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+            log.error("Login failed - User not found: {}", loginRequest.getEmail());
+            return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            log.error("Login failed - Bad credentials: {}", loginRequest.getEmail());
+            return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");
         } catch (Exception e) {
             log.error("Login failed for email: {}", loginRequest.getEmail(), e);
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Erreur lors de la connexion: " + e.getMessage());
         }
     }
     

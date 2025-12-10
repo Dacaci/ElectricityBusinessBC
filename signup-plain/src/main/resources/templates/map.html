@@ -1,21 +1,14 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="com.eb.signup.user.User" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + " https://unpkg.com https://api.openchargemap.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org; font-src 'self' data:;";
-    response.setHeader("Content-Security-Policy", csp);
-%>
+
+
+<div th:replace="~{includes/backend-config :: backend-config}"></div>
+
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Carte des Stations - Electricity Business</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte des Stations - Electricity Business</title>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -206,7 +199,7 @@
         <h1>Electricity Business - Carte des Stations</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="dashboard.jsp">Dashboard</a>
+            <a th:href="@{/dashboard}">Dashboard</a>
             <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
@@ -260,8 +253,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script src="js/jwt-utils.js"></script>
-    <script src="js/auth.js"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
     <script>
         // Variables globales
         let map;
@@ -453,7 +446,7 @@
                 '<p><strong>Adresse:</strong> ' + address + '</p>' +
                 '<p><strong>Tarif:</strong> <span class="price">' + rate + '</span></p>' +
                 '<p><strong>Type de prise:</strong> ' + plugType + '</p>' +
-                '<a href="add-reservation.jsp?stationId=' + station.id + '" class="btn">Réserver</a>' +
+                '<a href="/add-reservation?stationId=' + station.id + '" class="btn">Réserver</a>' +
                 '</div>';
         }
         
@@ -492,7 +485,7 @@
         
         // Réserver une station
         function reserveStation(stationId) {
-            window.location.href = `add-reservation.jsp?stationId=${stationId}`;
+            window.location.href = '/add-reservation?stationId=' + stationId;
         }
         
         // Afficher/masquer le loading
@@ -692,8 +685,7 @@
             const startTime = formData.get('startTime');
             const endDate = formData.get('endDate');
             const endTime = formData.get('endTime');
-            
-            
+
             // Pour l'instant, on recharge toutes les stations
             // Dans une vraie implémentation, on filtrerait par date/heure
             loadAllStations();

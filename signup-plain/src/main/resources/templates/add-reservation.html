@@ -1,21 +1,13 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ include file="includes/backend-config.jsp" %>
-<%
-    // backendUrl est déjà défini dans backend-config.jsp (inclus ci-dessus)
-    String backendUrlForCsp = (String) request.getAttribute("BACKEND_URL");
-    if (backendUrlForCsp == null || backendUrlForCsp.isEmpty()) {
-        backendUrlForCsp = "http://localhost:8080";
-    }
-    String csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 " + backendUrlForCsp + "; script-src 'self' 'unsafe-inline' 'unsafe-eval';";
-    response.setHeader("Content-Security-Policy", csp);
-%>
+
+<div th:replace="~{includes/backend-config :: backend-config}"></div>
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouvelle Réservation - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
 <body>
     <div class="header">
@@ -27,14 +19,14 @@
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link active">Réserver</a>
-        <a href="reservations.jsp" class="nav-link">Mes réservations</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link active">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
 
     <div class="container">
@@ -54,7 +46,7 @@
                             <select id="stationId" name="stationId" required onchange="updateStationInfo()">
                                 <option value="">Sélectionnez une borne...</option>
                             </select>
-                            <a href="map.jsp" class="find-station-link">Trouver une borne</a>
+                            <a th:href="@{/map}" class="find-station-link">Trouver une borne</a>
                         </div>
                     </div>
                     
@@ -177,8 +169,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
         // Vérifier l'authentification
         if (!requireAuth()) {
@@ -190,7 +182,7 @@
         
         if (!CURRENT_USER_ID) {
             alert('Erreur d\'authentification. Veuillez vous reconnecter.');
-            window.location.href = 'login.jsp';
+            window.location.href = '/login';
         }
         
         let stations = [];
@@ -534,7 +526,7 @@
                 
                 showSuccess('Réservation créée avec succès !');
                 setTimeout(() => {
-                    window.location.href = 'reservations.jsp';
+                    window.location.href = '/reservations';
                 }, 2000);
                 
             } catch (error) {
@@ -574,8 +566,7 @@
         
         } // Fin du bloc else
     </script>
-    <script src="js/auth.js"></script>
+    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>
-
 

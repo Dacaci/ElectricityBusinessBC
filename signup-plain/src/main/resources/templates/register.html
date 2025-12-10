@@ -1,7 +1,8 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - Electricity Business</title>
     <style>
         body { 
@@ -142,70 +143,62 @@
             <p style="color: #666; margin: 10px 0 0 0;">Rejoignez Electricity Business</p>
         </div>
         
-        <% if (request.getAttribute("error") != null) { %>
-            <div class="error">
-                <%= request.getAttribute("error") %>
-            </div>
-        <% } %>
+        <div th:if="${error != null}" class="error" th:text="${error}"></div>
         
-        <% if (request.getAttribute("success") != null) { %>
-            <div class="success">
-                <%= request.getAttribute("success") %>
-            </div>
-        <% } %>
+        <div th:if="${success != null}" class="success" th:text="${success}"></div>
         
-        <form method="post" action="register" id="registerForm">
+        <form method="post" th:action="@{/register}" id="registerForm">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="firstName">Prénom <span class="required">*</span></label>
                     <input type="text" id="firstName" name="firstName" required 
-                           value="<%= request.getParameter("firstName") != null ? request.getParameter("firstName") : "" %>">
+                           th:value="${param.firstName != null ? param.firstName[0] : ''}">
                 </div>
                 
                 <div class="form-group">
                     <label for="lastName">Nom <span class="required">*</span></label>
                     <input type="text" id="lastName" name="lastName" required 
-                           value="<%= request.getParameter("lastName") != null ? request.getParameter("lastName") : "" %>">
+                           th:value="${param.lastName != null ? param.lastName[0] : ''}">
                 </div>
             </div>
             
             <div class="form-group">
                 <label for="email">Email <span class="required">*</span></label>
                 <input type="email" id="email" name="email" required 
-                       value="<%= request.getParameter("email") != null ? request.getParameter("email") : "" %>">
+                       th:value="${param.email != null ? param.email[0] : ''}">
             </div>
             
             <div class="form-group">
                 <label for="phone">Téléphone</label>
                 <input type="tel" id="phone" name="phone" 
-                       value="<%= request.getParameter("phone") != null ? request.getParameter("phone") : "" %>">
+                       th:value="${param.phone != null ? param.phone[0] : ''}">
             </div>
             
             <div class="form-group">
                 <label for="dateOfBirth">Date de naissance</label>
                 <div class="date-input">
                     <input type="date" id="dateOfBirth" name="dateOfBirth" 
-                           value="<%= request.getParameter("dateOfBirth") != null ? request.getParameter("dateOfBirth") : "" %>">
+                           th:value="${param.dateOfBirth != null ? param.dateOfBirth[0] : ''}">
                 </div>
             </div>
             
             <div class="form-group full-width">
                 <label for="address">Adresse</label>
                 <input type="text" id="address" name="address" 
-                       value="<%= request.getParameter("address") != null ? request.getParameter("address") : "" %>">
+                       th:value="${param.address != null ? param.address[0] : ''}">
             </div>
             
             <div class="form-grid">
                 <div class="form-group">
                     <label for="postalCode">Code postal</label>
                     <input type="text" id="postalCode" name="postalCode" 
-                           value="<%= request.getParameter("postalCode") != null ? request.getParameter("postalCode") : "" %>">
+                           th:value="${param.postalCode != null ? param.postalCode[0] : ''}">
                 </div>
                 
                 <div class="form-group">
                     <label for="city">Ville</label>
                     <input type="text" id="city" name="city" 
-                           value="<%= request.getParameter("city") != null ? request.getParameter("city") : "" %>">
+                           th:value="${param.city != null ? param.city[0] : ''}">
                 </div>
             </div>
             
@@ -225,9 +218,9 @@
         </form>
         
         <div class="links">
-            <a href="verify">Déjà reçu un code ? Validez ici</a>
-            <a href="login">Déjà un compte ? Connectez-vous</a>
-            <a href="index">Retour à l'accueil</a>
+            <a th:href="@{/verify}">Déjà reçu un code ? Validez ici</a>
+            <a th:href="@{/login}">Déjà un compte ? Connectez-vous</a>
+            <a th:href="@{/}">Retour à l'accueil</a>
         </div>
     </div>
     

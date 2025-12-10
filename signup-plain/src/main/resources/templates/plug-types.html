@@ -1,31 +1,31 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
+
 <!DOCTYPE html>
-<html lang="fr">
-<head>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>`n    <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Types de Prises - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251022v5">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
 <body>
     <div class="header">
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
+            <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
     </div>
     
     <nav class="navigation">
-        <a href="dashboard.jsp" class="nav-link">Tableau de bord</a>
-        <a href="add-location.jsp" class="nav-link">Ajouter un lieu</a>
-        <a href="locations.jsp" class="nav-link">Mes lieux</a>
-        <a href="add-station.jsp" class="nav-link">Ajouter une borne</a>
-        <a href="stations.jsp" class="nav-link">Mes bornes</a>
-        <a href="add-reservation.jsp" class="nav-link">RÃ©server</a>
-        <a href="reservations.jsp" class="nav-link">Mes rÃ©servations</a>
-        <a href="vehicles.jsp" class="nav-link">Mes vÃ©hicules</a>
-        <a href="map.jsp" class="nav-link">Carte</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
+        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
+        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
+        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
+        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
+        <a th:href="@{/vehicles}" class="nav-link">Mes véhicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte</a>
     </nav>
 
     <div class="container">
@@ -37,7 +37,7 @@
             
             <div id="messageContainer"></div>
             
-            <!-- Formulaire d'ajout (masquÃ© par dÃ©faut) -->
+            <!-- Formulaire d'ajout (masqué par défaut) -->
             <div id="addFormContainer" style="display: none;" class="form-container">
                 <h3>Nouveau Type de Prise</h3>
                 <form id="addPlugTypeForm">
@@ -80,14 +80,14 @@
                     <tbody id="plugTypesBody"></tbody>
                 </table>
                 <div id="plugTypesEmpty" class="no-data" style="display: none;">
-                    Aucun type de prise enregistrÃ©.
+                    Aucun type de prise enregistré.
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/jwt-utils.js"></script>
+    <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
         if (!requireAuth()) {
             // Redirection automatique
@@ -178,7 +178,7 @@
                     throw new Error(errorText || 'Erreur lors de l\'ajout');
                 }
                 
-                showSuccess('Type de prise ajoutÃ© avec succÃ¨s !');
+                showSuccess('Type de prise ajouté avec succès !');
                 hideAddForm();
                 loadPlugTypes();
                 
@@ -188,7 +188,7 @@
         }
 
         async function deletePlugType(id, name) {
-            if (!confirm('ÃŠtes-vous sÃ»r de vouloir supprimer le type de prise "' + name + '" ?')) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer le type de prise "' + name + '" ?')) {
                 return;
             }
             
@@ -201,7 +201,7 @@
                     throw new Error('Erreur lors de la suppression');
                 }
                 
-                showSuccess('Type de prise supprimÃ© avec succÃ¨s !');
+                showSuccess('Type de prise supprimé avec succès !');
                 loadPlugTypes();
             } catch (error) {
                                 showError('Erreur lors de la suppression');
@@ -228,15 +228,9 @@
         function logout() {
             localStorage.clear();
             sessionStorage.clear();
-            window.location.replace('/login.jsp?message=logout');
+            window.location.replace('/login?message=logout');
         }
     </script>
 </body>
 </html>
-
-
-
-
-
-
 

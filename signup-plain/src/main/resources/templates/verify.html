@@ -1,11 +1,10 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vérification du compte - Electricity Business</title>
-    <link rel="stylesheet" href="css/common-styles.css?v=20251026">
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
     <style>
         .verify-container {
             max-width: 500px;
@@ -173,10 +172,13 @@
             <p>Entrez le code à 6 chiffres reçu par email</p>
         </div>
         
-        <form method="post" action="verify">
+        <div th:if="${error != null}" class="status-message status-error" th:text="${error}"></div>
+        <div th:if="${success != null}" class="status-message status-success" th:text="${success}"></div>
+        
+        <form method="post" th:action="@{/verify}">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" required placeholder="votre@email.com">
+                <input type="email" name="email" id="email" required placeholder="votre@email.com" th:value="${param.email != null ? param.email[0] : ''}">
             </div>
             
             <div class="form-group">
@@ -185,9 +187,9 @@
             </div>
             
             <button type="submit" class="btn-verify">Valider le code</button>
-</form>
+        </form>
         
-        <a href="register.jsp" class="link-back">← Retour à l'inscription</a>
+        <a th:href="@{/register}" class="link-back">← Retour à l'inscription</a>
     </div>
 </body>
 </html>
