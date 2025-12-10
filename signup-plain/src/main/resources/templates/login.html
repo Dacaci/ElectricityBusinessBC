@@ -161,7 +161,20 @@
                 console.log('📡 Status:', response.status);
                 
                 if (!response.ok) {
-                    alert('Erreur: Identifiants invalides');
+                    // Essayer de récupérer le message d'erreur du backend
+                    const errorText = await response.text();
+                    let errorMessage = 'Erreur: Identifiants invalides';
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.message || errorJson.error || errorMessage;
+                    } catch (e) {
+                        // Si ce n'est pas du JSON, utiliser le texte brut
+                        if (errorText && errorText.trim()) {
+                            errorMessage = errorText;
+                        }
+                    }
+                    alert(errorMessage);
+                    console.error('Erreur de connexion:', errorText);
                     return;
                 }
                 
