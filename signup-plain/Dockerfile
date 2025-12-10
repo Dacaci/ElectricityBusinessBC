@@ -6,32 +6,25 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build WAR
+# Copy source code and build JAR (Spring Boot)
 COPY src ./src
+COPY src/main/webapp ./src/main/webapp
 RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime with Tomcat
-FROM tomcat:10.1-jdk17-temurin-jammy
-WORKDIR /usr/local/tomcat
+# Stage 2: Runtime with Java
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
 
-# Remove default Tomcat applications
-RUN rm -rf webapps/*
+# Copy the JAR file from build stage
+COPY --from=build /app/target/signup-plain.jar app.jar
 
-# Copy the WAR file from build stage
-COPY --from=build /app/target/signup-plain.war webapps/ROOT.war
-
-# Expose port
+# Expose port (Render injecte la variable PORT)
 EXPOSE 8080
 
-# Configure Tomcat to use dynamic PORT (default 8080)
-ENV PORT=8080
-RUN echo '#!/bin/bash\nsed -i "s/port=\\\"8080\\\"/port=\\\"$PORT\\\"/" /usr/local/tomcat/conf/server.xml\nexec catalina.sh run' > /usr/local/tomcat/bin/start.sh \
-    && chmod +x /usr/local/tomcat/bin/start.sh
-
-# Health check (using PORT env var)
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8080}/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8080}/actuator/health || exit 1
 
-# Run Tomcat with dynamic port
-CMD ["/usr/local/tomcat/bin/start.sh"]
-
+# Run the Spring Boot application
+# Use PORT environment variable from Render
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -jar app.jar"]

@@ -1,27 +1,34 @@
 /**
- * Utilitaires pour la gestion des tokens JWT
+ * Utilitaires pour la gestion des tokens JWT avec cookies HTTPOnly
+ * 
+ * SÉCURITÉ : Le token JWT est maintenant stocké dans un cookie HTTPOnly côté serveur.
+ * JavaScript ne peut pas accéder au token (protection contre XSS).
+ * Seules les informations utilisateur sont stockées dans localStorage.
  */
 
-// Clé pour stocker le token dans localStorage
-const JWT_TOKEN_KEY = 'authToken';
+// Clé pour stocker les informations utilisateur dans localStorage (pas le token !)
 const JWT_USER_KEY = 'authUser';
 
 /**
- * Sauvegarde le token JWT et les informations utilisateur
- * @param {string} token - Le token JWT
+ * Sauvegarde les informations utilisateur (le token est dans le cookie HTTPOnly)
  * @param {object} user - Les informations utilisateur
  */
-function saveAuthData(token, user) {
-    localStorage.setItem(JWT_TOKEN_KEY, token);
+function saveAuthData(user) {
+    // Le token JWT est automatiquement stocké dans un cookie HTTPOnly par le serveur
+    // On stocke seulement les infos utilisateur en localStorage
     localStorage.setItem(JWT_USER_KEY, JSON.stringify(user));
 }
 
 /**
- * Récupère le token JWT depuis le localStorage
- * @returns {string|null} Le token JWT ou null
+ * Récupère le token JWT depuis le cookie HTTPOnly
+ * NOTE: Cette fonction retourne null car JavaScript ne peut pas accéder aux cookies HTTPOnly
+ * Le token est automatiquement envoyé avec chaque requête HTTP
+ * @returns {string|null} Toujours null (le token est dans un cookie HTTPOnly inaccessible)
  */
 function getAuthToken() {
-    return localStorage.getItem(JWT_TOKEN_KEY);
+    // Le token est dans un cookie HTTPOnly, JavaScript ne peut pas y accéder
+    // C'est une protection contre les attaques XSS
+    return null;
 }
 
 /**
@@ -35,21 +42,35 @@ function getAuthUser() {
 
 /**
  * Supprime les données d'authentification
+ * Le cookie HTTPOnly sera supprimé lors de l'appel à l'API /logout
  */
 function clearAuthData() {
-    localStorage.removeItem(JWT_TOKEN_KEY);
+    // Supprimer les infos utilisateur du localStorage
     localStorage.removeItem(JWT_USER_KEY);
     
     // Nettoyer aussi les anciennes clés au cas où
+    localStorage.removeItem('authToken');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
 }
 
 /**
  * Force la déconnexion complète
+ * Appelle l'API /logout pour supprimer le cookie HTTPOnly
  */
-function forceLogout() {
-            clearAuthData();
+async function forceLogout() {
+    try {
+        // Appeler l'API de déconnexion pour supprimer le cookie HTTPOnly
+        await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'  // Inclure les cookies dans la requête
+        });
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+    }
+    
+    // Supprimer les données locales
+    clearAuthData();
     
     // Vider complètement le localStorage
     localStorage.clear();
@@ -57,32 +78,24 @@ function forceLogout() {
     // Vider aussi sessionStorage
     sessionStorage.clear();
     
-            // Attendre un peu avant la redirection
+    // Redirection
     setTimeout(() => {
-                window.location.href = '/login.jsp?message=logout';
+        window.location.href = '/login.html?message=logout';
     }, 100);
 }
 
 /**
  * Vérifie si l'utilisateur est connecté
+ * Avec les cookies HTTPOnly, on vérifie seulement si les infos utilisateur existent
+ * Le serveur vérifiera automatiquement le cookie JWT à chaque requête
  * @returns {boolean} true si connecté, false sinon
  */
 function isAuthenticated() {
-    const token = getAuthToken();
     const user = getAuthUser();
     
-    // Vérifier que le token et l'utilisateur existent
-    if (!token || !user) {
-                return false;
-    }
-    
-    // Vérifier la validité du token directement
-    if (isTokenExpired(token)) {
-                clearAuthData();
-        return false;
-    }
-    
-        return true;
+    // Avec les cookies HTTPOnly, on vérifie seulement si on a les infos utilisateur
+    // Le serveur vérifiera automatiquement le cookie JWT à chaque requête
+    return user !== null;
 }
 
 /**
@@ -113,19 +126,20 @@ function getCurrentUserName() {
 }
 
 /**
- * Crée les headers d'autorisation pour les requêtes API
- * @returns {object} Les headers avec le token JWT
+ * Crée les headers pour les requêtes API (sans Authorization car le token est dans le cookie)
+ * @returns {object} Les headers basiques
  */
 function getAuthHeaders() {
-    const token = getAuthToken();
+    // Le token JWT est automatiquement envoyé via le cookie HTTPOnly
+    // Pas besoin de l'ajouter dans les headers
     return {
-        'Authorization': token ? `Bearer ${token}` : '',
         'Content-Type': 'application/json'
     };
 }
 
 /**
  * Effectue une requête authentifiée
+ * Le token JWT est automatiquement envoyé via le cookie HTTPOnly grâce à credentials: 'include'
  * @param {string} url - L'URL de la requête
  * @param {object} options - Les options de la requête
  * @returns {Promise<Response>} La réponse de la requête
@@ -138,13 +152,14 @@ async function authenticatedFetch(url, options = {}) {
     
     const response = await fetch(url, {
         ...options,
-        headers
+        headers,
+        credentials: 'include'  // IMPORTANT: Inclure les cookies dans la requête
     });
     
     // Si la réponse est 401 (Unauthorized), déconnecter l'utilisateur
     if (response.status === 401) {
         clearAuthData();
-        window.location.href = '/login.jsp';
+        window.location.href = '/login.html';
         return response;
     }
     
@@ -156,96 +171,17 @@ async function authenticatedFetch(url, options = {}) {
  */
 function requireAuth() {
     if (!isAuthenticated()) {
-        window.location.href = '/login.jsp';
+        window.location.href = '/login.html';
         return false;
     }
     return true;
 }
 
 /**
- * Décode le token JWT (pour obtenir les informations sans faire de requête)
- * @param {string} token - Le token JWT
- * @returns {object|null} Le payload décodé ou null
+ * NOTE: Les fonctions de vérification du token côté client ont été supprimées
+ * car le token est maintenant dans un cookie HTTPOnly (inaccessible à JavaScript).
+ * 
+ * La vérification de l'expiration du token est maintenant gérée côté serveur.
+ * Si le token expire, le serveur retournera une erreur 401 et l'utilisateur
+ * sera automatiquement déconnecté par authenticatedFetch().
  */
-function decodeJwtPayload(token) {
-    try {
-        const parts = token.split('.');
-        if (parts.length !== 3) {
-            return null;
-        }
-        
-        const payload = parts[1];
-        const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-        return JSON.parse(decoded);
-    } catch (error) {
-                return null;
-    }
-}
-
-/**
- * Vérifie si le token JWT est expiré
- * @param {string} token - Le token JWT
- * @returns {boolean} true si expiré, false sinon
- */
-function isTokenExpired(token) {
-    const payload = decodeJwtPayload(token);
-    if (!payload || !payload.exp) {
-        return true;
-    }
-    
-    const currentTime = Math.floor(Date.now() / 1000);
-    return payload.exp < currentTime;
-}
-
-/**
- * Vérifie et nettoie les données d'authentification si nécessaire
- */
-function validateAuthData() {
-    const token = getAuthToken();
-    const user = getAuthUser();
-    
-    // Vérifier que le token et l'utilisateur existent
-    if (!token || !user) {
-                return false;
-    }
-    
-    // Vérifier si le token est expiré
-    if (isTokenExpired(token)) {
-                clearAuthData();
-        return false;
-    }
-    
-        return true;
-}
-
-/**
- * Démarre la surveillance automatique de l'expiration du token
- * Vérifie toutes les minutes si le token est expiré
- */
-function startTokenExpirationMonitoring() {
-    setInterval(function() {
-        const token = getAuthToken();
-        if (token && isTokenExpired(token)) {
-            alert('Votre session a expiré. Vous allez être déconnecté.');
-            forceLogout();
-        }
-    }, 60000); // Vérifier toutes les minutes
-}
-
-/**
- * Démarre automatiquement la surveillance de l'expiration du token quand le script est chargé
- * Si on est sur une page protégée (pas login ou register), on démarre la surveillance
- */
-(function() {
-    const currentPath = window.location.pathname;
-    const publicPages = ['/login.jsp', '/register.jsp', '/verify-success.jsp'];
-    const isPublicPage = publicPages.some(page => currentPath.includes(page));
-    
-    if (!isPublicPage) {
-        // Vérifier si un token existe avant de démarrer la surveillance
-        const token = getAuthToken();
-        if (token) {
-            startTokenExpirationMonitoring();
-        }
-    }
-})();

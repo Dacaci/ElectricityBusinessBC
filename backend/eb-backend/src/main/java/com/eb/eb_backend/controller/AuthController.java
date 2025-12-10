@@ -5,6 +5,9 @@ import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.service.AuthService;
 import com.eb.eb_backend.security.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +24,20 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse httpResponse) {
         try {
             LoginResponse response = authService.login(loginRequest);
-            return ResponseEntity.ok(response);
+            
+            // Créer un cookie HTTPOnly pour le token JWT (protection XSS)
+            Cookie jwtCookie = new Cookie("JWT_TOKEN", response.getToken());
+            jwtCookie.setHttpOnly(true);  // Protection contre XSS - JavaScript ne peut pas accéder au cookie
+            jwtCookie.setSecure(false);   // TODO: Mettre à true en production avec HTTPS
+            jwtCookie.setPath("/");       // Cookie disponible pour toutes les routes
+            jwtCookie.setMaxAge(7200);    // 2 heures (même durée que le token)
+            httpResponse.addCookie(jwtCookie);
+            
+            // Retourner seulement les infos utilisateur (pas le token dans le body)
+            return ResponseEntity.ok(new LoginResponse(null, response.getUser()));
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
             log.error("Login failed - User not found: {}", loginRequest.getEmail());
             return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");
@@ -76,6 +89,19 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erreur lors de la vérification");
         }
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse httpResponse) {
+        // Supprimer le cookie JWT en le remplaçant par un cookie expiré
+        Cookie jwtCookie = new Cookie("JWT_TOKEN", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(false);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);  // Expire immédiatement
+        httpResponse.addCookie(jwtCookie);
+        
+        return ResponseEntity.ok("Déconnexion réussie");
     }
 }
 

@@ -46,13 +46,14 @@ public class SimpleSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Autoriser toutes les origines (pour le déploiement sur Render)
-        // Utiliser setAllowedOrigins avec * (compatible avec allowCredentials false)
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        // IMPORTANT: Pour les cookies HTTPOnly, on ne peut pas utiliser "*" avec allowCredentials=true
+        // On autorise toutes les origines avec setAllowedOriginPatterns au lieu de setAllowedOrigins
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(false);
+        // IMPORTANT: Activer les credentials pour envoyer les cookies HTTPOnly
+        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

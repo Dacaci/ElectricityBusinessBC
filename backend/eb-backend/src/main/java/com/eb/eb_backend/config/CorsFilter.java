@@ -18,18 +18,20 @@ public class CorsFilter extends OncePerRequestFilter {
         // Récupérer l'origine de la requête
         String origin = request.getHeader("Origin");
         
-        // Autoriser toutes les origines (pour le déploiement sur Render)
+        // Pour les cookies HTTPOnly, on doit autoriser l'origine spécifique (pas *)
         if (origin != null) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         } else {
-            response.setHeader("Access-Control-Allow-Origin", "*");
+            // Fallback pour les origines non spécifiées
+            response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
         }
         
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD");
         response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Expose-Headers", "Authorization, Content-Type");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Credentials", "false");
+        // IMPORTANT: Activer les credentials pour envoyer les cookies HTTPOnly
+        response.setHeader("Access-Control-Allow-Credentials", "true");
 
         // Répondre directement aux requêtes OPTIONS (preflight)
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
