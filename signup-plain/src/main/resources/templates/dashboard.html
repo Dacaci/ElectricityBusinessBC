@@ -1,23 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord - Electricity Business</title>
-    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
+    
+    <!-- Bootstrap 5 + Zephyr Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/zephyr/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <style>
-        /* Styles spécifiques au dashboard uniquement */
-        .section { 
-            background: #fff; 
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 25px; 
-            margin-bottom: 25px;
-        }
-        .section-title { 
-            color: #333; 
-            font-size: 18px; 
-            margin-bottom: 20px; 
-            padding-bottom: 10px;
-            border-bottom: 2px solid #333;
+        /* Styles spécifiques minimaux */
+        body {
+            background-color: #f8f9fa;
         }
         .filter-bar { 
             display: flex; 
@@ -53,7 +48,7 @@
             padding: 10px; 
             margin: 8px 0; 
             border-radius: 4px;
-            border-left: 3px solid #333;
+            border: 1px solid #e5e7eb;
         }
         .location-card .station-name { font-weight: 600; color: #333; font-size: 13px; }
         .location-card .station-rate { color: #666; font-size: 12px; margin-top: 3px; }
@@ -94,40 +89,51 @@
 <body>
     <div th:replace="~{includes/backend-config :: backend-config}"></div>
     
-    <div class="header">
-        <h1>Tableau de Bord - Electricity Business</h1>
-        <div class="user-info">
-            <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+    <!-- Navbar Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Electricity Business</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/dashboard}">Tableau de bord</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/locations}">Mes lieux</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/stations}">Mes bornes</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/reservations}">Réservations</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vehicles}">Véhicules</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/map}">Carte</a></li>
+                </ul>
+                <div class="d-flex align-items-center text-white">
+                    <span id="welcomeMessage" class="me-3">Bienvenue</span>
+                    <a href="#" onclick="logout(); return false;" class="btn btn-outline-light btn-sm">
+                        Déconnexion
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
-    
-    <nav class="navigation">
-        <a th:href="@{/dashboard}" class="nav-link active">Tableau de bord</a>
-        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
-        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
-        <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
-        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/vehicles}" class="nav-link">Mes véhicules</a>
-        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
     
-    <div class="container">
+    <div class="container my-4">
         <!-- Message container -->
         <div id="messageContainer"></div>
         
         <!-- Mes réservations en cours -->
-        <div class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 class="section-title" style="margin-bottom: 0;">Mes réservations en cours</h2>
-                <a th:href="@{/add-reservation}" class="btn btn-primary">Effectuer une réservation</a>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary">Mes réservations en cours</h5>
+                    <a th:href="@{/add-reservation}" class="btn btn-primary">
+                        Nouvelle réservation
+                    </a>
+                </div>
             </div>
+            <div class="card-body">
             <div id="currentReservationsLoading" class="loading">Chargement...</div>
             <div id="currentReservationsContainer" style="display: none;">
-                <table id="currentReservationsTable">
-                    <thead>
+                <table class="table table-hover" id="currentReservationsTable">
+                    <thead class="table-light">
                         <tr>
                             <th>Date et heure début</th>
                             <th>Date et heure fin</th>
@@ -140,30 +146,40 @@
                     </thead>
                     <tbody id="currentReservationsBody"></tbody>
                 </table>
-                <div id="currentReservationsEmpty" class="no-data" style="display: none;">
-                    Aucune réservation en cours
+                <div id="currentReservationsEmpty" class="text-center py-5 text-muted" style="display: none;">
+                    <p class="mb-0">Aucune réservation en cours</p>
                 </div>
             </div>
-            </div>
+        </div>
+        </div>
             
         <!-- Mes réservations passées -->
-        <div class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 class="section-title" style="margin-bottom: 0;">Mes réservations passées</h2>
-                <a href="#" onclick="exportToExcel(); return false;" class="btn btn-info">Exporter toutes les réservations au format Excel</a>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary">Mes réservations passées</h5>
+                    <a href="#" onclick="exportToExcel(); return false;" class="btn btn-success btn-sm">
+                        Exporter Excel
+                    </a>
+                </div>
             </div>
+            <div class="card-body">
             <div class="filter-bar">
                 <label>Date début :</label>
                 <input type="date" id="filterDateStart">
                 <label>Date fin :</label>
                 <input type="date" id="filterDateEnd">
-                <button class="btn btn-primary" onclick="filterPastReservations()">Filtrer</button>
-                <button class="btn btn-warning" onclick="resetPastFilter()">Réinitialiser</button>
+                <button class="btn btn-primary btn-sm" onclick="filterPastReservations()">
+                    Filtrer
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="resetPastFilter()">
+                    Réinitialiser
+                </button>
             </div>
             <div id="pastReservationsLoading" class="loading">Chargement...</div>
             <div id="pastReservationsContainer" style="display: none;">
-                <table id="pastReservationsTable">
-                    <thead>
+                <table class="table table-hover" id="pastReservationsTable">
+                    <thead class="table-light">
                         <tr>
                             <th>Date et heure début</th>
                             <th>Date et heure fin</th>
@@ -175,35 +191,45 @@
                     </thead>
                     <tbody id="pastReservationsBody"></tbody>
                 </table>
-                <div id="pastReservationsEmpty" class="no-data" style="display: none;">
-                    Aucune réservation passée
+                <div id="pastReservationsEmpty" class="text-center py-5 text-muted" style="display: none;">
+                    <p class="mb-0">Aucune réservation passée</p>
                 </div>
                 <div class="pagination" id="pastPagination"></div>
             </div>
-            </div>
+        </div>
+        </div>
             
         <!-- Lieux de recharge -->
-        <div class="section">
-            <h2 class="section-title">Lieux de recharge</h2>
-            <button class="btn btn-success" onclick="window.location.href='/add-location'" style="margin-bottom: 15px;">
-                Ajouter un lieu
-            </button>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary">Lieux de recharge</h5>
+                    <button class="btn btn-primary" onclick="window.location.href='/add-location'">
+                        Ajouter un lieu
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
             <div id="locationsLoading" class="loading">Chargement...</div>
             <div id="locationsContainer" style="display: none;">
                 <div class="locations-grid" id="locationsGrid"></div>
-                <div id="locationsEmpty" class="no-data" style="display: none;">
-                    Aucun lieu de recharge
+                <div id="locationsEmpty" class="text-center py-5 text-muted" style="display: none;">
+                    <p class="mb-0">Aucun lieu de recharge</p>
                 </div>
             </div>
-            </div>
+        </div>
+        </div>
             
         <!-- Demandes de réservations à traiter -->
-        <div class="section">
-            <h2 class="section-title">Demandes de réservations à traiter</h2>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 text-warning">Demandes de réservations à traiter</h5>
+            </div>
+            <div class="card-body">
             <div id="pendingRequestsLoading" class="loading">Chargement...</div>
             <div id="pendingRequestsContainer" style="display: none;">
-                <table id="pendingRequestsTable">
-                    <thead>
+                <table class="table table-hover" id="pendingRequestsTable">
+                    <thead class="table-light">
                         <tr>
                             <th>Date et heure début</th>
                             <th>Date et heure fin</th>
@@ -215,19 +241,23 @@
                     </thead>
                     <tbody id="pendingRequestsBody"></tbody>
                 </table>
-                <div id="pendingRequestsEmpty" class="no-data" style="display: none;">
-                    Aucune demande en attente
+                <div id="pendingRequestsEmpty" class="text-center py-5 text-muted" style="display: none;">
+                    <p class="mb-0">Aucune demande en attente</p>
                 </div>
             </div>
         </div>
+        </div>
         
         <!-- Demandes de réservations traitées -->
-        <div class="section">
-            <h2 class="section-title">Demandes de réservations traitées</h2>
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 text-success">Demandes de réservations traitées</h5>
+            </div>
+            <div class="card-body">
             <div id="treatedRequestsLoading" class="loading">Chargement...</div>
             <div id="treatedRequestsContainer" style="display: none;">
-                <table id="treatedRequestsTable">
-                    <thead>
+                <table class="table table-hover" id="treatedRequestsTable">
+                    <thead class="table-light">
                         <tr>
                             <th>Date et heure début</th>
                             <th>Date et heure fin</th>
@@ -239,14 +269,18 @@
                     </thead>
                     <tbody id="treatedRequestsBody"></tbody>
                 </table>
-                <div id="treatedRequestsEmpty" class="no-data" style="display: none;">
-                    Aucune demande traitée
+                <div id="treatedRequestsEmpty" class="text-center py-5 text-muted" style="display: none;">
+                    <p class="mb-0">Aucune demande traitée</p>
                 </div>
                 <div class="pagination" id="treatedPagination"></div>
             </div>
         </div>
+        </div>
     </div>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
     <script th:src="@{/js/jwt-utils.js}"></script>
@@ -339,9 +373,9 @@
                     '<td>' + (reservation.userFirstName + ' ' + reservation.userLastName) + '</td>' +
                     '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
-                    '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
+                    '<td>' + getStatusBadge(reservation.status) + '</td>' +
                     '<td>' +
-                        (reservation.status === 'PENDING' ? '<button class="btn btn-danger" onclick="cancelReservation(' + reservation.id + ')">Annuler</button>' : '') +
+                        (reservation.status === 'PENDING' ? '<button class="btn btn-danger btn-sm" onclick="cancelReservation(' + reservation.id + ')">Annuler</button>' : '') +
                     '</td>' +
                 '</tr>';
             }).join('');
@@ -396,7 +430,7 @@
                     '<td>' + (reservation.userFirstName + ' ' + reservation.userLastName) + '</td>' +
                     '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
-                    '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
+                    '<td>' + getStatusBadge(reservation.status) + '</td>' +
                 '</tr>';
             }).join('');
             
@@ -426,8 +460,8 @@
                 const locationStations = allStations.filter(s => s.locationId === location.id);
                 
                 return '<div class="location-card">' +
-                    '<h4>' + location.name + '</h4>' +
-                    '<p style="color: #7f8c8d; font-size: 12px; margin-bottom: 10px;">' + location.address + ', ' + location.city + '</p>' +
+                    '<h4>' + (location.label || location.name || 'Lieu') + '</h4>' +
+                    '<p style="color: #7f8c8d; font-size: 12px; margin-bottom: 10px;">' + (location.address || '') + (location.city ? ', ' + location.city : '') + '</p>' +
                     '<div>' +
                         locationStations.map(station => 
                             '<div class="station">' +
@@ -437,9 +471,9 @@
                         ).join('') +
                     '</div>' +
                     '<div class="location-actions">' +
-                        '<button class="btn btn-primary" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier</button>' +
-                        '<button class="btn btn-info" onclick="window.location.href=\'/add-station?locationId=' + location.id + '\'">Ajouter une borne</button>' +
-                        '<button class="btn btn-danger" onclick="deleteLocation(' + location.id + ')">Supprimer</button>' +
+                        '<button class="btn btn-primary btn-sm" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier</button>' +
+                        '<button class="btn btn-success btn-sm" onclick="window.location.href=\'/add-station?locationId=' + location.id + '\'">Ajouter une borne</button>' +
+                        '<button class="btn btn-danger btn-sm" onclick="deleteLocation(' + location.id + ')">Supprimer</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -481,8 +515,8 @@
                     '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
                     '<td>' +
-                        '<button class="btn btn-success" onclick="acceptReservation(' + reservation.id + ')">Accepter</button>' +
-                        '<button class="btn btn-danger" onclick="refuseReservation(' + reservation.id + ')">Refuser</button>' +
+                        '<button class="btn btn-success btn-sm me-2" onclick="acceptReservation(' + reservation.id + ')">Accepter</button>' +
+                        '<button class="btn btn-danger btn-sm" onclick="refuseReservation(' + reservation.id + ')">Refuser</button>' +
                     '</td>' +
                 '</tr>';
             }).join('');
@@ -532,7 +566,7 @@
                     '<td>' + (reservation.userFirstName + ' ' + reservation.userLastName) + '</td>' +
                     '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
-                    '<td><span class="status-badge status-' + reservation.status.toLowerCase() + '">' + getStatusText(reservation.status) + '</span></td>' +
+                    '<td>' + getStatusBadge(reservation.status) + '</td>' +
                 '</tr>';
             }).join('');
             
@@ -706,6 +740,37 @@
                 'REFUSED': 'Refusé'
             };
             return statusMap[status] || status;
+        }
+        
+        function getStatusBadge(status) {
+            let badgeClass = '';
+            let text = '';
+            
+            switch(status) {
+                case 'CONFIRMED':
+                case 'COMPLETED':
+                    badgeClass = 'badge bg-success rounded-pill';
+                    text = status === 'CONFIRMED' ? 'Accepté' : 'Terminé';
+                    break;
+                case 'REFUSED':
+                case 'CANCELLED':
+                    badgeClass = 'badge bg-danger rounded-pill';
+                    text = status === 'REFUSED' ? 'Refusé' : 'Annulé';
+                    break;
+                case 'PENDING':
+                    badgeClass = 'badge bg-warning text-dark rounded-pill';
+                    text = 'En attente';
+                    break;
+                case 'ACTIVE':
+                    badgeClass = 'badge bg-info text-dark rounded-pill';
+                    text = 'En cours';
+                    break;
+                default:
+                    badgeClass = 'badge bg-secondary rounded-pill';
+                    text = status;
+            }
+            
+            return '<span class="' + badgeClass + '">' + text + '</span>';
         }
         
         function showError(message) {

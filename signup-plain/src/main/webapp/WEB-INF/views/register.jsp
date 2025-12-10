@@ -1,5 +1,6 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +31,7 @@
         h2 { 
             color: #333; 
             margin: 0;
-            font-weight: 300;
+            font-weight: 400;
         }
         .form-grid {
             display: grid;
@@ -52,7 +53,7 @@
             font-size: 14px;
         }
         .required { color: #e74c3c; }
-        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="date"], select { 
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"] { 
             width: 100%; 
             padding: 12px 16px; 
             border: 2px solid #e1e8ed; 
@@ -61,22 +62,10 @@
             transition: border-color 0.3s ease;
             box-sizing: border-box;
         }
-        input:focus, select:focus {
+        input:focus {
             outline: none;
             border-color: #1E40AF;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .date-input {
-            position: relative;
-        }
-        .date-input::after {
-            content: "●";
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            color: #1E40AF;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
         }
         button { 
             width: 100%; 
@@ -88,11 +77,10 @@
             font-size: 16px; 
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.2s ease;
         }
         button:hover { 
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
         .links { 
             text-align: center; 
@@ -102,37 +90,26 @@
         }
         .links a { 
             color: #1E40AF; 
-            text-decoration: none; 
-            margin: 0 15px;
-            font-weight: 500;
+            text-decoration: none;
         }
-        .links a:hover { 
-            text-decoration: underline; 
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
         .error {
-            background-color: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            background: #fee;
+            color: #c00;
             border: 1px solid #e74c3c;
         }
         .success {
-            background-color: #efe;
-            color: #363;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            background: #efe;
+            color: #060;
             border: 1px solid #27ae60;
-        }
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .container {
-                margin: 10px;
-                padding: 30px 20px;
-            }
         }
     </style>
 </head>
@@ -143,90 +120,68 @@
             <p style="color: #666; margin: 10px 0 0 0;">Rejoignez Electricity Business</p>
         </div>
         
-        <div th:if="${error != null}" class="error" th:text="${error}"></div>
+        <%-- Messages d'erreur/succès (JSP au lieu de Thymeleaf) --%>
+        <% if (request.getAttribute("error") != null) { %>
+            <div class="message error"><%= request.getAttribute("error") %></div>
+        <% } %>
         
-        <div th:if="${success != null}" class="success" th:text="${success}"></div>
+        <% if (request.getAttribute("success") != null) { %>
+            <div class="message success"><%= request.getAttribute("success") %></div>
+        <% } %>
         
-        <form method="post" th:action="@{/register}" id="registerForm">
+        <%-- Formulaire d'inscription (action vers le Servlet) --%>
+        <form method="POST" action="<%= request.getContextPath() %>/register-servlet">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="firstName">Prénom <span class="required">*</span></label>
                     <input type="text" id="firstName" name="firstName" required 
-                           th:value="${param.firstName != null ? param.firstName[0] : ''}">
+                           placeholder="Ex: Jean" value="<%= request.getParameter("firstName") != null ? request.getParameter("firstName") : "" %>">
                 </div>
                 
                 <div class="form-group">
                     <label for="lastName">Nom <span class="required">*</span></label>
                     <input type="text" id="lastName" name="lastName" required 
-                           th:value="${param.lastName != null ? param.lastName[0] : ''}">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required 
-                       th:value="${param.email != null ? param.email[0] : ''}">
-            </div>
-            
-            <div class="form-group">
-                <label for="phone">Téléphone</label>
-                <input type="tel" id="phone" name="phone" 
-                       th:value="${param.phone != null ? param.phone[0] : ''}">
-            </div>
-            
-            <div class="form-group">
-                <label for="dateOfBirth">Date de naissance</label>
-                <div class="date-input">
-                    <input type="date" id="dateOfBirth" name="dateOfBirth" 
-                           th:value="${param.dateOfBirth != null ? param.dateOfBirth[0] : ''}">
+                           placeholder="Ex: Dupont" value="<%= request.getParameter("lastName") != null ? request.getParameter("lastName") : "" %>">
                 </div>
             </div>
             
             <div class="form-group full-width">
-                <label for="address">Adresse</label>
-                <input type="text" id="address" name="address" 
-                       th:value="${param.address != null ? param.address[0] : ''}">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="votre.email@exemple.com" value="<%= request.getParameter("email") != null ? request.getParameter("email") : "" %>">
             </div>
             
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="postalCode">Code postal</label>
-                    <input type="text" id="postalCode" name="postalCode" 
-                           th:value="${param.postalCode != null ? param.postalCode[0] : ''}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="city">Ville</label>
-                    <input type="text" id="city" name="city" 
-                           th:value="${param.city != null ? param.city[0] : ''}">
-                </div>
+            <div class="form-group full-width">
+                <label for="phone">Téléphone</label>
+                <input type="tel" id="phone" name="phone" 
+                       placeholder="+33 6 12 34 56 78" value="<%= request.getParameter("phone") != null ? request.getParameter("phone") : "" %>">
             </div>
             
             <div class="form-grid">
                 <div class="form-group">
                     <label for="password">Mot de passe <span class="required">*</span></label>
-                    <input type="password" id="password" name="password" minlength="8" required>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Minimum 8 caractères">
                 </div>
                 
                 <div class="form-group">
-                    <label for="confirmPassword">Confirmation <span class="required">*</span></label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" required>
+                    <label for="confirmPassword">Confirmer <span class="required">*</span></label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required 
+                           placeholder="Confirmer le mot de passe">
                 </div>
             </div>
             
-            <button type="submit">Créer mon compte</button>
+            <button type="submit">S'inscrire</button>
         </form>
         
         <div class="links">
-            <a th:href="@{/verify}">Déjà reçu un code ? Validez ici</a>
-            <a th:href="@{/login}">Déjà un compte ? Connectez-vous</a>
-            <a th:href="@{/}">Retour à l'accueil</a>
+            Déjà inscrit ? <a href="<%= request.getContextPath() %>/login">Se connecter</a>
         </div>
     </div>
     
     <script>
-        // Validation côté client
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        // Validation côté client (JavaScript vanilla)
+        document.querySelector('form').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -245,3 +200,4 @@
     </script>
 </body>
 </html>
+
