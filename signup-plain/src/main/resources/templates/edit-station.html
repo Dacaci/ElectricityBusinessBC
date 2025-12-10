@@ -15,7 +15,7 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
         </div>
     </div>
     
@@ -25,9 +25,10 @@
         <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
         <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
         <a th:href="@{/stations}" class="nav-link active">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/map}" class="nav-link">Carte</a>
+        <a th:href="@{/add-reservation}" class="nav-link">RÃ©server</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes rÃ©servations</a>
+        <a th:href="@{/vehicles}" class="nav-link">Mes vÃ©hicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
     
     <div class="container">
@@ -50,12 +51,12 @@
                     <div class="form-group">
                         <label for="locationId">Lieu <span style="color: #ef4444;">*</span></label>
                         <select id="locationId" name="locationId" class="form-control" required>
-                            <option value="">Sélectionnez un lieu...</option>
+                            <option value="">Sï¿½lectionnez un lieu...</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
+                        <label for="hourlyRate">Tarif horaire (ï¿½/h) <span style="color: #ef4444;">*</span></label>
                         <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
                     </div>
                     
@@ -67,7 +68,7 @@
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="isActive" name="isActive"> 
-                            Borne active (disponible pour les réservations)
+                            Borne active (disponible pour les rï¿½servations)
                         </label>
                     </div>
                     
@@ -86,12 +87,12 @@
         let stationId = null;
         let locations = [];
         
-        // Vérifier l'authentification
+        // Vï¿½rifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirigé automatiquement
+            // L'utilisateur sera redirigï¿½ automatiquement
         } else {
         
-        // Récupérer l'ID de la borne depuis l'URL
+        // Rï¿½cupï¿½rer l'ID de la borne depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         stationId = urlParams.get('id');
         
@@ -108,12 +109,12 @@
             try {
                 showLoading(true);
                 
-                // Charger la borne et les lieux en parallèle
+                // Charger la borne et les lieux en parallï¿½le
                 const stationResponse = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId);
                 const locationsResponse = await authenticatedFetch(API_BASE_URL + '/api/locations');
                 
                 if (!stationResponse.ok) {
-                    throw new Error('Borne non trouvée');
+                    throw new Error('Borne non trouvï¿½e');
                 }
                 
                 if (!locationsResponse.ok) {
@@ -137,7 +138,7 @@
         
         function populateLocationSelect() {
             const select = document.getElementById('locationId');
-            select.innerHTML = '<option value="">Sélectionnez un lieu...</option>';
+            select.innerHTML = '<option value="">Sï¿½lectionnez un lieu...</option>';
             
             locations.forEach(function(location) {
                 const option = document.createElement('option');
@@ -168,7 +169,7 @@
                 isActive: formData.get('isActive') === 'on'
             };
             
-            // Validation côté client
+            // Validation cï¿½tï¿½ client
             if (!stationData.name || !stationData.locationId || 
                 isNaN(stationData.hourlyRate) || stationData.hourlyRate < 0) {
                 showError('Veuillez remplir tous les champs obligatoires correctement');
@@ -191,7 +192,7 @@
                     throw new Error(errorText || 'Erreur lors de la modification');
                 }
                 
-                showSuccess('Borne modifiée avec succès !');
+                showSuccess('Borne modifiï¿½e avec succï¿½s !');
                 setTimeout(function() {
                     window.location.href = '//stations'';
                 }, 1500);

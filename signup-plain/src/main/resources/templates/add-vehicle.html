@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>`n    <div th:replace="~{includes/backend-config :: backend-config}"></div>
+<head>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter un Véhicule - Electricity Business</title>
+    <title>Ajouter un VÃ©hicule - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
 <body>
@@ -12,25 +13,25 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
         </div>
     </div>
     
     <nav class="navigation">
-            <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
+        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
         <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
         <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
         <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
         <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/vehicles}" class="nav-link active">Mes véhicules</a>
-        <a th:href="@{/map}" class="nav-link">Carte</a>
+        <a th:href="@{/add-reservation}" class="nav-link">RÃ©server</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes rÃ©servations</a>
+        <a th:href="@{/vehicles}" class="nav-link active">Mes vÃ©hicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
 
     <div class="container">
         <div class="content">
-            <h2>Ajouter un Véhicule Électrique</h2>
+            <h2>Ajouter un VÃ©hicule Ã©lectrique</h2>
             
             <div id="messageContainer"></div>
 
@@ -48,19 +49,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="model">Modèle</label>
+                    <label for="model">ModÃ¨le</label>
                     <input type="text" id="model" name="model" class="form-control" required 
                            placeholder="Ex: Model 3, Zoe, e-208">
                 </div>
 
                 <div class="form-group">
-                    <label for="year">Année</label>
+                    <label for="year">AnnÃ©e</label>
                     <input type="number" id="year" name="year" class="form-control" 
                            min="2000" max="2030" placeholder="Ex: 2023">
                 </div>
 
                 <div class="form-group">
-                    <label for="batteryCapacity">Capacité de la batterie (kWh)</label>
+                    <label for="batteryCapacity">CapacitÃ© de la batterie (kWh)</label>
                     <input type="number" id="batteryCapacity" name="batteryCapacity" class="form-control" 
                            step="0.1" min="0" placeholder="Ex: 50">
                 </div>
@@ -73,7 +74,7 @@
 
                 <div class="actions">
                     <a th:href="@{/vehicles}" class="btn btn-secondary">Annuler</a>
-                    <button type="submit" class="btn btn-primary">Ajouter le véhicule</button>
+                    <button type="submit" class="btn btn-primary">Ajouter le vÃ©hicule</button>
                 </div>
             </form>
         </div>
@@ -108,7 +109,7 @@
                 plugTypes = await response.json();
                 displayPlugTypes();
             } catch (error) {
-                                document.getElementById('plugTypesLoading').style.display = 'none';
+                document.getElementById('plugTypesLoading').style.display = 'none';
                 showError('Erreur lors du chargement des types de prises');
             }
         }
@@ -148,7 +149,7 @@
             const year = document.getElementById('year').value;
             const batteryCapacity = document.getElementById('batteryCapacity').value;
             
-            // Récupérer les types de prises sélectionnés
+            // RÃ©cupÃ©rer les types de prises sÃ©lectionnÃ©s
             const selectedPlugs = [];
             document.querySelectorAll('input[name="plugTypes"]:checked').forEach(checkbox => {
                 selectedPlugs.push(parseInt(checkbox.value));
@@ -172,16 +173,16 @@
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error(errorText || 'Erreur lors de l\'ajout du véhicule');
+                    throw new Error(errorText || 'Erreur lors de l\'ajout du vÃ©hicule');
                 }
                 
-                showSuccess('Véhicule ajouté avec succès !');
+                showSuccess('VÃ©hicule ajoutÃ© avec succÃ¨s !');
                 setTimeout(() => {
-                    window.location.href = '//vehicles'';
+                    window.location.href = '/vehicles';
                 }, 1500);
                 
             } catch (error) {
-                                showError('Erreur lors de l\'ajout du véhicule: ' + error.message);
+                showError('Erreur lors de l\'ajout du vÃ©hicule: ' + error.message);
             }
         }
 
@@ -235,4 +236,3 @@
     </style>
 </body>
 </html>
-

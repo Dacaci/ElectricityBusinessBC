@@ -15,7 +15,7 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
         </div>
     </div>
     
@@ -25,9 +25,10 @@
         <a th:href="@{/locations}" class="nav-link active">Mes lieux</a>
         <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
         <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/map}" class="nav-link">Carte</a>
+        <a th:href="@{/add-reservation}" class="nav-link">RÃ©server</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes rÃ©servations</a>
+        <a th:href="@{/vehicles}" class="nav-link">Mes vÃ©hicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
     
     <div class="container">
@@ -48,9 +49,9 @@
                 
                 <form id="ratesForm">
                     <div class="form-group">
-                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
+                        <label for="hourlyRate">Tarif horaire (ï¿½/h) <span style="color: #ef4444;">*</span></label>
                         <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
-                        <small style="color: #64748b;">Le tarif actuel est appliqué à toutes les nouvelles réservations</small>
+                        <small style="color: #64748b;">Le tarif actuel est appliquï¿½ ï¿½ toutes les nouvelles rï¿½servations</small>
                     </div>
                     
                     <div class="actions" style="margin-top: 24px;">
@@ -67,12 +68,12 @@
     <script>
         let stationId = null;
         
-        // Vérifier l'authentification
+        // Vï¿½rifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirigé automatiquement
+            // L'utilisateur sera redirigï¿½ automatiquement
         } else {
         
-        // Récupérer l'ID de la borne depuis l'URL
+        // Rï¿½cupï¿½rer l'ID de la borne depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         stationId = urlParams.get('id');
         
@@ -92,7 +93,7 @@
                 const response = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId);
                 
                 if (!response.ok) {
-                    throw new Error('Borne non trouvée');
+                    throw new Error('Borne non trouvï¿½e');
                 }
                 
                 const station = await response.json();
@@ -141,7 +142,7 @@
                     throw new Error('Erreur lors de la modification du tarif');
                 }
                 
-                showSuccess('Tarif modifié avec succès !');
+                showSuccess('Tarif modifiï¿½ avec succï¿½s !');
                 setTimeout(function() {
                     window.location.href = '//locations'';
                 }, 1500);

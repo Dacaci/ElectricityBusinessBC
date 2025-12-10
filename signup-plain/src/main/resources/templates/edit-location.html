@@ -15,7 +15,7 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
         </div>
     </div>
     
@@ -25,9 +25,10 @@
         <a th:href="@{/locations}" class="nav-link active">Mes lieux</a>
         <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
         <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/map}" class="nav-link">Carte</a>
+        <a th:href="@{/add-reservation}" class="nav-link">RÃ©server</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes rÃ©servations</a>
+        <a th:href="@{/vehicles}" class="nav-link">Mes vÃ©hicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
     
     <div class="container">
@@ -90,19 +91,19 @@
     <script>
         let locationId = null;
         
-        // Vérifier l'authentification
+        // VÃ©rifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirigé automatiquement
+            // L'utilisateur sera redirigï¿½ automatiquement
         } else {
         
-        // Récupérer l'ID du lieu depuis l'URL
+        // RÃ©cupÃ©rer l'ID du lieu depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         locationId = urlParams.get('id');
         
         if (!locationId) {
             showError('ID du lieu manquant');
             setTimeout(function() {
-                window.location.href = '//locations'';
+                window.location.href = '/locations';
             }, 2000);
         } else {
             loadData();
@@ -115,7 +116,7 @@
                 const response = await authenticatedFetch(API_BASE_URL + '/api/locations/' + locationId);
                 
                 if (!response.ok) {
-                    throw new Error('Lieu non trouvé');
+                    throw new Error('Lieu non trouvÃ©');
                 }
                 
                 const location = await response.json();
@@ -152,7 +153,7 @@
                 isActive: formData.get('isActive') === 'on'
             };
             
-            // Validation côté client
+            // Validation cÃ´tÃ© client
             if (!locationData.label || !locationData.address || 
                 isNaN(locationData.latitude) || isNaN(locationData.longitude)) {
                 showError('Veuillez remplir tous les champs obligatoires correctement');
@@ -175,9 +176,9 @@
                     throw new Error(errorText || 'Erreur lors de la modification');
                 }
                 
-                showSuccess('Lieu modifié avec succès !');
+                showSuccess('Lieu modifiÃ© avec succÃ¨s !');
                 setTimeout(function() {
-                    window.location.href = '//locations'';
+                    window.location.href = '/locations';
                 }, 1500);
                 
             } catch (error) {

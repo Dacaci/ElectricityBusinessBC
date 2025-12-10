@@ -1,7 +1,8 @@
 
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>`n    <div th:replace="~{includes/backend-config :: backend-config}"></div>
+<head>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Types de Prises - Electricity Business</title>
@@ -12,7 +13,7 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
         </div>
     </div>
     
@@ -22,10 +23,10 @@
         <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
         <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
         <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/vehicles}" class="nav-link">Mes véhicules</a>
-        <a th:href="@{/map}" class="nav-link">Carte</a>
+        <a th:href="@{/add-reservation}" class="nav-link">RÃ©server</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes rÃ©servations</a>
+        <a th:href="@{/vehicles}" class="nav-link">Mes vÃ©hicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
 
     <div class="container">
@@ -37,7 +38,7 @@
             
             <div id="messageContainer"></div>
             
-            <!-- Formulaire d'ajout (masqué par défaut) -->
+            <!-- Formulaire d'ajout (masquÃ© par dÃ©faut) -->
             <div id="addFormContainer" style="display: none;" class="form-container">
                 <h3>Nouveau Type de Prise</h3>
                 <form id="addPlugTypeForm">
@@ -80,7 +81,7 @@
                     <tbody id="plugTypesBody"></tbody>
                 </table>
                 <div id="plugTypesEmpty" class="no-data" style="display: none;">
-                    Aucun type de prise enregistré.
+                    Aucun type de prise enregistrÃ©.
                 </div>
             </div>
         </div>
@@ -113,7 +114,7 @@
                 displayPlugTypes(plugTypes);
                 showLoading(false);
             } catch (error) {
-                                showError('Erreur lors du chargement: ' + error.message);
+                showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
         }
@@ -178,17 +179,17 @@
                     throw new Error(errorText || 'Erreur lors de l\'ajout');
                 }
                 
-                showSuccess('Type de prise ajouté avec succès !');
+                showSuccess('Type de prise ajoutÃ© avec succÃ¨s !');
                 hideAddForm();
                 loadPlugTypes();
                 
             } catch (error) {
-                                showError('Erreur: ' + error.message);
+                showError('Erreur: ' + error.message);
             }
         }
 
         async function deletePlugType(id, name) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer le type de prise "' + name + '" ?')) {
+            if (!confirm('ÃŠtes-vous sÃ»r de vouloir supprimer le type de prise "' + name + '" ?')) {
                 return;
             }
             
@@ -201,10 +202,10 @@
                     throw new Error('Erreur lors de la suppression');
                 }
                 
-                showSuccess('Type de prise supprimé avec succès !');
+                showSuccess('Type de prise supprimÃ© avec succÃ¨s !');
                 loadPlugTypes();
             } catch (error) {
-                                showError('Erreur lors de la suppression');
+                showError('Erreur lors de la suppression');
             }
         }
 
@@ -233,4 +234,3 @@
     </script>
 </body>
 </html>
-

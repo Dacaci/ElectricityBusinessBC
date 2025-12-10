@@ -1,10 +1,11 @@
 
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>`n    <div th:replace="~{includes/backend-config :: backend-config}"></div>
+<head>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Véhicules - Electricity Business</title>
+    <title>Mes VÃ©hicules - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
 <body>
@@ -12,7 +13,7 @@
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
+            <a href="#" onclick="logout(); return false;">DÃ©connexion</a>
         </div>
     </div>
     
@@ -22,29 +23,29 @@
         <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
         <a th:href="@{/add-station}" class="nav-link">Ajouter une borne</a>
         <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/vehicles}" class="nav-link active">Mes véhicules</a>
-        <a th:href="@{/map}" class="nav-link">Carte</a>
+        <a th:href="@{/add-reservation}" class="nav-link">RÃ©server</a>
+        <a th:href="@{/reservations}" class="nav-link">Mes rÃ©servations</a>
+        <a th:href="@{/vehicles}" class="nav-link active">Mes vÃ©hicules</a>
+        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
 
     <div class="container">
         <div class="content">
             <div class="section-header">
-                <h2>Mes Véhicules</h2>
-                <a th:href="@{/add-vehicle}" class="btn btn-primary">Ajouter un véhicule</a>
+                <h2>Mes VÃ©hicules</h2>
+                <a th:href="@{/add-vehicle}" class="btn btn-primary">Ajouter un vÃ©hicule</a>
             </div>
             
             <div id="messageContainer"></div>
             
             <div id="loadingIndicator" class="loading">
-                <p>Chargement des véhicules...</p>
+                <p>Chargement des vÃ©hicules...</p>
             </div>
 
             <div id="vehiclesContainer" style="display: none;">
                 <div id="vehiclesList"></div>
                 <div id="vehiclesEmpty" class="no-data" style="display: none;">
-                    Aucun véhicule enregistré. Ajoutez votre premier véhicule électrique !
+                    Aucun vÃ©hicule enregistrÃ©. Ajoutez votre premier vÃ©hicule Ã©lectrique !
                 </div>
             </div>
         </div>
@@ -72,14 +73,14 @@
             try {
                 const response = await fetch(API_BASE_URL + '/api/vehicles');
                 if (!response.ok) {
-                    throw new Error('Erreur lors du chargement des véhicules');
+                    throw new Error('Erreur lors du chargement des vÃ©hicules');
                 }
                 
                 const vehicles = await response.json();
                 displayVehicles(vehicles);
                 showLoading(false);
             } catch (error) {
-                                showError('Erreur lors du chargement des véhicules: ' + error.message);
+                showError('Erreur lors du chargement des vÃ©hicules: ' + error.message);
                 showLoading(false);
             }
         }
@@ -100,7 +101,7 @@
             vehicles.forEach(vehicle => {
                 const plugs = vehicle.compatiblePlugNames && vehicle.compatiblePlugNames.length > 0
                     ? vehicle.compatiblePlugNames.join(', ')
-                    : 'Non spécifié';
+                    : 'Non spÃ©cifiÃ©';
                 
                 html += '<div class="card">';
                 html += '<div class="card-header">';
@@ -109,10 +110,10 @@
                 html += '</div>';
                 html += '<div class="card-body">';
                 if (vehicle.year) {
-                    html += '<p><strong>Année :</strong> ' + vehicle.year + '</p>';
+                    html += '<p><strong>AnnÃ©e :</strong> ' + vehicle.year + '</p>';
                 }
                 if (vehicle.batteryCapacity) {
-                    html += '<p><strong>Capacité batterie :</strong> ' + vehicle.batteryCapacity + ' kWh</p>';
+                    html += '<p><strong>CapacitÃ© batterie :</strong> ' + vehicle.batteryCapacity + ' kWh</p>';
                 }
                 html += '<p><strong>Prises compatibles :</strong> ' + plugs + '</p>';
                 html += '</div>';
@@ -127,7 +128,7 @@
         }
 
         async function deleteVehicle(id, licensePlate) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer le véhicule ' + licensePlate + ' ?')) {
+            if (!confirm('ÃŠtes-vous sÃ»r de vouloir supprimer le vÃ©hicule ' + licensePlate + ' ?')) {
                 return;
             }
             
@@ -140,10 +141,10 @@
                     throw new Error('Erreur lors de la suppression');
                 }
                 
-                showSuccess('Véhicule supprimé avec succès !');
+                showSuccess('VÃ©hicule supprimÃ© avec succÃ¨s !');
                 loadVehicles();
             } catch (error) {
-                                showError('Erreur lors de la suppression du véhicule');
+                showError('Erreur lors de la suppression du vÃ©hicule');
             }
         }
 
@@ -172,4 +173,3 @@
     </script>
 </body>
 </html>
-
