@@ -80,7 +80,7 @@
         if (!stationId) {
             showError('ID de la borne manquant');
             setTimeout(function() {
-                window.location.href = '//locations'';
+                window.location.href = '/locations';
             }, 2000);
         } else {
             loadStation();
@@ -142,9 +142,9 @@
                     throw new Error('Erreur lors de la modification du tarif');
                 }
                 
-                showSuccess('Tarif modifi� avec succ�s !');
+                showSuccess('Tarif modifié avec succès !');
                 setTimeout(function() {
-                    window.location.href = '//locations'';
+                    window.location.href = '/locations';
                 }, 1500);
                 
             } catch (error) {
