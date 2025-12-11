@@ -71,7 +71,7 @@
         async function loadVehicles() {
             showLoading(true);
             try {
-                const response = await fetch(API_BASE_URL + '/api/vehicles');
+                const response = await fetch(API_BASE_URL + '/api/vehicles', { credentials: 'include' });
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des véhicules');
                 }
@@ -134,7 +134,8 @@
             
             try {
                 const response = await fetch(API_BASE_URL + '/api/vehicles/' + id, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {

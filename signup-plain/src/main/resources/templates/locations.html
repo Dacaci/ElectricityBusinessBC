@@ -95,9 +95,9 @@
                 
                 // Charger les lieux, stations et médias en parallèle
                 const [locationsResponse, stationsResponse, mediasResponse] = await Promise.all([
-                    fetch(API_BASE_URL + '/api/locations'),
-                    fetch(API_BASE_URL + '/api/stations/owner/' + CURRENT_USER_ID), // Mes propres bornes
-                    fetch(API_BASE_URL + '/api/medias')
+                    fetch(API_BASE_URL + '/api/locations', { credentials: 'include' }),
+                    fetch(API_BASE_URL + '/api/stations/owner/' + CURRENT_USER_ID, { credentials: 'include' }), // Mes propres bornes
+                    fetch(API_BASE_URL + '/api/medias', { credentials: 'include' })
                 ]);
                 
                 if (!locationsResponse.ok || !stationsResponse.ok) {
@@ -268,7 +268,8 @@
             
             try {
                 const response = await fetch(API_BASE_URL + '/api/stations/' + stationId, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
@@ -316,7 +317,8 @@
             try {
                 const url = API_BASE_URL + '/api/locations/' + locationId;
                                 const response = await fetch(url, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {
@@ -354,7 +356,8 @@
             
             try {
                 const response = await fetch(API_BASE_URL + '/api/medias/' + mediaId, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {
@@ -413,6 +416,7 @@
             try {
                 const response = await fetch(API_BASE_URL + '/api/medias', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
                     },

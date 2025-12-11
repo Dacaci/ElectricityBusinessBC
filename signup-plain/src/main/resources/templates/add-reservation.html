@@ -249,8 +249,8 @@
                 // Charger les stations, les lieux et les véhicules en parallèle
                 // Utiliser authenticatedFetch pour les véhicules car c'est une donnée privée
                 const fetchPromises = [
-                    fetch(API_BASE_URL + '/api/stations'),
-                    fetch(API_BASE_URL + '/api/locations')
+                    fetch(API_BASE_URL + '/api/stations', { credentials: 'include' }),
+                    fetch(API_BASE_URL + '/api/locations', { credentials: 'include' })
                 ];
                 
                 if (userId) {

@@ -102,8 +102,8 @@
                 const stationsUrl = API_BASE_URL + '/api/stations/owner/' + CURRENT_USER_ID + '?t=' + Date.now();
                                                 // Charger les bornes et les lieux en parallèle
                 const [stationsResponse, locationsResponse] = await Promise.all([
-                    fetch(stationsUrl), // Mes propres bornes
-                    fetch(API_BASE_URL + '/api/locations')
+                    fetch(stationsUrl, { credentials: 'include' }), // Mes propres bornes
+                    fetch(API_BASE_URL + '/api/locations', { credentials: 'include' })
                 ]);
                 
                 if (!stationsResponse.ok) {
@@ -194,6 +194,7 @@
                 // PATCH - envoyer uniquement le champ à modifier
                 const response = await fetch(API_BASE_URL + '/api/stations/' + stationId, {
                     method: 'PATCH',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -235,7 +236,8 @@
             try {
                 const url = API_BASE_URL + '/api/stations/' + stationId;
                                 const response = await fetch(url, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
                 
                                 if (!response.ok) {

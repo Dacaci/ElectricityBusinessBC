@@ -101,7 +101,7 @@
 
         async function loadPlugTypes() {
             try {
-                const response = await fetch(API_BASE_URL + '/api/plug-types');
+                const response = await fetch(API_BASE_URL + '/api/plug-types', { credentials: 'include' });
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des types de prises');
                 }
