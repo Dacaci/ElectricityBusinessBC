@@ -23,6 +23,8 @@ public class ProxyController {
     private String backendUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyController.class);
 
     /**
      * Proxy pour toutes les requêtes API
@@ -30,14 +32,17 @@ public class ProxyController {
     @RequestMapping(value = "/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS})
     public ResponseEntity<?> proxyRequest(
             HttpServletRequest request,
-            @RequestBody(required = false) String body,
-            HttpMethod method
+            @RequestBody(required = false) String body
     ) {
+        // Extraire la méthode HTTP de la requête
+        HttpMethod method = HttpMethod.valueOf(request.getMethod());
         try {
             // Construire l'URL du backend
             String path = request.getRequestURI().substring(request.getContextPath().length());
             String queryString = request.getQueryString();
             String targetUrl = backendUrl + path + (queryString != null ? "?" + queryString : "");
+            
+            log.info("🔄 Proxy: {} {} -> {}", method, path, targetUrl);
 
             // Copier les headers de la requête
             HttpHeaders headers = new HttpHeaders();
@@ -76,11 +81,13 @@ public class ProxyController {
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             // Gérer les erreurs HTTP (4xx, 5xx)
+            log.error("❌ Erreur HTTP du backend: {} - {}", e.getStatusCode(), e.getMessage());
             return ResponseEntity
                     .status(e.getStatusCode())
                     .body(e.getResponseBodyAsString());
         } catch (Exception e) {
             // Gérer les autres erreurs
+            log.error("❌ Erreur proxy vers {}: {}", backendUrl, e.getMessage(), e);
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors de la communication avec le backend: " + e.getMessage());
