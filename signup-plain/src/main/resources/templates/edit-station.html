@@ -51,12 +51,12 @@
                     <div class="form-group">
                         <label for="locationId">Lieu <span style="color: #ef4444;">*</span></label>
                         <select id="locationId" name="locationId" class="form-control" required>
-                            <option value="">S�lectionnez un lieu...</option>
+                            <option value="">Sélectionnez un lieu...</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="hourlyRate">Tarif horaire (�/h) <span style="color: #ef4444;">*</span></label>
+                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
                         <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
                     </div>
                     
@@ -68,7 +68,7 @@
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="isActive" name="isActive"> 
-                            Borne active (disponible pour les r�servations)
+                            Borne active (disponible pour les réservations)
                         </label>
                     </div>
                     
@@ -87,12 +87,12 @@
         let stationId = null;
         let locations = [];
         
-        // V�rifier l'authentification
+        // Vérifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirig� automatiquement
+            // L'utilisateur sera redirigé automatiquement
         } else {
         
-        // R�cup�rer l'ID de la borne depuis l'URL
+        // Récupérer l'ID de la borne depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         stationId = urlParams.get('id');
         
@@ -109,12 +109,12 @@
             try {
                 showLoading(true);
                 
-                // Charger la borne et les lieux en parall�le
+                // Charger la borne et les lieux en parallèle
                 const stationResponse = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId);
                 const locationsResponse = await authenticatedFetch(API_BASE_URL + '/api/locations');
                 
                 if (!stationResponse.ok) {
-                    throw new Error('Borne non trouv�e');
+                    throw new Error('Borne non trouvée');
                 }
                 
                 if (!locationsResponse.ok) {
@@ -138,7 +138,7 @@
         
         function populateLocationSelect() {
             const select = document.getElementById('locationId');
-            select.innerHTML = '<option value="">S�lectionnez un lieu...</option>';
+            select.innerHTML = '<option value="">Sélectionnez un lieu...</option>';
             
             locations.forEach(function(location) {
                 const option = document.createElement('option');
@@ -169,7 +169,7 @@
                 isActive: formData.get('isActive') === 'on'
             };
             
-            // Validation c�t� client
+            // Validation côté client
             if (!stationData.name || !stationData.locationId || 
                 isNaN(stationData.hourlyRate) || stationData.hourlyRate < 0) {
                 showError('Veuillez remplir tous les champs obligatoires correctement');

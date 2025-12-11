@@ -49,9 +49,9 @@
                 
                 <form id="ratesForm">
                     <div class="form-group">
-                        <label for="hourlyRate">Tarif horaire (�/h) <span style="color: #ef4444;">*</span></label>
+                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
                         <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
-                        <small style="color: #64748b;">Le tarif actuel est appliqu� � toutes les nouvelles r�servations</small>
+                        <small style="color: #64748b;">Le tarif actuel est appliqué à toutes les nouvelles réservations</small>
                     </div>
                     
                     <div class="actions" style="margin-top: 24px;">
@@ -68,12 +68,12 @@
     <script>
         let stationId = null;
         
-        // V�rifier l'authentification
+        // Vérifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirig� automatiquement
+            // L'utilisateur sera redirigé automatiquement
         } else {
         
-        // R�cup�rer l'ID de la borne depuis l'URL
+        // Récupérer l'ID de la borne depuis l'URL
         const urlParams = new URLSearchParams(window.location.search);
         stationId = urlParams.get('id');
         
@@ -93,7 +93,7 @@
                 const response = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId);
                 
                 if (!response.ok) {
-                    throw new Error('Borne non trouv�e');
+                    throw new Error('Borne non trouvée');
                 }
                 
                 const station = await response.json();
