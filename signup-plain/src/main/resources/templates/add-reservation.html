@@ -182,7 +182,7 @@
         const CURRENT_USER_ID = getCurrentUserId();
         
         if (!CURRENT_USER_ID) {
-            alert('Erreur d\'authentification. Veuillez vous reconnecter.');
+            console.error('Erreur d\'authentification');
             window.location.href = '/login';
         }
         

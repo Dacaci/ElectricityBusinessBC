@@ -187,13 +187,13 @@
             
             if (password !== confirmPassword) {
                 e.preventDefault();
-                alert('Les mots de passe ne correspondent pas');
+                // Les mots de passe ne correspondent pas
                 return false;
             }
             
             if (password.length < 8) {
                 e.preventDefault();
-                alert('Le mot de passe doit contenir au moins 8 caractères');
+                // Mot de passe trop court
                 return false;
             }
         });

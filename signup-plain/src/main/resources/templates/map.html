@@ -298,7 +298,7 @@
                 const stations = Array.isArray(data) ? data : (data.content || []);
                 
                 if (stations.length === 0) {
-                    alert('Aucune station disponible. Créez d\'abord une borne de recharge !');
+                    console.log('Aucune station disponible');
                     showLoading(false);
                     return;
                 }
@@ -323,13 +323,13 @@
                         map.setView(currentCenter, currentZoom);
                     }
                 } else {
-                    alert('Aucune station avec coordonnées GPS valides');
+                    console.warn('Aucune station avec coordonnées GPS valides');
                 }
                 
                 showLoading(false);
             } catch (error) {
                 showLoading(false);
-                alert('Erreur lors du chargement des stations: ' + error.message);
+                console.error('Erreur lors du chargement des stations:', error.message);
             }
         }
         
@@ -379,7 +379,7 @@
                             default:
                                 errorMessage += 'Erreur inconnue.';
                         }
-                        alert(errorMessage);
+                        console.error('Erreur géolocalisation:', errorMessage);
                     },
                     {
                         enableHighAccuracy: true,
@@ -388,7 +388,7 @@
                     }
                 );
             } else {
-                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+                console.warn('Géolocalisation non supportée');
             }
         }
         

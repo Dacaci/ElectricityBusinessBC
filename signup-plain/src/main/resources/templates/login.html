@@ -91,7 +91,7 @@
                             errorMessage = errorText;
                         }
                     }
-                    alert(errorMessage);
+                    console.error('Erreur login:', errorMessage);
                     console.error('Erreur de connexion:', errorText);
                     return;
                 }
@@ -102,16 +102,16 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
                     console.log('✅ Connexion réussie !');
-                    alert('Connexion réussie !');
+                    // Connexion réussie - redirection automatique
                     window.location.href = '/dashboard';
                 } else {
-                    alert('Erreur: Token ou données utilisateur manquantes');
+                    console.error('Erreur: Token ou données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);
                 }
                 
             } catch (error) {
                 console.error('Erreur lors de la connexion:', error);
-                alert('Erreur: ' + error.message);
+                console.error('Erreur login:', error.message);
             }
         }
     </script>

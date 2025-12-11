@@ -292,7 +292,7 @@
         
         async function confirmReservation(reservationId) {
             if (!reservationId) {
-                alert('Erreur: ID de réservation manquant');
+                console.error('Erreur: ID de réservation manquant');
                 return;
             }
             
@@ -317,7 +317,7 @@
         
         async function cancelReservation(reservationId) {
             if (!reservationId) {
-                alert('Erreur: ID de réservation manquant');
+                console.error('Erreur: ID de réservation manquant');
                 return;
             }
             
@@ -346,7 +346,7 @@
         
         async function completeReservation(reservationId) {
             if (!reservationId) {
-                alert('Erreur: ID de réservation manquant');
+                console.error('Erreur: ID de réservation manquant');
                 return;
             }
             
@@ -371,7 +371,7 @@
         
         async function deleteReservation(reservationId) {
             if (!reservationId) {
-                alert('Erreur: ID de réservation manquant');
+                console.error('Erreur: ID de réservation manquant');
                 return;
             }
             
