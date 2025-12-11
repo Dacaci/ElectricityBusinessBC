@@ -1,7 +1,6 @@
 // Fonction de déconnexion
 function logout() {
-    alert('Déconnexion en cours...');
-    
+    // Déconnexion fluide : pas de popup, juste nettoyage et redirection
     try {
         localStorage.removeItem('authToken');
         localStorage.removeItem('authUser');
@@ -9,10 +8,10 @@ function logout() {
         localStorage.removeItem('auth_user');
         localStorage.clear();
         sessionStorage.clear();
-        window.location.replace('/login?message=logout');
+        window.location.replace('/login');
     } catch (error) {
         console.error('Erreur lors de la déconnexion:', error);
-        window.location.replace('/login?message=logout');
+        window.location.replace('/login');
     }
 }
 
