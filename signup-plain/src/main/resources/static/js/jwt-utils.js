@@ -80,7 +80,7 @@ async function forceLogout() {
     
     // Redirection
     setTimeout(() => {
-        window.location.href = '/login.html?message=logout';
+        window.location.href = '/login?message=logout';
     }, 100);
 }
 
@@ -159,7 +159,7 @@ async function authenticatedFetch(url, options = {}) {
     // Si la réponse est 401 (Unauthorized), déconnecter l'utilisateur
     if (response.status === 401) {
         clearAuthData();
-        window.location.href = '/login.html';
+        window.location.href = '/login';
         return response;
     }
     
@@ -171,7 +171,7 @@ async function authenticatedFetch(url, options = {}) {
  */
 function requireAuth() {
     if (!isAuthenticated()) {
-        window.location.href = '/login.html';
+        window.location.href = '/login';
         return false;
     }
     return true;
