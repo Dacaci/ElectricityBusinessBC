@@ -26,5 +26,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8080}/actuator/health || exit 1
 
 # Run the Spring Boot application
-# Use PORT environment variable from Render
-ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -jar app.jar"]
+# Use PORT and BACKEND_URL environment variables from Render
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-http://localhost:8080} -jar app.jar"]
