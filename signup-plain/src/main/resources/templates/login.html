@@ -173,6 +173,7 @@
                     // Stocker seulement les infos utilisateur (le token est dans le cookie HTTPOnly)
                     localStorage.setItem('authUser', JSON.stringify(data.user));
                     console.log('✅ Connexion réussie ! Cookie JWT reçu automatiquement.');
+                    console.log('👤 Utilisateur:', data.user);
                     alert('Connexion réussie !');
                     window.location.href = '/dashboard';
                 } else {

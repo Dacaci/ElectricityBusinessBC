@@ -60,8 +60,11 @@ function clearAuthData() {
  */
 async function forceLogout() {
     try {
+        // Récupérer l'URL du backend depuis config.js
+        const backendUrl = window.API_BASE_URL || 'http://localhost:8080';
+        
         // Appeler l'API de déconnexion pour supprimer le cookie HTTPOnly
-        await fetch('/api/auth/logout', {
+        await fetch(backendUrl + '/api/auth/logout', {
             method: 'POST',
             credentials: 'include'  // Inclure les cookies dans la requête
         });

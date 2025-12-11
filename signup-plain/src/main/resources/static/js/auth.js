@@ -1,17 +1,30 @@
 // Fonction de déconnexion
-function logout() {
-        alert('Déconnexion en cours...');
+async function logout() {
+    alert('Déconnexion en cours...');
     
-        try {
+    try {
+        // Récupérer l'URL du backend depuis config.js
+        const backendUrl = window.API_BASE_URL || 'http://localhost:8080';
+        
+        // Appeler l'API de déconnexion pour supprimer le cookie HTTPOnly
+        await fetch(backendUrl + '/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'  // IMPORTANT: Inclure les cookies dans la requête
+        });
+        
+        // Supprimer les données locales
         localStorage.removeItem('authToken');
         localStorage.removeItem('authUser');
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
         localStorage.clear();
         sessionStorage.clear();
-                        window.location.replace('/login.jsp?message=logout');
+        
+        window.location.replace('/login?message=logout');
     } catch (error) {
-                window.location.replace('/login.jsp?message=logout');
+        console.error('Erreur lors de la déconnexion:', error);
+        // Même en cas d'erreur, on redirige vers login
+        window.location.replace('/login?message=logout');
     }
 }
 
