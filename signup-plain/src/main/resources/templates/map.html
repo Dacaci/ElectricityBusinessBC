@@ -529,9 +529,10 @@
                     
                     // Ajouter les stations OCM à la carte (cluster)
                     stations.forEach(station => {
-                        // Gérer les deux formats possibles (backend standardisé ou format OpenChargeMap brut)
-                        const lat = station.latitude || (station.AddressInfo && station.AddressInfo.Latitude);
-                        const lng = station.longitude || (station.AddressInfo && station.AddressInfo.Longitude);
+                        // Les coordonnées viennent du Location associé, pas de Station
+                        const location = locations.find(l => l.id === station.locationId);
+                        const lat = location ? location.latitude : (station.AddressInfo && station.AddressInfo.Latitude);
+                        const lng = location ? location.longitude : (station.AddressInfo && station.AddressInfo.Longitude);
                         
                         if (lat && lng) {
                             const marker = L.marker([lat, lng], { icon: ocmStationIcon })
@@ -639,8 +640,9 @@
                         
                         // Ajouter les stations OCM à la carte (cluster)
                         stations.forEach(station => {
-                            const lat = station.latitude || (station.AddressInfo && station.AddressInfo.Latitude);
-                            const lng = station.longitude || (station.AddressInfo && station.AddressInfo.Longitude);
+                            const location = locations.find(l => l.id === station.locationId);
+                            const lat = location ? location.latitude : (station.AddressInfo && station.AddressInfo.Latitude);
+                            const lng = location ? location.longitude : (station.AddressInfo && station.AddressInfo.Longitude);
                             
                             if (lat && lng) {
                                 const marker = L.marker([lat, lng], { icon: ocmStationIcon })
