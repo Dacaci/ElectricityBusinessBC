@@ -42,8 +42,8 @@ public class AuthController {
             
             httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
             
-            // Retourner seulement les infos utilisateur (le token est dans le cookie HTTPOnly)
-            return ResponseEntity.ok(new LoginResponse(null, response.getUser()));
+            // Retourner le token ET les infos utilisateur (localStorage)
+            return ResponseEntity.ok(new LoginResponse(response.getToken(), response.getUser()));
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
             log.error("Login failed - User not found: {}", loginRequest.getEmail());
             return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");

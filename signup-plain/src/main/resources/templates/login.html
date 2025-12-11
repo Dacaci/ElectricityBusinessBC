@@ -138,7 +138,6 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'include',  // IMPORTANT: Pour recevoir le cookie HTTPOnly
                     body: JSON.stringify({ 
                         email: email, 
                         password: password 
@@ -167,15 +166,16 @@
                 
                 const data = await response.json();
                 
-                // Avec les cookies HTTPOnly via proxy, le token est dans un cookie
-                if (data.user) {
+                // Stocker le token dans localStorage
+                if (data.token && data.user) {
+                    localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
-                    console.log('✅ Connexion réussie ! Cookie HTTPOnly reçu via proxy.');
+                    console.log('✅ Connexion réussie ! Token stocké dans localStorage.');
                     console.log('👤 Utilisateur:', data.user);
                     alert('Connexion réussie !');
                     window.location.href = '/dashboard';
                 } else {
-                    alert('Erreur: Données utilisateur manquantes');
+                    alert('Erreur: Token ou données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);
                 }
                 
