@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +31,16 @@ public class AuthController {
             LoginResponse response = authService.login(loginRequest);
             
             // Créer un cookie HTTPOnly pour le token JWT (protection XSS)
-            Cookie jwtCookie = new Cookie("JWT_TOKEN", response.getToken());
-            jwtCookie.setHttpOnly(true);  // Protection contre XSS - JavaScript ne peut pas accéder au cookie
-            jwtCookie.setSecure(false);   // TODO: Mettre à true en production avec HTTPS
-            jwtCookie.setPath("/");       // Cookie disponible pour toutes les routes
-            jwtCookie.setMaxAge(7200);    // 2 heures (même durée que le token)
-            httpResponse.addCookie(jwtCookie);
+            // Utilisation de ResponseCookie pour supporter SameSite=None (cross-domain)
+            ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", response.getToken())
+                .httpOnly(true)       // Protection contre XSS - JavaScript ne peut pas accéder au cookie
+                .secure(true)         // HTTPS uniquement (obligatoire avec SameSite=None)
+                .path("/")            // Cookie disponible pour toutes les routes
+                .maxAge(7200)         // 2 heures (même durée que le token)
+                .sameSite("None")     // Permet les cookies cross-domain (frontend et backend sur domaines différents)
+                .build();
+            
+            httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
             
             // Retourner seulement les infos utilisateur (pas le token dans le body)
             return ResponseEntity.ok(new LoginResponse(null, response.getUser()));
@@ -94,12 +100,15 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse httpResponse) {
         // Supprimer le cookie JWT en le remplaçant par un cookie expiré
-        Cookie jwtCookie = new Cookie("JWT_TOKEN", null);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(false);
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(0);  // Expire immédiatement
-        httpResponse.addCookie(jwtCookie);
+        ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", "")
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0)           // Expire immédiatement
+            .sameSite("None")    // Permet les cookies cross-domain
+            .build();
+        
+        httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         
         return ResponseEntity.ok("Déconnexion réussie");
     }
