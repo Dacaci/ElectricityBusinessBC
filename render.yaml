@@ -51,10 +51,7 @@ services:
     dockerContext: ./signup-plain
     envVars:
       - key: BACKEND_URL
-        fromService:
-          type: web
-          name: electricity-business-backend
-          property: host
+        value: https://electricity-business-backend-jvc9.onrender.com
       - key: DB_HOST
         fromDatabase:
           name: electricity-business-db
