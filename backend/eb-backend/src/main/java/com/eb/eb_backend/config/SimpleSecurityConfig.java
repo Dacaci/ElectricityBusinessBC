@@ -50,8 +50,19 @@ public class SimpleSecurityConfig {
         // On autorise toutes les origines avec setAllowedOriginPatterns au lieu de setAllowedOrigins
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        // IMPORTANT: Avec allowCredentials=true, on ne peut pas utiliser "*" pour les headers
+        // Il faut lister explicitement les headers autorisés
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers",
+            "X-Requested-With",
+            "Cookie"
+        ));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "Set-Cookie"));
         // IMPORTANT: Activer les credentials pour envoyer les cookies HTTPOnly
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

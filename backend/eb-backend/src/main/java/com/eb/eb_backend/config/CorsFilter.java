@@ -27,8 +27,9 @@ public class CorsFilter extends OncePerRequestFilter {
         }
         
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD");
-        response.setHeader("Access-Control-Allow-Headers", "*");
-        response.setHeader("Access-Control-Expose-Headers", "Authorization, Content-Type");
+        // IMPORTANT: Avec allowCredentials=true, on ne peut pas utiliser "*" pour les headers
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, X-Requested-With, Cookie");
+        response.setHeader("Access-Control-Expose-Headers", "Authorization, Content-Type, Set-Cookie");
         response.setHeader("Access-Control-Max-Age", "3600");
         // IMPORTANT: Activer les credentials pour envoyer les cookies HTTPOnly
         response.setHeader("Access-Control-Allow-Credentials", "true");
