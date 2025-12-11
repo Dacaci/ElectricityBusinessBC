@@ -23,22 +23,20 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: false
 
+  mail:
+    host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USERNAME:30f599e363a0ac}
+    password: ${MAIL_PASSWORD:918f87795d255f}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   port: 8080
-
-# Mail Configuration - Mailtrap pour test local
-mail:
-  host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
-  port: ${MAIL_PORT:2525}
-  username: ${MAIL_USERNAME:30f599e363a0ac}
-  password: ${MAIL_PASSWORD:918f87795d255f}
-  from: ${MAIL_FROM:no-reply@electricitybusiness.com}
-  properties:
-    mail:
-      smtp:
-        auth: true
-        starttls:
-          enable: true
 
 logging:
   level:
