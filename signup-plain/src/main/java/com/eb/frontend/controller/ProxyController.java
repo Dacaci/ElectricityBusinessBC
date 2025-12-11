@@ -22,9 +22,20 @@ public class ProxyController {
     @Value("${backend.url:http://localhost:8080}")
     private String backendUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyController.class);
+    
+    public ProxyController() {
+        // Créer RestTemplate avec timeout augmenté pour Render
+        this.restTemplate = new RestTemplate();
+        this.restTemplate.setRequestFactory(
+            new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
+                setConnectTimeout(30000);  // 30 secondes
+                setReadTimeout(60000);     // 60 secondes
+            }}
+        );
+    }
 
     /**
      * Proxy pour toutes les requêtes API
