@@ -11,9 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "stations")
@@ -42,9 +40,6 @@ public class Station {
     @Column(name = "hourly_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal hourlyRate = BigDecimal.ZERO;
     
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private StationStatus status = StationStatus.ACTIVE;
@@ -52,17 +47,14 @@ public class Station {
     @Column(name = "power", precision = 10, scale = 2)
     private BigDecimal power;
     
+    @Column(name = "plug_type", length = 20)
+    private String plugType = "TYPE_2S";
+    
     @Column(name = "instructions", columnDefinition = "TEXT")
     private String instructions;
     
     @Column(name = "on_foot")
     private Boolean onFoot = false;
-
-    @Column(name = "latitude", precision = 10, scale = 8)
-    private BigDecimal latitude;
-
-    @Column(name = "longitude", precision = 11, scale = 8)
-    private BigDecimal longitude;
     
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -75,14 +67,6 @@ public class Station {
     // Relations
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
-    
-    @ManyToMany
-    @JoinTable(
-        name = "station_plug_type",
-        joinColumns = @JoinColumn(name = "station_id"),
-        inverseJoinColumns = @JoinColumn(name = "plug_type_id")
-    )
-    private Set<PlugType> plugTypes = new HashSet<>();
     
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Media> medias = new ArrayList<>();
