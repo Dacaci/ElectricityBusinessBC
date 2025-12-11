@@ -130,7 +130,7 @@
         <% } %>
         
         <%-- Formulaire d'inscription (action vers le Servlet) --%>
-        <form method="POST" action="<%= request.getContextPath() %>/register-servlet">
+        <form method="POST" action="<%= request.getContextPath() %>/register">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="firstName">Prénom <span class="required">*</span></label>

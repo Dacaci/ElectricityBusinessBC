@@ -15,7 +15,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Controller
+// DÉSACTIVÉ : Module d'inscription SANS framework (RegisterServlet) est utilisé à la place
+// @Controller
 public class RegisterController {
 
     @Autowired(required = false)
