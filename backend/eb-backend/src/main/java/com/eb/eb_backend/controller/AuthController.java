@@ -42,7 +42,7 @@ public class AuthController {
             
             httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
             
-            // Retourner seulement les infos utilisateur (pas le token dans le body)
+            // Retourner seulement les infos utilisateur (le token est dans le cookie HTTPOnly)
             return ResponseEntity.ok(new LoginResponse(null, response.getUser()));
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
             log.error("Login failed - User not found: {}", loginRequest.getEmail());

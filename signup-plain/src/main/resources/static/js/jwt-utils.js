@@ -15,19 +15,17 @@ const JWT_USER_KEY = 'authUser';
  */
 function saveAuthData(user) {
     // Le token JWT est automatiquement stocké dans un cookie HTTPOnly par le serveur
-    // On stocke seulement les infos utilisateur en localStorage
     localStorage.setItem(JWT_USER_KEY, JSON.stringify(user));
 }
 
 /**
  * Récupère le token JWT depuis le cookie HTTPOnly
  * NOTE: Cette fonction retourne null car JavaScript ne peut pas accéder aux cookies HTTPOnly
- * Le token est automatiquement envoyé avec chaque requête HTTP
- * @returns {string|null} Toujours null (le token est dans un cookie HTTPOnly inaccessible)
+ * Le token est automatiquement envoyé avec chaque requête HTTP grâce au proxy
+ * @returns {string|null} Toujours null (le token est dans un cookie HTTPOnly)
  */
 function getAuthToken() {
     // Le token est dans un cookie HTTPOnly, JavaScript ne peut pas y accéder
-    // C'est une protection contre les attaques XSS
     return null;
 }
 
@@ -89,15 +87,11 @@ async function forceLogout() {
 
 /**
  * Vérifie si l'utilisateur est connecté
- * Avec les cookies HTTPOnly, on vérifie seulement si les infos utilisateur existent
- * Le serveur vérifiera automatiquement le cookie JWT à chaque requête
  * @returns {boolean} true si connecté, false sinon
  */
 function isAuthenticated() {
     const user = getAuthUser();
-    
-    // Avec les cookies HTTPOnly, on vérifie seulement si on a les infos utilisateur
-    // Le serveur vérifiera automatiquement le cookie JWT à chaque requête
+    // Avec le proxy et cookies HTTPOnly, on vérifie juste les infos utilisateur
     return user !== null;
 }
 
@@ -133,8 +127,7 @@ function getCurrentUserName() {
  * @returns {object} Les headers basiques
  */
 function getAuthHeaders() {
-    // Le token JWT est automatiquement envoyé via le cookie HTTPOnly
-    // Pas besoin de l'ajouter dans les headers
+    // Le token JWT est automatiquement envoyé via le cookie HTTPOnly grâce au proxy
     return {
         'Content-Type': 'application/json'
     };

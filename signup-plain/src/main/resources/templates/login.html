@@ -167,12 +167,10 @@
                 
                 const data = await response.json();
                 
-                // Avec les cookies HTTPOnly, le token n'est plus dans la réponse JSON
-                // Il est automatiquement stocké dans un cookie par le serveur
+                // Avec les cookies HTTPOnly via proxy, le token est dans un cookie
                 if (data.user) {
-                    // Stocker seulement les infos utilisateur (le token est dans le cookie HTTPOnly)
                     localStorage.setItem('authUser', JSON.stringify(data.user));
-                    console.log('✅ Connexion réussie ! Cookie JWT reçu automatiquement.');
+                    console.log('✅ Connexion réussie ! Cookie HTTPOnly reçu via proxy.');
                     console.log('👤 Utilisateur:', data.user);
                     alert('Connexion réussie !');
                     window.location.href = '/dashboard';
