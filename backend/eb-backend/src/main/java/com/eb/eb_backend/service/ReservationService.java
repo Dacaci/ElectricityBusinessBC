@@ -38,7 +38,7 @@ public class ReservationService {
         Station station = stationRepository.findById(createReservationDto.getStationId())
                 .orElseThrow(() -> new IllegalArgumentException("Station non trouvée avec l'ID: " + createReservationDto.getStationId()));
         
-        if (!station.getIsActive()) {
+        if (station.getStatus() != com.eb.eb_backend.entity.StationStatus.ACTIVE) {
             throw new IllegalArgumentException("La station n'est pas active");
         }
         

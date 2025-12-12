@@ -30,8 +30,6 @@ public class MediaDto {
     private String mimeType;
     
     private Long stationId;
-    private Long locationId;
-    private Long userId;
     
     // Constructeur pour conversion depuis l'entité
     public MediaDto(Media media) {
@@ -45,12 +43,6 @@ public class MediaDto {
         
         if (media.getStation() != null) {
             this.stationId = media.getStation().getId();
-        }
-        if (media.getLocation() != null) {
-            this.locationId = media.getLocation().getId();
-        }
-        if (media.getUser() != null) {
-            this.userId = media.getUser().getId();
         }
     }
 }
