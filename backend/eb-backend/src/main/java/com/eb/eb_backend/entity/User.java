@@ -82,14 +82,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations = new ArrayList<>();
     
-    @ManyToMany
-    @JoinTable(
-        name = "user_vehicle",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "vehicle_id")
-    )
-    private List<Vehicle> vehicles = new ArrayList<>();
-    
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses = new ArrayList<>();
     

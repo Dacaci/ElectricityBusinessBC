@@ -32,10 +32,6 @@ public class Reservation {
     @JoinColumn(name = "station_id", nullable = false)
     private Station station;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehicle_id")
-    private Vehicle vehicle;
-    
     @NotNull(message = "La date de début est obligatoire")
     @FutureOrPresent(message = "La date de début ne peut pas être dans le passé")
     @Column(name = "start_time", nullable = false)
