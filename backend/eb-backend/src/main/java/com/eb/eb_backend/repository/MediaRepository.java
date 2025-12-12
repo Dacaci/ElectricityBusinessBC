@@ -9,8 +9,6 @@ import java.util.List;
 @Repository
 public interface MediaRepository extends JpaRepository<Media, Long> {
     List<Media> findByStationId(Long stationId);
-    List<Media> findByLocationId(Long locationId);
-    List<Media> findByUserId(Long userId);
 }
 
 

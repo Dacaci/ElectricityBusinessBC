@@ -5,11 +5,9 @@ import com.eb.eb_backend.dto.ReservationDto;
 import com.eb.eb_backend.entity.Reservation;
 import com.eb.eb_backend.entity.Station;
 import com.eb.eb_backend.entity.User;
-import com.eb.eb_backend.entity.Vehicle;
 import com.eb.eb_backend.repository.ReservationRepository;
 import com.eb.eb_backend.repository.StationRepository;
 import com.eb.eb_backend.repository.UserRepository;
-import com.eb.eb_backend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +28,6 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final StationRepository stationRepository;
     private final UserRepository userRepository;
-    private final VehicleRepository vehicleRepository;
     
     public ReservationDto createReservation(Long userId, CreateReservationDto createReservationDto) {
         // Vérifier que l'utilisateur existe
@@ -48,23 +45,6 @@ public class ReservationService {
         // Vérifier que l'utilisateur ne réserve pas sa propre station
         if (station.getOwner().getId().equals(userId)) {
             throw new IllegalArgumentException("Vous ne pouvez pas réserver votre propre station");
-        }
-        
-        // Vérifier et associer le véhicule si fourni
-        Vehicle vehicle = null;
-        if (createReservationDto.getVehicleId() != null) {
-            vehicle = vehicleRepository.findById(createReservationDto.getVehicleId())
-                    .orElseThrow(() -> new IllegalArgumentException("Véhicule non trouvé avec l'ID: " + createReservationDto.getVehicleId()));
-            
-            // Vérifier que le véhicule appartient à l'utilisateur
-            boolean vehicleBelongsToUser = vehicle.getUsers().stream()
-                    .anyMatch(u -> u.getId().equals(userId));
-            
-            if (!vehicleBelongsToUser) {
-                throw new IllegalArgumentException("Ce véhicule ne vous appartient pas");
-            }
-            
-            // Tous les véhicules sont compatibles avec toutes les stations (Type 2S universel)
         }
         
         // Vérifier les conflits de réservation
@@ -91,7 +71,6 @@ public class ReservationService {
         Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setStation(station);
-        reservation.setVehicle(vehicle);
         reservation.setStartTime(createReservationDto.getStartTime());
         reservation.setEndTime(createReservationDto.getEndTime());
         reservation.setTotalAmount(totalAmount);

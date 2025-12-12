@@ -27,7 +27,6 @@ public class StationService {
     private final StationRepository stationRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
-    private final com.eb.eb_backend.repository.PlugTypeRepository plugTypeRepository;
     
     public StationDto createStation(Long ownerId, StationDto stationDto) {
         User owner = userRepository.findById(ownerId)
@@ -51,28 +50,14 @@ public class StationService {
         station.setLocation(location);
         station.setName(stationDto.getName());
         station.setHourlyRate(stationDto.getHourlyRate());
-        // plugType géré via relation Many-to-Many avec plugTypes
-        station.setIsActive(stationDto.getIsActive() != null ? stationDto.getIsActive() : true);
+        station.setPlugType(stationDto.getPlugType() != null ? stationDto.getPlugType() : "TYPE_2S");
         station.setStatus(stationDto.getStatus() != null ? stationDto.getStatus() : com.eb.eb_backend.entity.StationStatus.ACTIVE);
         station.setPower(stationDto.getPower());
-        // Coordonnées spécifiques à la borne (optionnelles). Si null, la carte utilisera celles du lieu
-        station.setLatitude(stationDto.getLatitude());
-        station.setLongitude(stationDto.getLongitude());
         station.setInstructions(stationDto.getInstructions());
         station.setOnFoot(stationDto.getOnFoot() != null ? stationDto.getOnFoot() : false);
         
         Station savedStation = stationRepository.save(station);
-        // FORCER TYPE2S : Toutes les bornes doivent avoir exactement TYPE2S (spécification métier)
-        com.eb.eb_backend.entity.PlugType type2s = plugTypeRepository.findByName("TYPE2S")
-                .orElseThrow(() -> new IllegalStateException("Le type de prise TYPE2S n'existe pas en base de données"));
-        
-        // Vider toutes les prises existantes et assigner uniquement TYPE2S
-        savedStation.getPlugTypes().clear();
-        savedStation.getPlugTypes().add(type2s);
-        
-        // Sauvegarder avec TYPE2S forcé
-        Station finalStation = stationRepository.save(savedStation);
-        return new StationDto(finalStation);
+        return new StationDto(savedStation);
     }
     
     @Transactional(readOnly = true)
@@ -130,15 +115,11 @@ public class StationService {
         
         station.setName(stationDto.getName());
         station.setHourlyRate(stationDto.getHourlyRate());
-        station.setIsActive(stationDto.getIsActive());
-        
-        // FORCER TYPE2S : S'assurer que la borne a toujours exactement TYPE2S (spécification métier)
-        com.eb.eb_backend.entity.PlugType type2s = plugTypeRepository.findByName("TYPE2S")
-                .orElseThrow(() -> new IllegalStateException("Le type de prise TYPE2S n'existe pas en base de données"));
-        
-        // Vider toutes les prises existantes et assigner uniquement TYPE2S
-        station.getPlugTypes().clear();
-        station.getPlugTypes().add(type2s);
+        station.setPlugType(stationDto.getPlugType() != null ? stationDto.getPlugType() : "TYPE_2S");
+        station.setStatus(stationDto.getStatus());
+        station.setPower(stationDto.getPower());
+        station.setInstructions(stationDto.getInstructions());
+        station.setOnFoot(stationDto.getOnFoot());
         
         Station savedStation = stationRepository.save(station);
         return new StationDto(savedStation);
@@ -155,7 +136,7 @@ public class StationService {
         Station station = stationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
         
-        station.setIsActive(true);
+        station.setStatus(com.eb.eb_backend.entity.StationStatus.ACTIVE);
         Station savedStation = stationRepository.save(station);
         return new StationDto(savedStation);
     }
@@ -164,7 +145,7 @@ public class StationService {
         Station station = stationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
         
-        station.setIsActive(false);
+        station.setStatus(com.eb.eb_backend.entity.StationStatus.INACTIVE);
         Station savedStation = stationRepository.save(station);
         return new StationDto(savedStation);
     }
