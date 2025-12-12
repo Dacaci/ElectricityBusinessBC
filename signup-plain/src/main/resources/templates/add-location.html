@@ -5,11 +5,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Lieu - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css}">
+    <style>
+        /* Styles pour l'autocomplétion */
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .autocomplete-suggestions.active {
+            display: block;
+        }
+        
+        .autocomplete-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        .autocomplete-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .autocomplete-item.selected {
+            background-color: #e3f2fd;
+        }
+        
+        .autocomplete-item-main {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .autocomplete-item-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .geo-button-container {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-geo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-geo:hover {
+            background-color: #218838;
+        }
+        
+        .btn-geo:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .coords-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .coords-hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spinner 0.8s linear infinite;
+        }
+        
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+        
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .info-box-title {
+            font-weight: 600;
+            color: #1976D2;
+            margin-bottom: 5px;
+        }
+        
+        .info-box-text {
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
     <div th:replace="~{includes/backend-config :: backend-config}"></div>
     
-        <div class="header">
+    <div class="header">
         <h1>Electricity Business</h1>
         <div class="user-info">
             <span id="welcomeMessage">Bienvenue</span>
@@ -29,56 +158,75 @@
     </nav>
     
     <div class="container">
-        
         <div class="content">
             <div id="messageContainer"></div>
             
             <div class="form-container">
+                <h2>Ajouter un nouveau lieu</h2>
+                
+                <div class="info-box">
+                    <div class="info-box-title">Géolocalisation intelligente</div>
+                    <div class="info-box-text">
+                        Commencez à taper une adresse pour obtenir des suggestions automatiques.
+                        Les coordonnées GPS seront remplies automatiquement et restent modifiables.
+                    </div>
+                </div>
+                
                 <form id="locationForm">
+                    <!-- Nom du lieu -->
                     <div class="form-group">
                         <label for="label">Nom du lieu <span class="required">*</span></label>
                         <input type="text" id="label" name="label" required maxlength="255" 
                                placeholder="Ex: Parking du centre commercial">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="address">Adresse complète <span class="required">*</span></label>
-                        <textarea id="address" name="address" required maxlength="500" 
-                                  placeholder="Ex: 123 Rue de la Paix, 75001 Paris, France"></textarea>
+                    <!-- Adresse avec autocomplétion -->
+                    <div class="form-group autocomplete-container">
+                        <label for="address">Adresse <span class="required">*</span></label>
+                        <input type="text" id="address" name="address" required 
+                               placeholder="Commencez à taper une adresse..."
+                               autocomplete="off">
+                        <div id="addressSuggestions" class="autocomplete-suggestions"></div>
+                        <div class="coords-hint">
+                            Tapez une adresse et sélectionnez une suggestion pour remplir automatiquement les coordonnées
+                        </div>
                     </div>
                     
-                    <div class="form-row">
+                    <!-- Bouton Géolocalisation -->
+                    <div class="geo-button-container">
+                        <button type="button" class="btn-geo" id="geoButton">
+                            <span>📍</span>
+                            <span id="geoButtonText">Utiliser ma position</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Coordonnées GPS (ÉDITABLES) -->
+                    <div class="coords-row">
                         <div class="form-group">
                             <label for="latitude">Latitude <span class="required">*</span></label>
-                            <input type="number" id="latitude" name="latitude" step="any" required 
-                                   placeholder="Ex: 48.8566">
+                            <input type="text" id="latitude" name="latitude" required 
+                                   placeholder="Ex: 48.8566"
+                                   pattern="^-?([0-9]{1,2}|1[0-7][0-9]|180)(\.[0-9]+)?$">
+                            <div class="coords-hint">Valeur entre -90 et 90</div>
                         </div>
                         
                         <div class="form-group">
                             <label for="longitude">Longitude <span class="required">*</span></label>
-                            <input type="number" id="longitude" name="longitude" step="any" required 
-                                   placeholder="Ex: 2.3522">
+                            <input type="text" id="longitude" name="longitude" required 
+                                   placeholder="Ex: 2.3522"
+                                   pattern="^-?([0-9]{1,2}|1[0-7][0-9]|180)(\.[0-9]+)?$">
+                            <div class="coords-hint">Valeur entre -180 et 180</div>
                         </div>
                     </div>
                     
-                    <div class="geo-button-container">
-                        <button type="button" class="btn btn-secondary" id="geoButton">
-                            Utiliser ma position actuelle
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="searchAddress()" style="margin-left: 10px;">
-                            Rechercher l'adresse
-                        </button>
-                    </div>
-                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                        Astuce : Saisissez l'adresse et cliquez sur "Rechercher l'adresse" pour obtenir les coordonnées automatiquement
-                    </p>
-                    
+                    <!-- Description -->
                     <div class="form-group">
                         <label for="description">Description (optionnel)</label>
                         <textarea id="description" name="description" maxlength="1000" 
-                                  placeholder="Informations supplémentaires sur le lieu..."></textarea>
+                                  placeholder="Informations supplémentaires sur le lieu..." rows="4"></textarea>
                     </div>
                     
+                    <!-- Actions -->
                     <div class="form-actions">
                         <a th:href="@{/locations}" class="btn btn-secondary">Annuler</a>
                         <button type="submit" class="btn" id="submitBtn">Créer le lieu</button>
@@ -91,244 +239,331 @@
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
     <script th:src="@{/js/jwt-utils.js}"></script>
-    <script th:src="@{/js/nominatim-utils.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
+    
     <script>
         // Vérifier l'authentification
         if (!requireAuth()) {
-            // L'utilisateur sera redirigé automatiquement par requireAuth()
+            // Redirection automatique
         } else {
-        
-        // Récupérer l'ID de l'utilisateur depuis le token JWT
-        const CURRENT_USER_ID = getCurrentUserId();
-        
-                document.getElementById('locationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            // Variables globales
+            const CURRENT_USER_ID = getCurrentUserId();
+            const ADDRESS_API_URL = 'https://api-adresse.data.gouv.fr/search/';
             
-            const formData = new FormData(this);
-            const locationData = {
-                label: formData.get('label').trim(),
-                address: formData.get('address').trim(),
-                latitude: formData.get('latitude'),
-                longitude: formData.get('longitude'),
-                description: formData.get('description')?.trim() || null,
-                ownerId: CURRENT_USER_ID // Utilisation du vrai ID utilisateur
-            };
+            let debounceTimer;
+            let selectedSuggestionIndex = -1;
+            let suggestions = [];
             
-            // Validation côté client
-            if (!locationData.label || !locationData.address) {
-                showError('Veuillez remplir tous les champs obligatoires');
-                return;
-            }
+            // ============================================
+            // 1. AUTOCOMPLÉTION ADRESSE (API Gouv)
+            // ============================================
             
-            if (isNaN(locationData.latitude) || isNaN(locationData.longitude)) {
-                showError('Les coordonnées GPS doivent être des nombres valides');
-                return;
-            }
+            const addressInput = document.getElementById('address');
+            const suggestionsBox = document.getElementById('addressSuggestions');
             
-            try {
-                showLoading(true);
+            addressInput.addEventListener('input', function() {
+                const query = this.value.trim();
                 
-                                const response = await authenticatedFetch(API_BASE_URL + '/api/locations', {
-                    method: 'POST',
-                    body: JSON.stringify(locationData)
-                });
+                // Réinitialiser l'index
+                selectedSuggestionIndex = -1;
                 
-                                if (!response.ok) {
-                    const errorText = await response.text();
-                                        throw new Error(errorText || 'Erreur lors de la création du lieu');
-                }
-                
-                const createdLocation = await response.json();
-                                showSuccess('Lieu créé avec succès !');
-                setTimeout(() => {
-                    window.location.href = '/locations';
-                }, 1500);
-                
-            } catch (error) {
-                                showError('Erreur lors de la création: ' + error.message);
-                showLoading(false);
-            }
-        });
-        
-        // Bouton de géolocalisation
-        document.getElementById('geoButton').addEventListener('click', function() {
-            getCurrentLocation();
-        });
-        
-        // Fonction pour obtenir les coordonnées GPS automatiquement avec Nominatim
-        async function getCurrentLocation() {
-            showLoading(true);
-            const btn = document.getElementById('geoButton');
-            btn.disabled = true;
-            btn.innerHTML = 'Détection en cours...';
-            
-            try {
-                // Utiliser la fonction améliorée avec Nominatim
-                const location = await getAccurateLocation();
-                
-                                // Remplir les champs
-                document.getElementById('latitude').value = location.latitude.toFixed(6);
-                document.getElementById('longitude').value = location.longitude.toFixed(6);
-                
-                // Remplir aussi l'adresse si disponible
-                if (location.city) {
-                    document.getElementById('city').value = location.city;
-                }
-                if (location.postalCode) {
-                    document.getElementById('postalCode').value = location.postalCode;
-                }
-                if (location.address && !document.getElementById('address').value) {
-                    document.getElementById('address').value = location.address;
-                }
-                
-                // Message avec source et précision
-                let successMsg = 'Position détectée avec succès !';
-                if (location.source === 'IP Address') {
-                    successMsg += '\nPosition approximative (basée sur votre IP)';
-                } else {
-                    successMsg += '\nPrécision : ' + Math.round(location.accuracy) + 'm';
-                }
-                if (location.city) {
-                    successMsg += '\nVille détectée : ' + location.city;
-                }
-                
-                showSuccess(successMsg);
-                btn.disabled = false;
-                btn.innerHTML = 'Utiliser ma position actuelle';
-                showLoading(false);
-                
-            } catch (error) {
-                                showError('Erreur : ' + error.message + '\nVeuillez saisir les coordonnées manuellement.');
-                btn.disabled = false;
-                btn.innerHTML = 'Utiliser ma position actuelle';
-                showLoading(false);
-            }
-        }
-        
-        // Fonction de recherche d'adresse avec Nominatim
-        async function searchAddress() {
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const postalCode = document.getElementById('postalCode').value;
-            
-            if (!address && !city) {
-                showError('Veuillez saisir au moins une adresse ou une ville');
-                return;
-            }
-            
-            const query = [address, postalCode, city].filter(x => x).join(', ');
-            
-            showLoading(true);
-            
-            try {
-                const results = await geocodeAddress(query);
-                
-                if (results.length === 0) {
-                    showError('Aucune adresse trouvée. Vérifiez votre saisie.');
-                    showLoading(false);
+                if (query.length < 3) {
+                    hideSuggestions();
                     return;
                 }
                 
-                // Prendre le premier résultat (le plus pertinent)
-                const location = results[0];
-                
-                                // Remplir les coordonnées
-                document.getElementById('latitude').value = location.latitude.toFixed(6);
-                document.getElementById('longitude').value = location.longitude.toFixed(6);
-                
-                // Mettre à jour les champs d'adresse avec les données précises
-                if (location.city) {
-                    document.getElementById('city').value = location.city;
-                }
-                if (location.postalCode) {
-                    document.getElementById('postalCode').value = location.postalCode;
-                }
-                
-                showSuccess('Adresse trouvée : ' + location.displayName);
-                showLoading(false);
-                
-            } catch (error) {
-                                showError('Erreur lors de la recherche d\'adresse : ' + error.message);
-                showLoading(false);
-            }
-        }
-        
-        // Ancienne fonction de géolocalisation simple (fallback)
-        function getCurrentLocationSimple() {
-            if (!navigator.geolocation) {
-                showError('La géolocalisation n\'est pas supportée par ce navigateur');
-                return;
-            }
+                // Debounce pour éviter trop de requêtes
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    searchAddress(query);
+                }, 300);
+            });
             
-            showLoading(true);
-            const btn = document.getElementById('geoButton');
-            btn.disabled = true;
-            btn.innerHTML = 'Détection en cours...';
+            // Navigation au clavier dans les suggestions
+            addressInput.addEventListener('keydown', function(e) {
+                const items = suggestionsBox.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, items.length - 1);
+                    updateSelectedSuggestion(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, 0);
+                    updateSelectedSuggestion(items);
+                } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+                    e.preventDefault();
+                    items[selectedSuggestionIndex].click();
+                } else if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+            });
             
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
-                    document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
-                    showSuccess('Position détectée avec succès !');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Utiliser ma position actuelle';
-                    showLoading(false);
-                },
-                function(error) {
-                                        let errorMessage = 'Impossible d\'obtenir la position.';
+            // Fermer les suggestions si clic à l'extérieur
+            document.addEventListener('click', function(e) {
+                if (!addressInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+            
+            async function searchAddress(query) {
+                try {
+                    const response = await fetch(`${ADDRESS_API_URL}?q=${encodeURIComponent(query)}&limit=10`);
                     
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage = 'Permission de géolocalisation refusée.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage = 'Position indisponible.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage = 'Délai de géolocalisation dépassé.';
-                            break;
+                    if (!response.ok) {
+                        throw new Error('Erreur API Adresse');
                     }
                     
-                    showError(errorMessage);
-                    btn.disabled = false;
-                    btn.innerHTML = 'Utiliser ma position actuelle';
-                    showLoading(false);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 60000
+                    const data = await response.json();
+                    suggestions = data.features || [];
+                    
+                    displaySuggestions(suggestions);
+                    
+                } catch (error) {
+                    console.error('Erreur recherche adresse:', error);
+                    showError('Impossible de rechercher l\'adresse');
                 }
-            );
-        }
-        
-        function showLoading(show) {
-            const submitBtn = document.getElementById('submitBtn');
-            if (show) {
-                submitBtn.innerHTML = 'Création en cours...';
-                submitBtn.disabled = true;
-            } else {
-                submitBtn.innerHTML = 'Créer le lieu';
-                submitBtn.disabled = false;
+            }
+            
+            function displaySuggestions(features) {
+                if (features.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+                
+                suggestionsBox.innerHTML = '';
+                selectedSuggestionIndex = -1;
+                
+                features.forEach((feature, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.dataset.index = index;
+                    
+                    const props = feature.properties;
+                    const coords = feature.geometry.coordinates; // [longitude, latitude]
+                    
+                    item.innerHTML = `
+                        <div class="autocomplete-item-main">${props.label || props.name}</div>
+                        <div class="autocomplete-item-details">
+                            ${props.context || ''} 
+                            ${props.postcode ? '(' + props.postcode + ')' : ''}
+                        </div>
+                    `;
+                    
+                    item.addEventListener('click', function() {
+                        selectSuggestion(feature);
+                    });
+                    
+                    suggestionsBox.appendChild(item);
+                });
+                
+                suggestionsBox.classList.add('active');
+            }
+            
+            function selectSuggestion(feature) {
+                const props = feature.properties;
+                const coords = feature.geometry.coordinates; // [longitude, latitude]
+                
+                // SCÉNARIO A : Remplir tous les champs
+                addressInput.value = props.label || props.name;
+                document.getElementById('latitude').value = coords[1].toFixed(6); // Latitude
+                document.getElementById('longitude').value = coords[0].toFixed(6); // Longitude
+                
+                // Optionnel : remplir le nom du lieu si vide
+                const labelInput = document.getElementById('label');
+                if (!labelInput.value.trim() && props.name) {
+                    labelInput.value = props.name;
+                }
+                
+                hideSuggestions();
+                showSuccess('Adresse sélectionnée ! Coordonnées remplies automatiquement.');
+            }
+            
+            function updateSelectedSuggestion(items) {
+                items.forEach((item, index) => {
+                    if (index === selectedSuggestionIndex) {
+                        item.classList.add('selected');
+                        item.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            }
+            
+            function hideSuggestions() {
+                suggestionsBox.classList.remove('active');
+                suggestionsBox.innerHTML = '';
+            }
+            
+            // ============================================
+            // 2. GÉOLOCALISATION NAVIGATEUR
+            // ============================================
+            
+            document.getElementById('geoButton').addEventListener('click', function() {
+                getMyPosition();
+            });
+            
+            function getMyPosition() {
+                if (!navigator.geolocation) {
+                    showError('La géolocalisation n\'est pas supportée par votre navigateur');
+                    return;
+                }
+                
+                const btn = document.getElementById('geoButton');
+                const btnText = document.getElementById('geoButtonText');
+                
+                btn.disabled = true;
+                btnText.innerHTML = '<span class="loading-spinner"></span> Détection en cours...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    async function(position) {
+                        // SCÉNARIO B : Remplir Latitude et Longitude
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lon = position.coords.longitude.toFixed(6);
+                        
+                        document.getElementById('latitude').value = lat;
+                        document.getElementById('longitude').value = lon;
+                        
+                        // Bonus : Geocoding inversé pour obtenir l'adresse
+                        try {
+                            const reverseUrl = `https://api-adresse.data.gouv.fr/reverse/?lon=${lon}&lat=${lat}`;
+                            const response = await fetch(reverseUrl);
+                            const data = await response.json();
+                            
+                            if (data.features && data.features.length > 0) {
+                                const address = data.features[0].properties.label;
+                                addressInput.value = address;
+                                showSuccess(`Position détectée ! Adresse trouvée : ${address}`);
+                            } else {
+                                showSuccess('Position détectée ! Coordonnées remplies.');
+                            }
+                        } catch (error) {
+                            showSuccess('Position détectée ! Coordonnées remplies.');
+                        }
+                        
+                        btn.disabled = false;
+                        btnText.textContent = 'Utiliser ma position';
+                    },
+                    function(error) {
+                        let errorMessage = 'Impossible d\'obtenir la position.';
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Permission de géolocalisation refusée par l\'utilisateur.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Position indisponible.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'Délai de géolocalisation dépassé.';
+                                break;
+                        }
+                        
+                        showError(errorMessage);
+                        btn.disabled = false;
+                        btnText.textContent = 'Utiliser ma position';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            }
+            
+            // ============================================
+            // 3. SOUMISSION DU FORMULAIRE
+            // ============================================
+            
+            document.getElementById('locationForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                // SCÉNARIO C : Les champs lat/lon sont ÉDITABLES
+                // L'utilisateur peut avoir modifié les valeurs
+                const latitude = parseFloat(formData.get('latitude'));
+                const longitude = parseFloat(formData.get('longitude'));
+                
+                // Validation côté client
+                if (isNaN(latitude) || isNaN(longitude)) {
+                    showError('Les coordonnées GPS doivent être des nombres valides');
+                    return;
+                }
+                
+                if (latitude < -90 || latitude > 90) {
+                    showError('La latitude doit être entre -90 et 90');
+                    return;
+                }
+                
+                if (longitude < -180 || longitude > 180) {
+                    showError('La longitude doit être entre -180 et 180');
+                    return;
+                }
+                
+                const locationData = {
+                    label: formData.get('label').trim(),
+                    address: formData.get('address').trim(),
+                    latitude: latitude,
+                    longitude: longitude,
+                    description: formData.get('description')?.trim() || null,
+                    ownerId: CURRENT_USER_ID
+                };
+                
+                try {
+                    showLoading(true);
+                    
+                    const response = await authenticatedFetch(API_BASE_URL + '/api/locations', {
+                        method: 'POST',
+                        body: JSON.stringify(locationData)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Erreur lors de la création du lieu');
+                    }
+                    
+                    const createdLocation = await response.json();
+                    showSuccess('Lieu créé avec succès !');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/locations';
+                    }, 1500);
+                    
+                } catch (error) {
+                    showError('Erreur : ' + error.message);
+                    showLoading(false);
+                }
+            });
+            
+            // ============================================
+            // 4. FONCTIONS UTILITAIRES
+            // ============================================
+            
+            function showLoading(show) {
+                const submitBtn = document.getElementById('submitBtn');
+                if (show) {
+                    submitBtn.innerHTML = '<span class="loading-spinner"></span> Création en cours...';
+                    submitBtn.disabled = true;
+                } else {
+                    submitBtn.innerHTML = 'Créer le lieu';
+                    submitBtn.disabled = false;
+                }
+            }
+            
+            function showError(message) {
+                const container = document.getElementById('messageContainer');
+                container.innerHTML = `<div class="error">${message}</div>`;
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+            
+            function showSuccess(message) {
+                const container = document.getElementById('messageContainer');
+                container.innerHTML = `<div class="success">${message}</div>`;
             }
         }
-        
-        function showError(message) {
-            const container = document.getElementById('messageContainer');
-            container.innerHTML = '<div class="error">' + message + '</div>';
-            // Auto-hide après 5 secondes
-            setTimeout(() => {
-                container.innerHTML = '';
-            }, 5000);
-        }
-        
-        function showSuccess(message) {
-            const container = document.getElementById('messageContainer');
-            container.innerHTML = '<div class="success">' + message + '</div>';
-        }
-        
-        } // Fermer le bloc else
     </script>
-    <script th:src="@{/js/auth.js}"></script>
 </body>
 </html>
