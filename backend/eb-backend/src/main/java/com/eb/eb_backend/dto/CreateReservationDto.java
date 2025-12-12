@@ -11,8 +11,6 @@ public class CreateReservationDto {
     @NotNull(message = "L'ID de la station est obligatoire")
     private Long stationId;
     
-    private Long vehicleId;
-    
     @NotNull(message = "La date de début est obligatoire")
     @FutureOrPresent(message = "La date de début ne peut pas être dans le passé")
     private LocalDateTime startTime;

@@ -26,10 +26,6 @@ public class ReservationDto {
     private String locationAddress;
     private BigDecimal stationHourlyRate;
     
-    private Long vehicleId;
-    private String vehicleLicensePlate;
-    private String vehicleBrandModel;
-    
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private BigDecimal totalAmount;
