@@ -11,15 +11,10 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 https://electricity-business-backend-jvc9.onrender.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;">
 </head>
 <body>
-    <div class="header">
-        <h1>Electricity Business</h1>
-        <div class="user-info">
-            <span id="welcomeMessage">Utilisateur :</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
-        </div>
-    </div>
+    <div th:replace="~{includes/navbar :: navbar}"></div>
     
-    <nav class="navigation">
+    <div class="container-main">
+    <nav class="navigation" style="display:none;">
         <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
         <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
         <a th:href="@{/locations}" class="nav-link">Mes lieux</a>

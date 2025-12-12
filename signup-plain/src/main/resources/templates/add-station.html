@@ -4,31 +4,12 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
 <title>Ajouter une Borne - Electricity Business</title>
 <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 https://electricity-business-backend-jvc9.onrender.com https://nominatim.openstreetmap.org; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;">
 </head>
 <body>
-    <div class="header">
-        <h1>Electricity Business</h1>
-        <div class="user-info">
-            <span id="welcomeMessage">Utilisateur :</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
-        </div>
-    </div>
-    
-    <nav class="navigation">
-        <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
-        <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
-        <a th:href="@{/locations}" class="nav-link">Mes lieux</a>
-        <a th:href="@{/add-station}" class="nav-link active">Ajouter une borne</a>
-        <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
-        <a th:href="@{/add-reservation}" class="nav-link">Réserver</a>
-        <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
-    </nav>
+    <div th:replace="~{includes/navbar :: navbar}"></div>
 
 <div class="container">
   <h2>Ajouter une borne</h2>
