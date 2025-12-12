@@ -116,20 +116,20 @@
             width: 100%;
         }
         
-        /* Bulles de prix personnalisées - forme ronde */
+        /* Bulles de prix personnalisées - forme ronde compacte */
         .price-marker {
             background-color: #1E40AF;
             color: white;
             border-radius: 50%;
-            padding: 10px;
+            padding: 6px 8px;
             font-weight: bold;
-            font-size: 12px;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-size: 11px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             white-space: nowrap;
             text-align: center;
-            min-width: 45px;
-            min-height: 45px;
+            min-width: 32px;
+            min-height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -290,14 +290,14 @@
         let userLocation = null;
         let nearbyMode = false;
         
-        // Fonction pour créer une icône avec prix
+        // Fonction pour créer une icône avec prix (taille réduite)
         function createPriceIcon(price) {
             const priceText = price ? `${price}€` : 'N/A';
             return L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div class="price-marker">${priceText}</div>`,
-                iconSize: [60, 30],
-                iconAnchor: [30, 15]
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
             });
         }
         
