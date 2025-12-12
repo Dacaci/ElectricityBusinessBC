@@ -224,7 +224,7 @@
     <div class="header">
         <h1>Electricity Business - Carte des Stations</h1>
         <div class="user-info">
-            <span id="welcomeMessage">Bienvenue</span>
+            <span id="welcomeMessage">Utilisateur :</span>
             <a th:href="@{/dashboard}">Dashboard</a>
             <a href="#" onclick="logout(); return false;">Déconnexion</a>
         </div>
@@ -604,7 +604,7 @@
             // Afficher le nom de l'utilisateur
             const user = getAuthUser();
             if (user) {
-                document.getElementById('welcomeMessage').textContent = 'Bienvenue, ' + user.firstName + ' ' + user.lastName;
+                document.getElementById('welcomeMessage').textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
             }
             
             // Initialiser la carte Leaflet

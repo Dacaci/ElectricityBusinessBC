@@ -140,7 +140,7 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/map}">Carte</a></li>
                 </ul>
                 <div class="d-flex align-items-center text-white">
-                    <span id="welcomeMessage" class="me-3">Bienvenue</span>
+                    <span id="welcomeMessage" class="me-3">Utilisateur :</span>
                     <a href="#" onclick="logout(); return false;" class="btn btn-outline-light btn-sm">
                         Déconnexion
                     </a>
@@ -346,7 +346,7 @@
             CURRENT_USER_ID = getCurrentUserId();
             const user = getAuthUser();
             if (user) {
-                document.getElementById('welcomeMessage').textContent = 'Bienvenue, ' + user.firstName + ' ' + user.lastName;
+                document.getElementById('welcomeMessage').textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
             }
             
             // Charger toutes les données au démarrage
