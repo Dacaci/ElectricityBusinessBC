@@ -270,7 +270,7 @@
         <div class="controls">
             <button onclick="getUserLocation()">Ma Position</button>
             <button onclick="toggleNearbySearch()">Recherche Proximité</button>
-            <button id="togglePublicBtn" onclick="togglePublicStations()" style="background: #6c757d;">⚪ Afficher bornes publiques</button>
+            <button id="togglePublicBtn" onclick="togglePublicStations()" style="background: #6c757d;">Afficher bornes publiques</button>
         </div>
         
         <div id="loading" class="loading" style="display: none;">
@@ -593,7 +593,7 @@
             showPublicStations = !showPublicStations;
             const btn = document.getElementById('togglePublicBtn');
             if (btn) {
-                btn.textContent = showPublicStations ? '🟢 Cacher bornes publiques' : '⚪ Afficher bornes publiques';
+                btn.textContent = showPublicStations ? 'Cacher bornes publiques' : 'Afficher bornes publiques';
                 btn.style.background = showPublicStations ? '#28a745' : '#6c757d';
             }
             loadOCMBoundingBox();

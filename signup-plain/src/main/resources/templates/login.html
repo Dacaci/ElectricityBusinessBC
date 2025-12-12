@@ -24,7 +24,7 @@
             <div class="card shadow-lg border-0">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold">⚡ Electricity Business</h2>
+                        <h2 class="fw-bold">Electricity Business</h2>
                         <p class="text-muted">Connectez-vous à votre compte</p>
                     </div>
                     
@@ -101,7 +101,7 @@
                 if (data.token && data.user) {
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
-                    console.log('✅ Connexion réussie !');
+                    console.log('Connexion réussie');
                     // Connexion réussie - redirection automatique
                     window.location.href = '/dashboard';
                 } else {
