@@ -6,9 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -36,8 +33,7 @@ public class VehicleDto {
     @DecimalMin(value = "0.0", message = "La capacité de batterie doit être positive")
     private Double batteryCapacity;
     
-    private List<Long> compatiblePlugIds = new ArrayList<>();
-    private List<String> compatiblePlugNames = new ArrayList<>();
+    private String plugType = "TYPE_2S";
     
     // Constructeur pour conversion depuis l'entité
     public VehicleDto(Vehicle vehicle) {
@@ -47,15 +43,7 @@ public class VehicleDto {
         this.model = vehicle.getModel();
         this.year = vehicle.getYear();
         this.batteryCapacity = vehicle.getBatteryCapacity();
-        
-        if (vehicle.getCompatiblePlugs() != null) {
-            this.compatiblePlugIds = vehicle.getCompatiblePlugs().stream()
-                .map(plugType -> plugType.getId())
-                .collect(Collectors.toList());
-            this.compatiblePlugNames = vehicle.getCompatiblePlugs().stream()
-                .map(plugType -> plugType.getName())
-                .collect(Collectors.toList());
-        }
+        this.plugType = vehicle.getPlugType();
     }
     
     public String getDisplayName() {

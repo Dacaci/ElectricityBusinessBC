@@ -28,13 +28,8 @@ public class Vehicle {
     @Column(name = "battery_capacity")
     private Double batteryCapacity; // en kWh
     
-    @ManyToMany
-    @JoinTable(
-        name = "vehicle_plug_compatibility",
-        joinColumns = @JoinColumn(name = "vehicle_id"),
-        inverseJoinColumns = @JoinColumn(name = "plug_type_id")
-    )
-    private Set<PlugType> compatiblePlugs = new HashSet<>();
+    @Column(name = "plug_type", length = 20)
+    private String plugType = "TYPE_2S";
     
     @ManyToMany(mappedBy = "vehicles")
     private Set<User> users = new HashSet<>();
@@ -114,12 +109,12 @@ public class Vehicle {
         this.batteryCapacity = batteryCapacity;
     }
     
-    public Set<PlugType> getCompatiblePlugs() {
-        return compatiblePlugs;
+    public String getPlugType() {
+        return plugType;
     }
     
-    public void setCompatiblePlugs(Set<PlugType> compatiblePlugs) {
-        this.compatiblePlugs = compatiblePlugs;
+    public void setPlugType(String plugType) {
+        this.plugType = plugType;
     }
     
     public Set<User> getUsers() {
