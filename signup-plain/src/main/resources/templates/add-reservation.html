@@ -4,8 +4,7 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Nouvelle Réservation - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
@@ -510,6 +509,8 @@
         } // Fin du bloc else
     </script>
     <script th:src="@{/js/auth.js}"></script>
+    <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
+    <div th:replace="~{includes/navbar :: navbar-script}"></div>
 </body>
 </html>
 

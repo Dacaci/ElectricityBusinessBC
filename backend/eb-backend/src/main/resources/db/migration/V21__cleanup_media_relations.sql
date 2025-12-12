@@ -17,3 +17,4 @@ COMMENT ON TABLE medias IS 'Table des médias (photos et vidéos) liés aux born
 COMMENT ON COLUMN medias.station_id IS 'ID de la station (obligatoire) - Un média appartient toujours à une station';
 COMMENT ON COLUMN medias.type IS 'Type de média : IMAGE ou VIDEO';
 
+

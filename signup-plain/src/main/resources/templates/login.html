@@ -102,8 +102,8 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
                     console.log('Connexion réussie');
-                    // Connexion réussie - redirection automatique
-                    window.location.href = '/dashboard';
+                    // Connexion réussie - redirection automatique vers la carte
+                    window.location.href = '/map';
                 } else {
                     console.error('Erreur: Token ou données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);

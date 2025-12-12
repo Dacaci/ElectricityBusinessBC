@@ -1,13 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Tableau de bord - Electricity Business</title>
-    
-    <!-- Bootstrap 5 + Zephyr Theme -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/zephyr/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
         /* Styles spécifiques minimaux */
@@ -963,5 +958,7 @@
             window.location.replace('/login?message=logout');
         }
     </script>
+    <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
+    <div th:replace="~{includes/navbar :: navbar-script}"></div>
 </body>
 </html>

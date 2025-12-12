@@ -9,3 +9,4 @@ DROP TABLE IF EXISTS addresses CASCADE;
 -- Note: Les attributs address, postal_code et city restent dans la table users
 -- Note: Les attributs latitude et longitude restent dans la table locations
 
+
