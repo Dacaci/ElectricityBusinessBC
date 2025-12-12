@@ -26,7 +26,6 @@
         <a th:href="@{/stations}" class="nav-link">Mes bornes</a>
         <a th:href="@{/add-reservation}" class="nav-link active">Réserver</a>
         <a th:href="@{/reservations}" class="nav-link">Mes réservations</a>
-        <a th:href="@{/vehicles}" class="nav-link">Mes véhicules</a>
         <a th:href="@{/map}" class="nav-link">Carte des bornes</a>
     </nav>
 
@@ -71,14 +70,6 @@
                                 <span class="detail-value" id="stationStatus">-</span>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="vehicleId">Véhicule (optionnel)</label>
-                        <select id="vehicleId" name="vehicleId">
-                            <option value="">Aucun véhicule</option>
-                        </select>
-                        <small style="color: #666; display: block; margin-top: 5px;">Sélectionnez votre véhicule pour vérifier la compatibilité des prises</small>
                     </div>
                     
                     <div class="form-group">
@@ -188,7 +179,6 @@
         
         let stations = [];
         let locations = [];
-        let vehicles = [];
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
@@ -243,23 +233,11 @@
             try {
                 showLoading(true);
                 
-                const userId = getCurrentUserId();
-                const vehiclesUrl = API_BASE_URL + '/api/vehicles/user/' + userId;
-                
-                // Charger les stations, les lieux et les véhicules en parallèle
-                // Utiliser authenticatedFetch pour les véhicules car c'est une donnée privée
-                const fetchPromises = [
+                // Charger les stations et les lieux
+                const [stationsResponse, locationsResponse] = await Promise.all([
                     fetch(API_BASE_URL + '/api/stations', { credentials: 'include' }),
                     fetch(API_BASE_URL + '/api/locations', { credentials: 'include' })
-                ];
-                
-                if (userId) {
-                    fetchPromises.push(authenticatedFetch(vehiclesUrl));
-                } else {
-                    fetchPromises.push(Promise.resolve({ ok: false }));
-                }
-                
-                const [stationsResponse, locationsResponse, vehiclesResponse] = await Promise.all(fetchPromises);
+                ]);
                 
                 if (!stationsResponse.ok) {
                     throw new Error('Erreur lors du chargement des bornes');
@@ -271,20 +249,12 @@
                 
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
-                let vehiclesData = [];
-                
-                // Charger les véhicules si la requête réussit
-                if (vehiclesResponse.ok) {
-                    vehiclesData = await vehiclesResponse.json();
-                }
                 
                 // Gérer la pagination
                 stations = stationsData.content || stationsData;
                 locations = locationsData.content || locationsData;
-                vehicles = Array.isArray(vehiclesData) ? vehiclesData : (vehiclesData.content || []);
                 
                 populateStationSelect();
-                populateVehicleSelect();
                 showLoading(false);
                 
             } catch (error) {
@@ -358,28 +328,6 @@
             });
             
             document.getElementById('formContainer').style.display = 'block';
-        }
-        
-        function populateVehicleSelect() {
-            const select = document.getElementById('vehicleId');
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">Aucun véhicule</option>';
-            
-            if (!Array.isArray(vehicles) || vehicles.length === 0) {
-                select.innerHTML = '<option value="">Aucun véhicule enregistré</option>';
-                return;
-            }
-            
-            vehicles.forEach((vehicle) => {
-                const option = document.createElement('option');
-                option.value = vehicle.id;
-                option.textContent = vehicle.brand + ' ' + vehicle.model + ' - ' + vehicle.licensePlate;
-                select.appendChild(option);
-            });
-            
-            if (currentValue) {
-                select.value = currentValue;
-            }
         }
         
         function updateStationInfo() {
@@ -456,7 +404,6 @@
             
             const reservationData = {
                 stationId: parseInt(formData.get('stationId')),
-                vehicleId: formData.get('vehicleId') ? parseInt(formData.get('vehicleId')) : null,
                 startTime: startDateTime,
                 endTime: endDateTime
             };
