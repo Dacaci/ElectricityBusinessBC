@@ -10,3 +10,4 @@ DROP TABLE IF EXISTS addresses CASCADE;
 -- Note: Les attributs latitude et longitude restent dans la table locations
 
 
+

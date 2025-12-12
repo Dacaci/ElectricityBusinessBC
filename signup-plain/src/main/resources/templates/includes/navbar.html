@@ -4,7 +4,7 @@
     <!-- Fragment: Navbar Bootstrap -->
     <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/map">Electricity Business</a>
+            <a class="navbar-brand" th:href="@{/dashboard}">Electricity Business</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -30,7 +30,7 @@
         </div>
     </nav>
     
-    <!-- Script pour mettre à jour le nom d'utilisateur -->
+    <!-- Script pour mettre à jour le nom d'utilisateur et marquer le lien actif -->
     <script th:fragment="navbar-script">
         // Mettre à jour le message de bienvenue avec le nom de l'utilisateur
         document.addEventListener('DOMContentLoaded', function() {
@@ -41,6 +41,59 @@
                     welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
                 }
             }
+            
+            // Marquer le lien actif selon l'URL courante
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('#navbarNav .nav-link');
+            
+            // Mapping des chemins pour correspondance
+            const pathMapping = {
+                '/dashboard': '/dashboard',
+                '/add-location': '/add-location',
+                '/locations': '/locations',
+                '/add-station': '/add-station',
+                '/edit-station': '/add-station', // edit-station est considéré comme une sous-page de stations
+                '/stations': '/stations',
+                '/add-reservation': '/add-reservation',
+                '/reservations': '/reservations',
+                '/map': '/map'
+            };
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href) {
+                    // Normaliser le href (supprimer le / au début si présent, puis le remettre)
+                    const normalizedHref = href.startsWith('/') ? href : '/' + href;
+                    
+                    // Vérifier si le chemin actuel correspond au lien
+                    let isActive = false;
+                    
+                    // Correspondance exacte
+                    if (currentPath === normalizedHref) {
+                        isActive = true;
+                    }
+                    // Correspondance avec sous-chemin (ex: /edit-station correspond à /stations)
+                    else if (pathMapping[currentPath] === normalizedHref) {
+                        isActive = true;
+                    }
+                    // Correspondance partielle pour les sous-pages
+                    else if (currentPath.startsWith(normalizedHref + '/')) {
+                        isActive = true;
+                    }
+                    // Cas spécial: /map peut aussi correspondre à / (pour la page d'accueil)
+                    else if (normalizedHref === '/map' && (currentPath === '/' || currentPath === '')) {
+                        isActive = true;
+                    }
+                    
+                    if (isActive) {
+                        link.classList.add('active');
+                        link.setAttribute('aria-current', 'page');
+                    } else {
+                        link.classList.remove('active');
+                        link.removeAttribute('aria-current');
+                    }
+                }
+            });
         });
     </script>
     

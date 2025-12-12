@@ -18,3 +18,4 @@ COMMENT ON COLUMN medias.station_id IS 'ID de la station (obligatoire) - Un méd
 COMMENT ON COLUMN medias.type IS 'Type de média : IMAGE ou VIDEO';
 
 
+
