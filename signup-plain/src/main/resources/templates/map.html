@@ -266,6 +266,7 @@
         <div class="controls">
             <button onclick="getUserLocation()">Ma Position</button>
             <button onclick="toggleNearbySearch()">Recherche Proximité</button>
+            <button id="togglePublicBtn" onclick="togglePublicStations()" style="background: #6c757d;">⚪ Afficher bornes publiques</button>
         </div>
         
         <div id="loading" class="loading" style="display: none;">
@@ -520,7 +521,15 @@
             document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
         
-        function loadOCMBoundingBox() {
+        // Variable pour gérer l'affichage des bornes publiques
+        let showPublicStations = false;
+        
+        async function loadOCMBoundingBox() {
+            if (!showPublicStations) {
+                ocmClusterLayer.clearLayers();
+                return;
+            }
+            
             let lat = 48.8566;
             let lng = 2.3522;
             
@@ -534,46 +543,56 @@
                     }
                 }
             } catch (e) {
-                // Ignorer les erreurs
+                console.warn('Erreur lors de la récupération des bounds:', e);
             }
             
-            // Limiter les valeurs pour éviter les problèmes de mémoire
-            const url = `${window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080'}/api/stations/external?latitude=${lat}&longitude=${lng}&distance=20&maxResults=100`;
+            // Appel direct à l'API OpenChargeMap (bornes publiques françaises)
+            // Clé API de développement publique - à remplacer en production
+            const OCM_API_KEY = '93b912b5-9d70-4b1f-960b-fb80a4c9c017';
+            const url = `https://api.openchargemap.io/v3/poi/?output=json&countrycode=FR&latitude=${lat}&longitude=${lng}&distance=50&maxresults=100&compact=true&verbose=false&key=${OCM_API_KEY}`;
+            
             showLoading(true);
             
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Erreur HTTP: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const stations = Array.isArray(data) ? data : [];
-                    
-                    // Purger la couche OCM avant d'ajouter
-                    ocmClusterLayer.clearLayers();
-                    
-                    // Ajouter les stations OCM à la carte (cluster)
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                const stations = await response.json();
+                
+                // Purger la couche OCM avant d'ajouter
+                ocmClusterLayer.clearLayers();
+                
+                // Ajouter les stations OCM à la carte (cluster)
+                if (Array.isArray(stations)) {
                     stations.forEach(station => {
-                        // Les coordonnées viennent du Location associé, pas de Station
-                        const location = locations.find(l => l.id === station.locationId);
-                        const lat = location ? location.latitude : (station.AddressInfo && station.AddressInfo.Latitude);
-                        const lng = location ? location.longitude : (station.AddressInfo && station.AddressInfo.Longitude);
-                        
-                        if (lat && lng) {
-                            const marker = L.marker([lat, lng], { icon: ocmStationIcon })
+                        const addr = station.AddressInfo;
+                        if (addr && addr.Latitude && addr.Longitude) {
+                            const marker = L.marker([addr.Latitude, addr.Longitude], { icon: ocmStationIcon })
                                 .bindPopup(createOCMStationPopup(station));
                             
                             ocmClusterLayer.addLayer(marker);
                         }
                     });
-                    
-                    showLoading(false);
-                })
-                .catch(error => {
-                    showLoading(false);
-                });
+                }
+                
+                console.log(`${stations.length} bornes publiques chargées`);
+                showLoading(false);
+            } catch (error) {
+                console.error('Erreur chargement OpenChargeMap:', error);
+                showLoading(false);
+            }
+        }
+        
+        // Fonction pour toggle l'affichage des bornes publiques
+        function togglePublicStations() {
+            showPublicStations = !showPublicStations;
+            const btn = document.getElementById('togglePublicBtn');
+            if (btn) {
+                btn.textContent = showPublicStations ? '🟢 Cacher bornes publiques' : '⚪ Afficher bornes publiques';
+                btn.style.background = showPublicStations ? '#28a745' : '#6c757d';
+            }
+            loadOCMBoundingBox();
         }
         
         // Charger les stations au démarrage
