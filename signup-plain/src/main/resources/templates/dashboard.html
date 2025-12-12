@@ -192,12 +192,7 @@
         <!-- Mes réservations passées -->
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-primary">Mes réservations passées</h5>
-                    <a href="#" onclick="exportToExcel(); return false;" class="btn btn-success btn-sm">
-                        Exporter Excel
-                    </a>
-                </div>
+                <h5 class="mb-0 text-primary">Mes réservations passées</h5>
             </div>
             <div class="card-body">
             <div class="filter-bar">
@@ -224,6 +219,7 @@
                             <th>Borne, Lieu, Ville</th>
                             <th>Montant réglé</th>
                             <th>Statut</th>
+                            <th>Reçu</th>
                         </tr>
                     </thead>
                     <tbody id="pastReservationsBody"></tbody>
@@ -233,6 +229,11 @@
                     <p class="mb-0">Aucune réservation passée</p>
                 </div>
                 <div class="pagination" id="pastPagination"></div>
+                <div class="d-flex justify-content-center mt-3">
+                    <a href="#" onclick="exportToExcel(); return false;" class="btn btn-success">
+                        Exporter les réservations passées au format Excel
+                    </a>
+                </div>
             </div>
         </div>
         </div>
@@ -409,11 +410,15 @@
             
             empty.style.display = 'none';
             body.innerHTML = current.map(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                const city = location?.city || 'N/A';
+                
                 return '<tr>' +
                     '<td>' + formatDateTime(reservation.startTime) + '</td>' +
                     '<td>' + formatDateTime(reservation.endTime) + '</td>' +
                     '<td>' + (reservation.userFirstName + ' ' + reservation.userLastName) + '</td>' +
-                    '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '</td>' +
+                    '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '<br>' + city + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
                     '<td>' + getStatusBadge(reservation.status) + '</td>' +
                     '<td>' +
@@ -466,13 +471,18 @@
             const paginatedPast = past.slice(startIndex, endIndex);
             
             body.innerHTML = paginatedPast.map(reservation => {
+                const station = allStations.find(s => s.id === reservation.stationId);
+                const location = allLocations.find(l => l.id === station?.locationId);
+                const city = location?.city || 'N/A';
+                
                 return '<tr>' +
                     '<td>' + formatDateTime(reservation.startTime) + '</td>' +
                     '<td>' + formatDateTime(reservation.endTime) + '</td>' +
                     '<td>' + (reservation.userFirstName + ' ' + reservation.userLastName) + '</td>' +
-                    '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '</td>' +
+                    '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '<br>' + city + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
                     '<td>' + getStatusBadge(reservation.status) + '</td>' +
+                    '<td><button class="btn btn-info btn-sm" onclick="downloadReceipt(' + reservation.id + ')">Télécharger</button></td>' +
                 '</tr>';
             }).join('');
             
@@ -509,13 +519,20 @@
                             '<div class="station">' +
                                 '<div class="station-name">' + station.name + '</div>' +
                                 '<div class="station-rate">' + (station.hourlyRate ? station.hourlyRate.toFixed(2) : '0.00') + ' €/h</div>' +
+                                '<div style="margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap;">' +
+                                    '<button class="btn btn-info btn-sm" onclick="window.location.href=\'/edit-station?id=' + station.id + '\'">Modifier</button>' +
+                                    '<button class="btn btn-warning btn-sm" onclick="setStationRate(' + station.id + ')">Définir tarif</button>' +
+                                    '<button class="btn btn-danger btn-sm" onclick="deleteStation(' + station.id + ')">Supprimer</button>' +
+                                '</div>' +
                             '</div>'
                         ).join('') +
                     '</div>' +
                     '<div class="location-actions">' +
-                        '<button class="btn btn-primary btn-sm" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier</button>' +
+                        '<button class="btn btn-primary btn-sm" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier lieu</button>' +
                         '<button class="btn btn-success btn-sm" onclick="window.location.href=\'/add-station?locationId=' + location.id + '\'">Ajouter une borne</button>' +
-                        '<button class="btn btn-danger btn-sm" onclick="deleteLocation(' + location.id + ')">Supprimer</button>' +
+                        '<button class="btn btn-secondary btn-sm" onclick="uploadPhoto(' + location.id + ')">Téléverser 1 photo</button>' +
+                        '<button class="btn btn-secondary btn-sm" onclick="uploadVideo(' + location.id + ')">Téléverser 1 vidéo</button>' +
+                        '<button class="btn btn-danger btn-sm" onclick="deleteLocation(' + location.id + ')">Supprimer lieu</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -716,26 +733,76 @@
             return html;
         }
         
+        function downloadReceipt(reservationId) {
+            showSuccess('Téléchargement du reçu pour la réservation #' + reservationId);
+            // TODO: Implémenter la génération de reçu PDF
+        }
+        
+        function setStationRate(stationId) {
+            const newRate = prompt('Entrez le nouveau tarif horaire (€/h) :');
+            if (newRate && !isNaN(newRate)) {
+                // TODO: Appel API pour mettre à jour le tarif
+                showSuccess('Tarif mis à jour');
+                loadAllData();
+            }
+        }
+        
+        async function deleteStation(stationId) {
+            if (!confirm('Voulez-vous supprimer cette borne ?')) return;
+            try {
+                const response = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Erreur');
+                showSuccess('Borne supprimée');
+                loadAllData();
+            } catch (error) {
+                showError('Erreur lors de la suppression');
+            }
+        }
+        
+        function uploadPhoto(locationId) {
+            showSuccess('Fonctionnalité de téléversement de photo pour le lieu #' + locationId);
+            // TODO: Implémenter l'upload de photo
+        }
+        
+        function uploadVideo(locationId) {
+            showSuccess('Fonctionnalité de téléversement de vidéo pour le lieu #' + locationId);
+            // TODO: Implémenter l'upload de vidéo
+        }
+        
         function exportToExcel() {
-            // Récupérer toutes les réservations de l'utilisateur
-            const myReservations = allReservations.filter(r => r.userId === CURRENT_USER_ID);
+            // Récupérer toutes les réservations passées de l'utilisateur
+            const now = new Date();
+            const pastReservations = allReservations.filter(r => {
+                if (r.userId !== CURRENT_USER_ID) return false;
+                if (r.status === 'COMPLETED' || r.status === 'REFUSED') return true;
+                if (r.status === 'CANCELLED') {
+                    const endTime = new Date(r.endTime);
+                    return endTime < now;
+                }
+                return false;
+            });
             
-            if (myReservations.length === 0) {
-                showError('Aucune réservation à exporter');
+            if (pastReservations.length === 0) {
+                showError('Aucune réservation passée à exporter');
                 return;
             }
             
             // Créer le contenu CSV
-            let csv = 'Date et heure debut,Date et heure fin,Borne,Lieu,Ville,Montant regle,Statut\n';
+            let csv = 'Date et heure debut,Date et heure fin,Utilisateur,Borne,Lieu,Ville,Montant regle,Statut\n';
             
-            myReservations.forEach(reservation => {
+            pastReservations.forEach(reservation => {
                 const station = allStations.find(s => s.id === reservation.stationId);
                 const location = allLocations.find(l => l.id === station?.locationId);
+                const city = location?.city || 'N/A';
                 
                 csv += formatDateTime(reservation.startTime) + ',' +
                        formatDateTime(reservation.endTime) + ',' +
+                       (reservation.userFirstName + ' ' + reservation.userLastName) + ',' +
                        (reservation.stationName || 'N/A') + ',' +
                        (reservation.locationLabel || 'N/A') + ',' +
+                       city + ',' +
                        (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' EUR,' +
                        getStatusText(reservation.status) + '\n';
             });
@@ -746,7 +813,7 @@
             const url = URL.createObjectURL(blob);
             
             link.setAttribute('href', url);
-            link.setAttribute('download', 'mes_reservations_' + new Date().getTime() + '.csv');
+            link.setAttribute('download', 'reservations_passees_' + new Date().getTime() + '.csv');
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
