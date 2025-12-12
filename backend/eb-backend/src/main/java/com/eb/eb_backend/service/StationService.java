@@ -258,18 +258,13 @@ public class StationService {
             java.time.LocalDateTime startTime, 
             java.time.LocalDateTime endTime) {
         
-        // Récupérer toutes les stations de la ville avec status ACTIVE
-        // City vient maintenant de location.addressEntity.city
+        // Récupérer toutes les stations avec status ACTIVE
+        // Note: La recherche par ville n'est plus possible sans l'entité Address
+        // On retourne toutes les stations actives
         List<Station> stationsInCity = stationRepository.findAll().stream()
-                .filter(station -> {
-                    String stationCity = station.getLocation() != null && 
-                                        station.getLocation().getAddressEntity() != null 
-                                        ? station.getLocation().getAddressEntity().getCity() 
-                                        : null;
-                    return stationCity != null && city.equalsIgnoreCase(stationCity)
-                            && station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE
-                            && station.getIsActive();
-                })
+                .filter(station -> 
+                    station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE
+                )
                 .collect(Collectors.toList());
         
         // Filtrer les stations qui n'ont pas de réservations conflictuelles

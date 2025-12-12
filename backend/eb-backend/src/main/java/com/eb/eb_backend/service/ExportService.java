@@ -53,11 +53,9 @@ public class ExportService {
                     row.createCell(c++).setCellValue(r.getUser().getFirstName() + " " + r.getUser().getLastName());
                     row.createCell(c++).setCellValue(r.getUser().getEmail());
                     row.createCell(c++).setCellValue(r.getStation().getName());
-                    // Adresse depuis addressEntity de location
-                    String address = r.getStation().getLocation().getAddressEntity() != null
-                            ? r.getStation().getLocation().getAddressEntity().getFullAddress()
-                            : "Lat: " + r.getStation().getLocation().getLatitude() + 
-                              ", Long: " + r.getStation().getLocation().getLongitude();
+                    // Adresse construite depuis les coordonnées GPS
+                    String address = "Lat: " + r.getStation().getLocation().getLatitude() + 
+                                    ", Long: " + r.getStation().getLocation().getLongitude();
                     row.createCell(c++).setCellValue(address);
                     row.createCell(c++).setCellValue(r.getStartTime().toString());
                     row.createCell(c++).setCellValue(r.getEndTime().toString());

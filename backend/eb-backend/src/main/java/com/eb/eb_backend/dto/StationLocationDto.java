@@ -35,27 +35,20 @@ public class StationLocationDto {
         this.id = station.getId();
         this.name = station.getName();
         this.hourlyRate = station.getHourlyRate();
-        // plugType depuis la relation Many-to-Many (prendre le premier si disponible)
-        this.plugType = !station.getPlugTypes().isEmpty() 
-                ? station.getPlugTypes().iterator().next().getName()
-                : "Non défini";
-        this.isActive = station.getIsActive();
+        this.plugType = station.getPlugType();
+        this.isActive = station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE;
         
-        // Coordonnées: privilégier celles de la borne si présentes, sinon celles du lieu
+        // Coordonnées depuis le lieu (location)
         if (station.getLocation() != null) {
-            this.latitude = station.getLatitude() != null ? station.getLatitude() : station.getLocation().getLatitude();
-            this.longitude = station.getLongitude() != null ? station.getLongitude() : station.getLocation().getLongitude();
+            this.latitude = station.getLocation().getLatitude();
+            this.longitude = station.getLocation().getLongitude();
             this.locationLabel = station.getLocation().getLabel();
             this.locationDescription = station.getLocation().getDescription();
             
-            // Adresse depuis addressEntity de location
-            if (station.getLocation().getAddressEntity() != null) {
-                this.address = station.getLocation().getAddressEntity().getFullAddress();
-            } else {
-                this.address = (this.latitude != null && this.longitude != null)
-                        ? "Lat: " + this.latitude + ", Long: " + this.longitude
-                        : "Adresse non disponible";
-            }
+            // Adresse construite depuis les coordonnées GPS
+            this.address = (this.latitude != null && this.longitude != null)
+                    ? "Lat: " + this.latitude + ", Long: " + this.longitude
+                    : "Adresse non disponible";
         } else {
             // Pas de location associée
             this.latitude = null;

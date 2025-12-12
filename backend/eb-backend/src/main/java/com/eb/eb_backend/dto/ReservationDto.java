@@ -51,21 +51,12 @@ public class ReservationDto {
         this.stationName = reservation.getStation().getName();
         this.locationId = reservation.getStation().getLocation() != null ? reservation.getStation().getLocation().getId() : null;
         this.locationLabel = reservation.getStation().getLocation() != null ? reservation.getStation().getLocation().getLabel() : "N/A";
-        // Adresse depuis addressEntity de location
-        this.locationAddress = reservation.getStation().getLocation() != null && reservation.getStation().getLocation().getAddressEntity() != null
-                ? reservation.getStation().getLocation().getAddressEntity().getFullAddress()
-                : (reservation.getStation().getLocation() != null 
-                    ? "Lat: " + reservation.getStation().getLocation().getLatitude() + 
-                      ", Long: " + reservation.getStation().getLocation().getLongitude()
-                    : "N/A");
+        // Adresse construite depuis les coordonnées GPS du lieu
+        this.locationAddress = reservation.getStation().getLocation() != null 
+                ? "Lat: " + reservation.getStation().getLocation().getLatitude() + 
+                  ", Long: " + reservation.getStation().getLocation().getLongitude()
+                : "N/A";
         this.stationHourlyRate = reservation.getStation().getHourlyRate();
-        
-        // Informations du véhicule si présent
-        if (reservation.getVehicle() != null) {
-            this.vehicleId = reservation.getVehicle().getId();
-            this.vehicleLicensePlate = reservation.getVehicle().getLicensePlate();
-            this.vehicleBrandModel = reservation.getVehicle().getBrand() + " " + reservation.getVehicle().getModel();
-        }
         
         this.startTime = reservation.getStartTime();
         this.endTime = reservation.getEndTime();

@@ -41,6 +41,8 @@ node_modules/
 *.drawio
 *.puml
 *.mmd
+*.xml
+*.drawio.xml
 
 # Scripts de conversion et utilitaires
 *.ps1

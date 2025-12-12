@@ -43,12 +43,8 @@ public class LocationDto {
     public LocationDto(Location location) {
         this.id = location.getId();
         this.label = location.getLabel();
-        // Utiliser addressEntity si disponible, sinon construire depuis lat/long
-        if (location.getAddressEntity() != null) {
-            this.address = location.getAddressEntity().getFullAddress();
-        } else {
-            this.address = "Lat: " + location.getLatitude() + ", Long: " + location.getLongitude();
-        }
+        // Adresse construite depuis les coordonnées GPS
+        this.address = "Lat: " + location.getLatitude() + ", Long: " + location.getLongitude();
         this.latitude = location.getLatitude();
         this.longitude = location.getLongitude();
         this.description = location.getDescription();

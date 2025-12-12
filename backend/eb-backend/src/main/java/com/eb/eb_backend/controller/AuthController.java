@@ -5,8 +5,6 @@ import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.service.AuthService;
 import com.eb.eb_backend.security.JwtUtil;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

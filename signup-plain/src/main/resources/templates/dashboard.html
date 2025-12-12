@@ -522,6 +522,8 @@
                                 '<div style="margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap;">' +
                                     '<button class="btn btn-info btn-sm" onclick="window.location.href=\'/edit-station?id=' + station.id + '\'">Modifier</button>' +
                                     '<button class="btn btn-warning btn-sm" onclick="setStationRate(' + station.id + ')">Définir tarif</button>' +
+                                    '<button class="btn btn-secondary btn-sm" onclick="uploadStationPhoto(' + station.id + ')">Téléverser 1 photo</button>' +
+                                    '<button class="btn btn-secondary btn-sm" onclick="uploadStationVideo(' + station.id + ')">Téléverser 1 vidéo</button>' +
                                     '<button class="btn btn-danger btn-sm" onclick="deleteStation(' + station.id + ')">Supprimer</button>' +
                                 '</div>' +
                             '</div>'
@@ -530,8 +532,6 @@
                     '<div class="location-actions">' +
                         '<button class="btn btn-primary btn-sm" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier lieu</button>' +
                         '<button class="btn btn-success btn-sm" onclick="window.location.href=\'/add-station?locationId=' + location.id + '\'">Ajouter une borne</button>' +
-                        '<button class="btn btn-secondary btn-sm" onclick="uploadPhoto(' + location.id + ')">Téléverser 1 photo</button>' +
-                        '<button class="btn btn-secondary btn-sm" onclick="uploadVideo(' + location.id + ')">Téléverser 1 vidéo</button>' +
                         '<button class="btn btn-danger btn-sm" onclick="deleteLocation(' + location.id + ')">Supprimer lieu</button>' +
                     '</div>' +
                 '</div>';
@@ -761,14 +761,80 @@
             }
         }
         
-        function uploadPhoto(locationId) {
-            showSuccess('Fonctionnalité de téléversement de photo pour le lieu #' + locationId);
-            // TODO: Implémenter l'upload de photo
+        function uploadStationPhoto(stationId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('stationId', stationId);
+                formData.append('type', 'IMAGE');
+                
+                try {
+                    const token = getToken();
+                    const response = await fetch(API_BASE_URL + '/api/medias/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        showSuccess('Photo téléversée avec succès');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        const error = await response.text();
+                        showError('Erreur : ' + error);
+                    }
+                } catch (error) {
+                    console.error('Erreur upload :', error);
+                    showError('Erreur lors du téléversement');
+                }
+            };
+            input.click();
         }
         
-        function uploadVideo(locationId) {
-            showSuccess('Fonctionnalité de téléversement de vidéo pour le lieu #' + locationId);
-            // TODO: Implémenter l'upload de vidéo
+        function uploadStationVideo(stationId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'video/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('stationId', stationId);
+                formData.append('type', 'VIDEO');
+                
+                try {
+                    const token = getToken();
+                    const response = await fetch(API_BASE_URL + '/api/medias/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        showSuccess('Vidéo téléversée avec succès');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        const error = await response.text();
+                        showError('Erreur : ' + error);
+                    }
+                } catch (error) {
+                    console.error('Erreur upload :', error);
+                    showError('Erreur lors du téléversement');
+                }
+            };
+            input.click();
         }
         
         function exportToExcel() {

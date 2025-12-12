@@ -1,19 +1,25 @@
 package com.eb.eb_backend.service;
 
 import com.eb.eb_backend.dto.MediaDto;
-import com.eb.eb_backend.entity.Location;
 import com.eb.eb_backend.entity.Media;
+import com.eb.eb_backend.entity.Media.MediaType;
 import com.eb.eb_backend.entity.Station;
-import com.eb.eb_backend.entity.User;
-import com.eb.eb_backend.repository.LocationRepository;
 import com.eb.eb_backend.repository.MediaRepository;
 import com.eb.eb_backend.repository.StationRepository;
-import com.eb.eb_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,11 +31,16 @@ public class MediaService {
     @Autowired
     private StationRepository stationRepository;
     
-    @Autowired
-    private LocationRepository locationRepository;
+    @Value("${media.upload.dir:uploads/medias}")
+    private String uploadDir;
     
-    @Autowired
-    private UserRepository userRepository;
+    private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
+        "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
+    );
+    
+    private static final List<String> ALLOWED_VIDEO_TYPES = Arrays.asList(
+        "video/mp4", "video/mpeg", "video/quicktime", "video/x-msvideo", "video/webm"
+    );
     
     @Transactional(readOnly = true)
     public List<MediaDto> getAllMedias() {
@@ -45,19 +56,6 @@ public class MediaService {
             .collect(Collectors.toList());
     }
     
-    @Transactional(readOnly = true)
-    public List<MediaDto> getMediasByLocationId(Long locationId) {
-        return mediaRepository.findByLocationId(locationId).stream()
-            .map(MediaDto::new)
-            .collect(Collectors.toList());
-    }
-    
-    @Transactional(readOnly = true)
-    public List<MediaDto> getMediasByUserId(Long userId) {
-        return mediaRepository.findByUserId(userId).stream()
-            .map(MediaDto::new)
-            .collect(Collectors.toList());
-    }
     
     @Transactional(readOnly = true)
     public MediaDto getMediaById(Long id) {
@@ -66,17 +64,74 @@ public class MediaService {
         return new MediaDto(media);
     }
     
+    /**
+     * Upload d'un fichier média (photo ou vidéo) pour une station
+     */
+    @Transactional
+    public MediaDto uploadMedia(Long stationId, MultipartFile file, MediaType type) throws IOException {
+        // 1. Valider la station
+        Station station = stationRepository.findById(stationId)
+            .orElseThrow(() -> new IllegalArgumentException("Station non trouvée: " + stationId));
+        
+        // 2. Valider le fichier
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Le fichier est vide");
+        }
+        
+        String contentType = file.getContentType();
+        if (contentType == null) {
+            throw new IllegalArgumentException("Type de fichier non déterminé");
+        }
+        
+        // 3. Vérifier que le type de fichier correspond au MediaType
+        if (type == MediaType.IMAGE && !ALLOWED_IMAGE_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Format d'image non supporté. Formats acceptés : JPG, PNG, GIF, WEBP");
+        }
+        
+        if (type == MediaType.VIDEO && !ALLOWED_VIDEO_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Format de vidéo non supporté. Formats acceptés : MP4, MPEG, MOV, AVI, WEBM");
+        }
+        
+        // 4. Créer le répertoire d'upload s'il n'existe pas
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        
+        // 5. Générer un nom de fichier unique
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".") 
+            ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+            : "";
+        String uniqueFilename = UUID.randomUUID().toString() + extension;
+        
+        // 6. Sauvegarder le fichier
+        Path filePath = uploadPath.resolve(uniqueFilename);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        
+        // 7. Créer l'entité Media
+        Media media = new Media();
+        media.setName(originalFilename);
+        media.setUrl("/uploads/medias/" + uniqueFilename); // URL relative
+        media.setType(type);
+        media.setMimeType(contentType);
+        media.setFileSize(file.getSize());
+        media.setStation(station);
+        
+        // 8. Sauvegarder en base
+        Media savedMedia = mediaRepository.save(media);
+        return new MediaDto(savedMedia);
+    }
+    
     @Transactional
     public MediaDto createMedia(MediaDto mediaDto) {
-        // Validation : exactement un parent doit être fourni
-        int parentCount = 0;
-        if (mediaDto.getStationId() != null) parentCount++;
-        if (mediaDto.getLocationId() != null) parentCount++;
-        if (mediaDto.getUserId() != null) parentCount++;
-        
-        if (parentCount != 1) {
-            throw new IllegalArgumentException("Un média doit être lié à exactement une entité (Station, Location ou User)");
+        // Validation : stationId doit être fourni
+        if (mediaDto.getStationId() == null) {
+            throw new IllegalArgumentException("Un média doit être lié à une station");
         }
+        
+        Station station = stationRepository.findById(mediaDto.getStationId())
+            .orElseThrow(() -> new IllegalArgumentException("Station non trouvée: " + mediaDto.getStationId()));
         
         Media media = new Media();
         media.setName(mediaDto.getName());
@@ -94,21 +149,7 @@ public class MediaService {
         media.setDescription(mediaDto.getDescription());
         media.setFileSize(mediaDto.getFileSize());
         media.setMimeType(mediaDto.getMimeType());
-        
-        // Utiliser setParentEntity pour assurer l'exclusivité
-        if (mediaDto.getStationId() != null) {
-            Station station = stationRepository.findById(mediaDto.getStationId())
-                .orElseThrow(() -> new IllegalArgumentException("Station non trouvée: " + mediaDto.getStationId()));
-            media.setParentEntity(station);
-        } else if (mediaDto.getLocationId() != null) {
-            Location location = locationRepository.findById(mediaDto.getLocationId())
-                .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé: " + mediaDto.getLocationId()));
-            media.setParentEntity(location);
-        } else if (mediaDto.getUserId() != null) {
-            User user = userRepository.findById(mediaDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé: " + mediaDto.getUserId()));
-            media.setParentEntity(user);
-        }
+        media.setStation(station);
         
         Media savedMedia = mediaRepository.save(media);
         return new MediaDto(savedMedia);

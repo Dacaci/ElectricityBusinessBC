@@ -34,10 +34,6 @@ public class Location {
     @Column(name = "label", nullable = false, length = 255)
     private String label;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id")
-    private Address addressEntity;
-    
     @NotNull(message = "La latitude est obligatoire")
     @DecimalMin(value = "-90.0", message = "La latitude doit être entre -90 et 90")
     @DecimalMax(value = "90.0", message = "La latitude doit être entre -90 et 90")
@@ -70,7 +66,4 @@ public class Location {
     // Relations
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Station> stations = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Media> medias = new ArrayList<>();
 }

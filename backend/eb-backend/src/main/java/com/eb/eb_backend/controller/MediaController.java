@@ -1,12 +1,14 @@
 package com.eb.eb_backend.controller;
 
 import com.eb.eb_backend.dto.MediaDto;
+import com.eb.eb_backend.entity.Media.MediaType;
 import com.eb.eb_backend.service.MediaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,14 +30,27 @@ public class MediaController {
         return ResponseEntity.ok(mediaService.getMediasByStationId(stationId));
     }
     
-    @GetMapping("/location/{locationId}")
-    public ResponseEntity<List<MediaDto>> getMediasByLocationId(@PathVariable Long locationId) {
-        return ResponseEntity.ok(mediaService.getMediasByLocationId(locationId));
-    }
-    
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<MediaDto>> getMediasByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(mediaService.getMediasByUserId(userId));
+    /**
+     * Upload d'un média (photo ou vidéo) pour une station
+     * @param stationId ID de la station
+     * @param file Fichier à uploader
+     * @param type Type de média (IMAGE ou VIDEO)
+     * @return MediaDto créé
+     */
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadMedia(
+            @RequestParam("stationId") Long stationId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("type") MediaType type) {
+        try {
+            MediaDto created = mediaService.uploadMedia(stationId, file, type);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de l'upload : " + e.getMessage());
+        }
     }
     
     @GetMapping("/{id}")
