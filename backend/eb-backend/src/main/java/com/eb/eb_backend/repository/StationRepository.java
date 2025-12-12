@@ -2,6 +2,7 @@ package com.eb.eb_backend.repository;
 
 import com.eb.eb_backend.entity.Location;
 import com.eb.eb_backend.entity.Station;
+import com.eb.eb_backend.entity.StationStatus;
 import com.eb.eb_backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,18 +21,18 @@ public interface StationRepository extends JpaRepository<Station, Long> {
     Page<Station> findByOwner(@Param("owner") User owner, Pageable pageable);
     
     // Stations actives d'un propriétaire
-    @Query("SELECT s FROM Station s WHERE s.location.owner = :owner AND s.isActive = true")
-    List<Station> findByOwnerAndIsActiveTrue(@Param("owner") User owner);
+    @Query("SELECT s FROM Station s WHERE s.location.owner = :owner AND s.status = com.eb.eb_backend.entity.StationStatus.ACTIVE")
+    List<Station> findByOwnerAndStatusActive(@Param("owner") User owner);
     
-    List<Station> findByLocationAndIsActiveTrue(Location location);
+    List<Station> findByLocationAndStatus(Location location, StationStatus status);
     
-    List<Station> findByIsActiveTrue();
+    List<Station> findByStatus(StationStatus status);
     
-    @Query("SELECT s FROM Station s WHERE s.isActive = true")
+    @Query("SELECT s FROM Station s WHERE s.status = com.eb.eb_backend.entity.StationStatus.ACTIVE")
     Page<Station> findBySearchQuery(@Param("q") String query, Pageable pageable);
     
     @Query("SELECT s FROM Station s WHERE " +
-           "s.isActive = true AND " +
+           "s.status = com.eb.eb_backend.entity.StationStatus.ACTIVE AND " +
            "s.location.latitude BETWEEN :minLat AND :maxLat AND " +
            "s.location.longitude BETWEEN :minLng AND :maxLng")
     List<Station> findByCoordinatesRange(@Param("minLat") java.math.BigDecimal minLat,

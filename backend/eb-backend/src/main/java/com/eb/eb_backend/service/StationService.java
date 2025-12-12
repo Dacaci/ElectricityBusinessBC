@@ -80,7 +80,7 @@ public class StationService {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
         
-        return stationRepository.findByOwnerAndIsActiveTrue(owner)
+        return stationRepository.findByOwnerAndStatusActive(owner)
                 .stream()
                 .map(StationDto::new)
                 .toList();
@@ -91,7 +91,7 @@ public class StationService {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + locationId));
         
-        return stationRepository.findByLocationAndIsActiveTrue(location)
+        return stationRepository.findByLocationAndStatus(location, com.eb.eb_backend.entity.StationStatus.ACTIVE)
                 .stream()
                 .map(StationDto::new)
                 .toList();
@@ -161,7 +161,7 @@ public class StationService {
     
     @Transactional(readOnly = true)
     public List<StationLocationDto> getAllStationsForMap() {
-        List<Station> stations = stationRepository.findByIsActiveTrue();
+        List<Station> stations = stationRepository.findByStatus(com.eb.eb_backend.entity.StationStatus.ACTIVE);
         return stations.stream()
                 .map(StationLocationDto::new)
                 .collect(Collectors.toList());
@@ -184,7 +184,7 @@ public class StationService {
         BigDecimal maxLon = longitude.add(BigDecimal.valueOf(lonDelta));
         
         // Récupérer toutes les stations actives dans la bounding box
-        List<Station> stations = stationRepository.findByIsActiveTrue();
+        List<Station> stations = stationRepository.findByStatus(com.eb.eb_backend.entity.StationStatus.ACTIVE);
         
         return stations.stream()
                 .filter(station -> {
