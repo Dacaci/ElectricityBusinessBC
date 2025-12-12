@@ -116,6 +116,28 @@
             width: 100%;
         }
         
+        /* Bulles de prix personnalisées */
+        .price-marker {
+            background-color: #1E40AF;
+            color: white;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            text-align: center;
+            min-width: 50px;
+        }
+        
+        .price-marker:hover {
+            background-color: #1E3A8A;
+            cursor: pointer;
+            transform: scale(1.1);
+            transition: all 0.2s ease;
+        }
+        
         .controls {
             position: absolute;
             top: 10px;
@@ -263,13 +285,16 @@
         let userLocation = null;
         let nearbyMode = false;
         
-        // Icône personnalisée pour les stations
-        const stationIcon = L.divIcon({
-            className: 'station-marker',
-            html: '<div style="background-color: #1E40AF; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-        });
+        // Fonction pour créer une icône avec prix
+        function createPriceIcon(price) {
+            const priceText = price ? `${price}€` : 'N/A';
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="price-marker">${priceText}</div>`,
+                iconSize: [60, 30],
+                iconAnchor: [30, 15]
+            });
+        }
         
         // Icône pour les stations OpenChargeMap (verte)
         const ocmStationIcon = L.divIcon({
@@ -305,7 +330,8 @@
                 
                 stations.forEach(station => {
                     if (station.latitude && station.longitude) {
-                        const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
+                        const priceIcon = createPriceIcon(station.hourlyRate);
+                        const marker = L.marker([station.latitude, station.longitude], { icon: priceIcon })
                             .bindPopup(createStationPopup(station));
                         
                         stationsLayer.addLayer(marker);
@@ -420,7 +446,8 @@
                 
                 stations.forEach(station => {
                     if (station.latitude && station.longitude) {
-                        const marker = L.marker([station.latitude, station.longitude], { icon: stationIcon })
+                        const priceIcon = createPriceIcon(station.hourlyRate);
+                        const marker = L.marker([station.latitude, station.longitude], { icon: priceIcon })
                             .bindPopup(createStationPopup(station));
                         
                         stationsLayer.addLayer(marker);

@@ -320,10 +320,6 @@
                 return;
             }
             
-            if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
-                return;
-            }
-            
             try {
                 const url = API_BASE_URL + '/api/reservations/' + reservationId + '/cancel';
                 
@@ -371,10 +367,6 @@
         async function deleteReservation(reservationId) {
             if (!reservationId) {
                 console.error('Erreur: ID de réservation manquant');
-                return;
-            }
-            
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) {
                 return;
             }
             

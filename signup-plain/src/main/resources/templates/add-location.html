@@ -164,14 +164,6 @@
             <div class="form-container">
                 <h2>Ajouter un nouveau lieu</h2>
                 
-                <div class="info-box">
-                    <div class="info-box-title">Géolocalisation intelligente</div>
-                    <div class="info-box-text">
-                        Commencez à taper une adresse pour obtenir des suggestions automatiques.
-                        Les coordonnées GPS seront remplies automatiquement et restent modifiables.
-                    </div>
-                </div>
-                
                 <form id="locationForm">
                     <!-- Nom du lieu -->
                     <div class="form-group">
@@ -433,12 +425,12 @@
                             if (data.features && data.features.length > 0) {
                                 const address = data.features[0].properties.label;
                                 addressInput.value = address;
-                                showSuccess(`Position détectée ! Adresse trouvée : ${address}`);
+                                showSuccess(`Adresse géolocalisée : ${address}`);
                             } else {
-                                showSuccess('Position détectée ! Coordonnées remplies.');
+                                showSuccess('Coordonnées GPS remplies');
                             }
                         } catch (error) {
-                            showSuccess('Position détectée ! Coordonnées remplies.');
+                            showSuccess('Coordonnées GPS remplies');
                         }
                         
                         btn.disabled = false;

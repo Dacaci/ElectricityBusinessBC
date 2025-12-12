@@ -259,10 +259,6 @@
                                 return;
             }
             
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette borne ?')) {
-                return;
-            }
-            
             isDeletingStation = true;
             
             try {
@@ -307,10 +303,6 @@
                     'Êtes-vous vraiment sûr de vouloir continuer ?';
             }
             
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-            
             isDeletingLocation = true;
             
             try {
@@ -349,9 +341,6 @@
         }
         
         async function deleteMedia(mediaId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce média ?')) {
-                return;
-            }
             
             try {
                 const response = await fetch(API_BASE_URL + '/api/medias/' + mediaId, {

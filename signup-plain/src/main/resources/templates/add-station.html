@@ -34,37 +34,32 @@
   <h2>Ajouter une borne</h2>
 
   <div class="row">
-    <label for="name">Nom</label>
-    <input id="name" type="text" placeholder="Ex: Borne Maison" required>
-  </div>
-
-  <div class="row">
     <label for="locationId">Lieu</label>
     <select id="locationId" required></select>
   </div>
 
   <div class="row">
-    <label for="power">Puissance (kW)</label>
+    <label for="name">Nom</label>
+    <input id="name" type="text" placeholder="Ex: Borne Maison" required>
+  </div>
+
+  <div class="row">
+    <label for="power">Puissance (KVA)</label>
     <input id="power" type="number" step="0.1" value="7.4">
   </div>
 
   <div class="row">
-    <label for="city">Ville</label>
-    <input id="city" type="text" placeholder="Ex: Paris">
-  </div>
-
-  <div class="row">
-    <label><input id="customPosition" type="checkbox"> Position spécifique à la borne</label>
-  </div>
-
-  <div id="latitudeRow" class="row" style="display:none;">
     <label for="latitude">Latitude</label>
     <input id="latitude" type="number" step="0.000001" placeholder="48.8566">
   </div>
 
-  <div id="longitudeRow" class="row" style="display:none;">
+  <div class="row">
     <label for="longitude">Longitude</label>
     <input id="longitude" type="number" step="0.000001" placeholder="2.3522">
+  </div>
+
+  <div class="row">
+    <button id="geoBtn" class="secondary" type="button">Utiliser ma position</button>
   </div>
 
   <div class="row">
@@ -78,7 +73,6 @@
 
   <div class="row">
     <button id="submitBtn">Ajouter</button>
-    <button id="geoBtn" class="secondary" type="button">Utiliser ma position</button>
   </div>
 
   <div id="msg" class="msg"></div>
@@ -101,16 +95,6 @@
     loadLocations();
     document.getElementById('submitBtn').addEventListener('click', onSubmit);
     document.getElementById('geoBtn').addEventListener('click', useGeolocation);
-    const custom = document.getElementById('customPosition');
-    custom.addEventListener('change', () => {
-      const show = custom.checked;
-      document.getElementById('latitudeRow').style.display = show ? '' : 'none';
-      document.getElementById('longitudeRow').style.display = show ? '' : 'none';
-      if (!show) {
-        document.getElementById('latitude').value = '';
-        document.getElementById('longitude').value = '';
-      }
-    });
   });
 
   async function loadLocations() {
@@ -125,20 +109,25 @@
         // Afficher tous les lieux (le backend vérifie la propriété lors de la création)
         const opt = document.createElement('option');
         opt.value = String(loc.id);
-        const lat = loc.latitude != null ? Number(loc.latitude).toFixed(6) : '?';
-        const lng = loc.longitude != null ? Number(loc.longitude).toFixed(6) : '?';
-        opt.textContent = (loc.label || 'Lieu') + ` (lat:${lat}, lng:${lng})`;
+        // Format: Nom du lieu - Adresse, Ville
+        const locationText = loc.label || 'Lieu';
+        const addressParts = [];
+        if (loc.address) addressParts.push(loc.address);
+        if (loc.city) addressParts.push(loc.city);
+        const addressText = addressParts.length > 0 ? ' - ' + addressParts.join(', ') : '';
+        opt.textContent = locationText + addressText;
         select.appendChild(opt);
       }
       select.addEventListener('change', () => {
         const sel = select.value;
         const found = locations.find(l => String(l.id) === sel);
         if (found) {
-          // Si position spécifique non cochée, masquer les champs
-          const custom = document.getElementById('customPosition').checked;
-          if (!custom) {
-            document.getElementById('latitude').value = '';
-            document.getElementById('longitude').value = '';
+          // Pré-remplir automatiquement avec les coordonnées du lieu
+          if (found.latitude != null) {
+            document.getElementById('latitude').value = Number(found.latitude).toFixed(6);
+          }
+          if (found.longitude != null) {
+            document.getElementById('longitude').value = Number(found.longitude).toFixed(6);
           }
         }
       });
@@ -156,14 +145,12 @@
       return;
     }
 
-    const custom = document.getElementById('customPosition').checked;
     const payload = {
       name: name + ' - ' + Date.now(),
       locationId: parseInt(locationIdStr, 10),
       power: parseFloat(document.getElementById('power').value) || null,
-      city: document.getElementById('city').value || null,
-      latitude: custom ? toNum(document.getElementById('latitude').value) : null,
-      longitude: custom ? toNum(document.getElementById('longitude').value) : null,
+      latitude: toNum(document.getElementById('latitude').value),
+      longitude: toNum(document.getElementById('longitude').value),
       instructions: document.getElementById('instructions').value || null,
       onFoot: document.getElementById('onFoot').checked,
       plugType: 'TYPE_2S',
@@ -214,29 +201,14 @@
       // Utiliser la fonction améliorée avec Nominatim
       const location = await getAccurateLocation();
       
-      // Cocher automatiquement la case "Position spécifique"
-      document.getElementById('customPosition').checked = true;
-      document.getElementById('latitudeRow').style.display = '';
-      document.getElementById('longitudeRow').style.display = '';
-      
       // Remplir les champs
       document.getElementById('latitude').value = location.latitude.toFixed(6);
       document.getElementById('longitude').value = location.longitude.toFixed(6);
       
-      // Remplir aussi la ville si disponible
-      if (location.city && !document.getElementById('city').value) {
-        document.getElementById('city').value = location.city;
-      }
-      
-      // Message avec source et précision
-      let successMsg = 'Position détectée !';
-      if (location.source === 'IP Address') {
-        successMsg += ' (approximative - basée sur IP)';
-      } else {
-        successMsg += ' Précision: ' + Math.round(location.accuracy) + 'm';
-      }
+      // Message naturel
+      let successMsg = 'Adresse géolocalisée';
       if (location.city) {
-        successMsg += ' - Ville: ' + location.city;
+        successMsg += ' : ' + location.city;
       }
       
       showMsg(successMsg, false);

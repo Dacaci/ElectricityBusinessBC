@@ -647,7 +647,6 @@
         }
         
         async function refuseReservation(id) {
-            if (!confirm('Voulez-vous refuser cette demande ?')) return;
             try {
                 const response = await authenticatedFetch(API_BASE_URL + '/api/reservations/' + id + '/refuse', {
                     method: 'PUT'
@@ -661,7 +660,6 @@
         }
         
         async function cancelReservation(id) {
-            if (!confirm('Voulez-vous annuler cette réservation ?')) return;
             try {
                 const response = await authenticatedFetch(API_BASE_URL + '/api/reservations/' + id + '/cancel', {
                     method: 'PUT'
@@ -675,7 +673,6 @@
         }
         
         async function deleteLocation(id) {
-            if (!confirm('Voulez-vous supprimer ce lieu ?')) return;
             try {
                 const response = await authenticatedFetch(API_BASE_URL + '/api/locations/' + id, {
                     method: 'DELETE'
@@ -748,7 +745,6 @@
         }
         
         async function deleteStation(stationId) {
-            if (!confirm('Voulez-vous supprimer cette borne ?')) return;
             try {
                 const response = await authenticatedFetch(API_BASE_URL + '/api/stations/' + stationId, {
                     method: 'DELETE'
