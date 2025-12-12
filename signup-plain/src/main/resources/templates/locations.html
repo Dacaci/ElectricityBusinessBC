@@ -5,21 +5,15 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Mes Lieux - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
 </head>
 <body>
-    <div class="header">
-        <h1>Electricity Business</h1>
-        <div class="user-info">
-            <span id="welcomeMessage">Utilisateur :</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
-        </div>
-    </div>
+    <div th:replace="~{includes/navbar :: navbar}"></div>
     
-    <nav class="navigation">
+    <div class="container-main">
+        <!-- Navigation supprimée - maintenant dans navbar -->
         <a th:href="@{/dashboard}" class="nav-link">Tableau de bord</a>
         <a th:href="@{/add-location}" class="nav-link">Ajouter un lieu</a>
         <a th:href="@{/locations}" class="nav-link active">Mes lieux</a>

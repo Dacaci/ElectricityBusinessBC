@@ -5,8 +5,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Carte des Stations - Electricity Business</title>
     <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -107,7 +106,7 @@
         }
         
         .map-container {
-            height: calc(100vh - 140px);
+            height: calc(100vh - 220px);
             position: relative;
         }
         
@@ -221,15 +220,9 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Electricity Business - Carte des Stations</h1>
-        <div class="user-info">
-            <span id="welcomeMessage">Utilisateur :</span>
-            <a th:href="@{/dashboard}">Dashboard</a>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
-        </div>
-    </div>
-        
+    <div th:replace="~{includes/navbar :: navbar}"></div>
+    
+    <div class="container-fluid p-0">
         <div class="search-section">
             <h2 class="search-title">Trouver une borne disponible autour de soi</h2>
             <form class="search-form" id="searchForm">
@@ -748,5 +741,11 @@
             }
         }
     </script>
+    
+    <!-- Scripts Bootstrap communs -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script pour mettre à jour le nom d'utilisateur dans la navbar -->
+    <div th:replace="~{includes/navbar :: navbar-script}"></div>
 </body>
 </html>

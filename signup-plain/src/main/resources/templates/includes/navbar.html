@@ -30,6 +30,20 @@
         </div>
     </nav>
     
+    <!-- Script pour mettre à jour le nom d'utilisateur -->
+    <script th:fragment="navbar-script">
+        // Mettre à jour le message de bienvenue avec le nom de l'utilisateur
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getAuthUser();
+            if (user && user.firstName && user.lastName) {
+                const welcomeEl = document.getElementById('welcomeMessage');
+                if (welcomeEl) {
+                    welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
+                }
+            }
+        });
+    </script>
+    
     <!-- Fragment: Head Bootstrap (CSS communs) -->
     <th:block th:fragment="head-bootstrap">
         <meta charset="UTF-8">
@@ -54,4 +68,3 @@
     </th:block>
 </body>
 </html>
-
