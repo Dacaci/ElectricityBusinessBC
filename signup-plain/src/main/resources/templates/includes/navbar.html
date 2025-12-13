@@ -136,6 +136,8 @@
                 color: rgba(255, 255, 255, 0.9);
                 transition: all 0.2s ease;
                 white-space: nowrap;
+                font-size: 0.875rem; /* Réduction de la taille pour tenir sur une ligne */
+                padding: 0.4rem 0.6rem; /* Réduction du padding */
             }
             
             .navbar.navbar-dark.bg-primary .navbar-nav .nav-link:hover {
@@ -253,6 +255,16 @@
                     flex-wrap: nowrap !important;
                 }
                 
+                .navbar.navbar-dark.bg-primary .navbar-nav.me-auto {
+                    flex-wrap: nowrap !important;
+                    display: flex !important;
+                }
+                
+                .navbar.navbar-dark.bg-primary .navbar-nav.me-auto .nav-link {
+                    font-size: 0.8rem !important; /* Taille encore plus petite en desktop */
+                    padding: 0.35rem 0.5rem !important;
+                }
+                
                 .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto {
                     display: flex !important;
                     flex-direction: row !important;
@@ -267,12 +279,12 @@
                     flex-shrink: 0 !important;
                     min-width: fit-content !important;
                     margin-left: 0.5rem !important;
+                    font-size: 0.8rem !important;
+                    padding: 0.25rem 0.5rem !important;
                 }
                 
-                /* Limiter la largeur des éléments de navigation pour éviter le débordement */
-                .navbar.navbar-dark.bg-primary .navbar-nav.me-auto {
-                    flex-wrap: wrap !important;
-                    max-width: calc(100% - 250px) !important;
+                .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .navbar-text {
+                    font-size: 0.8rem !important;
                 }
             }
         </style>
