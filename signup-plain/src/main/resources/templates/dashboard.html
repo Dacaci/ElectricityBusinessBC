@@ -161,10 +161,10 @@
                     <tbody id="pastReservationsBody"></tbody>
                 </table>
                 </div>
+                <div id="pastPagination" class="d-flex justify-content-center mt-3"></div>
                 <div id="pastReservationsEmpty" class="text-center py-5 text-muted" style="display: none;">
                     <p class="mb-0">Aucune réservation passée</p>
                 </div>
-                <div class="pagination" id="pastPagination"></div>
                 <div class="d-flex justify-content-end mt-3">
                     <a href="#" onclick="exportToExcel(); return false;" class="btn btn-success">
                         Exporter les réservations passées au format Excel
@@ -248,10 +248,10 @@
                     <tbody id="treatedRequestsBody"></tbody>
                 </table>
                 </div>
+                <div id="treatedPagination" class="d-flex justify-content-center mt-3"></div>
                 <div id="treatedRequestsEmpty" class="text-center py-5 text-muted" style="display: none;">
                     <p class="mb-0">Aucune demande traitée</p>
                 </div>
-                <div class="pagination" id="treatedPagination"></div>
             </div>
         </div>
         </div>
@@ -624,7 +624,10 @@
         }
         
         function filterPastReservations() {
+            // Réinitialiser à la première page lors du filtrage
+            currentPastPage = 1;
             // TODO: Implémenter le filtre
+            loadPastReservations();
             showSuccess('Filtre appliqué');
         }
         
@@ -636,35 +639,81 @@
         }
         
         function changePastPage(page) {
+            if (page < 1) return;
             currentPastPage = page;
             loadPastReservations();
+            // Scroller vers le haut du tableau après changement de page
+            document.getElementById('pastReservationsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         function changeTreatedPage(page) {
+            if (page < 1) return;
             currentTreatedPage = page;
             loadTreatedRequests();
+            // Scroller vers le haut du tableau après changement de page
+            document.getElementById('treatedRequestsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         function generatePaginationControls(currentPage, totalPages, changeFunction) {
             // La pagination est toujours affichée, même avec une seule page
             if (totalPages <= 0) totalPages = 1;
             
-            let html = '';
+            let html = '<nav><ul class="pagination mb-0">';
             
             // Bouton première page
-            html += '<button ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="' + changeFunction + '(1)">«</button>';
+            html += '<li class="page-item' + (currentPage === 1 ? ' disabled' : '') + '">';
+            html += '<a class="page-link" href="#" onclick="' + changeFunction + '(1); return false;" aria-label="Première page">';
+            html += '<span aria-hidden="true">&laquo;</span>';
+            html += '</a></li>';
             
             // Bouton précédent
-            html += '<button ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="' + changeFunction + '(' + (currentPage - 1) + ')">‹</button>';
+            html += '<li class="page-item' + (currentPage === 1 ? ' disabled' : '') + '">';
+            html += '<a class="page-link" href="#" onclick="' + changeFunction + '(' + (currentPage - 1) + '); return false;" aria-label="Précédent">';
+            html += '<span aria-hidden="true">&lsaquo;</span>';
+            html += '</a></li>';
             
-            // Affichage info page
-            html += '<span class="page-info">Page ' + currentPage + ' sur ' + totalPages + '</span>';
+            // Affichage des numéros de pages (max 5 pages visibles)
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                html += '<li class="page-item"><a class="page-link" href="#" onclick="' + changeFunction + '(1); return false;">1</a></li>';
+                if (startPage > 2) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += '<li class="page-item' + (i === currentPage ? ' active' : '') + '">';
+                html += '<a class="page-link" href="#" onclick="' + changeFunction + '(' + i + '); return false;">' + i + '</a>';
+                html += '</li>';
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+                html += '<li class="page-item"><a class="page-link" href="#" onclick="' + changeFunction + '(' + totalPages + '); return false;">' + totalPages + '</a></li>';
+            }
             
             // Bouton suivant
-            html += '<button ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="' + changeFunction + '(' + (currentPage + 1) + ')">›</button>';
+            html += '<li class="page-item' + (currentPage === totalPages ? ' disabled' : '') + '">';
+            html += '<a class="page-link" href="#" onclick="' + changeFunction + '(' + (currentPage + 1) + '); return false;" aria-label="Suivant">';
+            html += '<span aria-hidden="true">&rsaquo;</span>';
+            html += '</a></li>';
             
             // Bouton dernière page
-            html += '<button ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="' + changeFunction + '(' + totalPages + ')">»</button>';
+            html += '<li class="page-item' + (currentPage === totalPages ? ' disabled' : '') + '">';
+            html += '<a class="page-link" href="#" onclick="' + changeFunction + '(' + totalPages + '); return false;" aria-label="Dernière page">';
+            html += '<span aria-hidden="true">&raquo;</span>';
+            html += '</a></li>';
+            
+            html += '</ul></nav>';
             
             return html;
         }

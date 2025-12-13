@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Vérification réussie - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css}">
     <style>
@@ -87,5 +86,6 @@
             <a th:href="@{/login}" style="color: #1E40AF; text-decoration: none;">Cliquez ici si la redirection ne fonctionne pas</a>
         </p>
     </div>
+    <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
 </body>
 </html>

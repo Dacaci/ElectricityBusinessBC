@@ -258,42 +258,8 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 13px;
 }
 
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 24px;
-}
-
-.pagination button {
-    padding: 8px 14px;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #475569;
-    font-weight: 500;
-}
-
-.pagination button:hover:not(:disabled) {
-    background: #f8fafc;
-    border-color: #1E40AF;
-    color: #1E40AF;
-}
-
-.pagination button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.pagination .page-info {
-    color: #64748b;
-    font-size: 13px;
-    margin: 0 8px;
-}
+/* Pagination - Bootstrap gère maintenant la pagination */
+/* Les styles custom ont été supprimés pour utiliser Bootstrap natif */
 
 /* Utilities - Bootstrap fournit déjà toutes les classes utilitaires */
 /* Utilisez .text-center, .mt-*, .mb-*, .p-* de Bootstrap */
