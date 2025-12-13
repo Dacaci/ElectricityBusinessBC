@@ -300,6 +300,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script th:src="@{/js/config.js}"></script>
     <script th:src="@{/js/jwt-utils.js}"></script>
     <script th:src="@{/js/auth.js}"></script>
     <script>
@@ -508,7 +509,7 @@
                 '<p><strong>Adresse:</strong> ' + address + '</p>' +
                 '<p><strong>Tarif:</strong> <span class="price">' + rate + '</span></p>' +
                 '<p><strong>Type de prise:</strong> ' + plugType + '</p>' +
-                '<a href="/add-reservation?stationId=' + station.id + '" class="btn">Réserver</a>' +
+                '<a href="#" onclick="reserveStation(' + station.id + '); return false;" class="btn">Réserver</a>' +
                 '</div>';
         }
         
@@ -545,8 +546,15 @@
             }
         }
         
-        // Réserver une station
+        // Réserver une station - Vérifier l'authentification d'abord
         function reserveStation(stationId) {
+            // Vérifier si l'utilisateur est connecté
+            if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
+                // Rediriger vers login avec le paramètre de retour
+                const returnUrl = encodeURIComponent('/add-reservation?stationId=' + stationId);
+                window.location.href = '/login?returnUrl=' + returnUrl;
+                return;
+            }
             window.location.href = '/add-reservation?stationId=' + stationId;
         }
         

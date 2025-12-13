@@ -8,7 +8,8 @@ public class IndexController {
 
     @GetMapping("/")
     public String index() {
-        return "index";
+        // Approche "Map-First" : rediriger directement vers la carte
+        return "redirect:/map";
     }
 }
 

@@ -102,8 +102,18 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
                     console.log('Connexion réussie');
-                    // Connexion réussie - redirection automatique vers la carte
-                    window.location.href = '/map';
+                    
+                    // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('returnUrl');
+                    
+                    if (returnUrl) {
+                        // Rediriger vers l'URL de retour (ex: /add-reservation?stationId=123)
+                        window.location.href = decodeURIComponent(returnUrl);
+                    } else {
+                        // Sinon, rediriger vers la carte par défaut
+                        window.location.href = '/map';
+                    }
                 } else {
                     console.error('Erreur: Token ou données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);

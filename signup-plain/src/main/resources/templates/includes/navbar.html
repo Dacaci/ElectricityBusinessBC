@@ -19,14 +19,19 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/reservations}">Mes réservations</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/map}">Carte des bornes</a></li>
                 </ul>
-                <ul class="navbar-nav ms-auto flex-nowrap align-items-center">
-                    <li class="nav-item d-flex align-items-center">
+                <ul class="navbar-nav ms-auto flex-nowrap align-items-center" id="userMenu">
+                    <li class="nav-item d-flex align-items-center" id="welcomeItem" style="display: none;">
                         <span class="navbar-text text-white me-3" id="welcomeMessage">Utilisateur :</span>
                     </li>
-                    <li class="nav-item d-flex align-items-center flex-shrink-0">
+                    <li class="nav-item d-flex align-items-center flex-shrink-0" id="logoutItem" style="display: none;">
                         <button class="btn btn-outline-light btn-sm d-flex align-items-center" onclick="logout(); return false;" style="white-space: nowrap; flex-shrink: 0;">
                             <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
                         </button>
+                    </li>
+                    <li class="nav-item d-flex align-items-center flex-shrink-0" id="loginItem" style="display: none;">
+                        <a th:href="@{/login}" class="btn btn-outline-light btn-sm d-flex align-items-center" style="white-space: nowrap; flex-shrink: 0;">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Connexion
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -37,12 +42,38 @@
     <script th:fragment="navbar-script">
         // Mettre à jour le message de bienvenue avec le nom de l'utilisateur
         document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si l'utilisateur est connecté
+            const isUserLoggedIn = typeof isAuthenticated === 'function' && isAuthenticated();
+            const welcomeItem = document.getElementById('welcomeItem');
+            const logoutItem = document.getElementById('logoutItem');
+            const loginItem = document.getElementById('loginItem');
             const welcomeEl = document.getElementById('welcomeMessage');
-            if (welcomeEl) {
-                const user = getAuthUser();
-                if (user && user.firstName && user.lastName) {
-                    welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
+            
+            if (isUserLoggedIn) {
+                // Afficher les éléments pour utilisateur connecté
+                if (welcomeItem) welcomeItem.style.display = 'flex';
+                if (logoutItem) logoutItem.style.display = 'flex';
+                if (loginItem) loginItem.style.display = 'none';
+                
+                // Mettre à jour le message de bienvenue
+                if (welcomeEl) {
+                    const user = getAuthUser();
+                    if (user && user.firstName && user.lastName) {
+                        welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
+                    }
                 }
+            } else {
+                // Afficher le bouton de connexion pour utilisateur non connecté
+                if (welcomeItem) welcomeItem.style.display = 'none';
+                if (logoutItem) logoutItem.style.display = 'none';
+                if (loginItem) loginItem.style.display = 'flex';
+                
+                // Masquer les liens qui nécessitent une connexion
+                const protectedLinks = document.querySelectorAll('#navbarNav .nav-link[href*="/dashboard"], #navbarNav .nav-link[href*="/add-location"], #navbarNav .nav-link[href*="/locations"], #navbarNav .nav-link[href*="/add-station"], #navbarNav .nav-link[href*="/stations"], #navbarNav .nav-link[href*="/add-reservation"], #navbarNav .nav-link[href*="/reservations"]');
+                protectedLinks.forEach(link => {
+                    const parent = link.closest('.nav-item');
+                    if (parent) parent.style.display = 'none';
+                });
             }
             
             // Marquer le lien actif selon l'URL courante
