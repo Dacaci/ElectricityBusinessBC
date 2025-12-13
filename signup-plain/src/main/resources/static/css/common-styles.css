@@ -4,6 +4,19 @@
 /* Override Bootstrap font avec nos polices personnalisées */
 body { 
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+html {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 /* Titres avec Poppins */

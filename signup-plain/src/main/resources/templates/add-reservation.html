@@ -34,27 +34,25 @@
                         </div>
                     </div>
                     
-                    <div id="stationInfo" class="station-info">
-                        <h5>Informations de la borne</h5>
-                        <div class="station-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Type de prise:</span>
-                                <span class="detail-value" id="stationPlugType">-</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Tarif horaire:</span>
-                                <span class="detail-value" id="stationHourlyRate">-</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Lieu:</span>
-                                <span class="detail-value" id="stationLocation">-</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Statut:</span>
-                                <span class="detail-value" id="stationStatus">-</span>
+                        <div id="stationInfo" class="card bg-light mb-3" style="display: none;">
+                            <div class="card-body">
+                                <h5 class="card-title">Informations de la borne</h5>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <strong>Type de prise:</strong> <span id="stationPlugType">-</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Tarif horaire:</strong> <span id="stationHourlyRate">-</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Lieu:</strong> <span id="stationLocation">-</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Statut:</strong> <span id="stationStatus">-</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     
                     <div class="mb-3">
                         <label class="form-label">Quand ?</label>
@@ -78,7 +76,7 @@
                         </div>
                     </div>
                     
-                    <div id="priceCalculation" class="price-calculation">
+                        <div id="priceCalculation" class="card bg-primary text-white mb-3" style="display: none;">
                         <h5>Montant à régler</h5>
                         <div class="price-breakdown">
                             <span>Durée:</span>
@@ -136,10 +134,14 @@
                         </div>
                     </div>
                     
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">Réserver</button>
-                    </div>
-                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Réserver</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

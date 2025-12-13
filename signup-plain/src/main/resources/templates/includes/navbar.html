@@ -185,18 +185,27 @@
                 flex-shrink: 0;
             }
             
-            /* Assurer que le texte reste visible */
-            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link.text-white {
+            /* Assurer que le texte reste visible - couleur blanche pour tous les nav-link */
+            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link {
                 color: rgba(255, 255, 255, 0.9) !important;
             }
             
-            /* S'assurer que le bouton de déconnexion est toujours visible */
+            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link:hover {
+                color: #fff !important;
+            }
+            
+            /* S'assurer que le bouton de déconnexion est toujours visible avec couleur blanche */
             .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .nav-link[onclick*="logout"],
             .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .nav-link[onclick*="logout"] i,
             .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .nav-link[onclick*="logout"] span {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
+                color: rgba(255, 255, 255, 0.9) !important;
+            }
+            
+            .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .nav-link[onclick*="logout"]:hover {
+                color: #fff !important;
             }
             
             /* Forcer l'affichage du collapse quand il contient le bouton de déconnexion */

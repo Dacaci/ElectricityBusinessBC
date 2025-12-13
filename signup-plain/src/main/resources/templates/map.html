@@ -17,7 +17,14 @@
             margin: 0; 
             background-color: white; 
             height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
         }
         
         .header { 
@@ -108,6 +115,18 @@
         .map-container {
             height: calc(100vh - 220px);
             position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .map-container {
+                height: calc(100vh - 280px);
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr !important;
+            }
         }
         
         #map {
