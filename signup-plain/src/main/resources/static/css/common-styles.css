@@ -1,19 +1,9 @@
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-/* Reset et base */
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-}
-
+/* Override Bootstrap font avec nos polices personnalisées */
 body { 
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #f8f9fa;
-    color: #1a1a1a;
-    line-height: 1.6;
-    min-height: 100vh;
 }
 
 /* Titres avec Poppins */
@@ -61,163 +51,8 @@ h1, h2, h3, h4, h5, h6 {
     color: #dc2626;
 }
 
-/* Navigation */
-.navigation {
-    background: #ffffff;
-    border-bottom: 1px solid #cbd5e1;
-    display: flex;
-    overflow-x: auto;
-}
-
-.nav-link {
-    color: #64748b;
-    text-decoration: none;
-    padding: 16px 24px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-}
-
-.nav-link:hover {
-    color: #1e293b;
-    background: #f1f5f9;
-    border-bottom-color: #94a3b8;
-}
-
-.nav-link.active {
-    color: #1e293b;
-    border-bottom-color: #1e293b;
-    background: #f1f5f9;
-    font-weight: 600;
-}
-
-/* Container */
-.container { 
-    max-width: 1400px; 
-    margin: 32px auto; 
-    padding: 0 40px;
-}
-
-/* Content */
-.content {
-    padding: 24px 0;
-}
-
-/* Cards & Sections */
-.card,
-.section {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 32px;
-    margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.card-title,
-.section-title {
-    color: #1e293b;
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #cbd5e1;
-}
-
-/* Forms */
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #1e293b;
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.form-control,
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-select,
-textarea {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.2s;
-    background: #ffffff;
-    color: #1a1a1a;
-}
-
-.form-control:focus,
-input:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: #1e293b;
-    box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
-}
-
-textarea.form-control,
-textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-/* Buttons - Colorés mais épurés */
-.btn,
-button {
-    padding: 7px 14px;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 400;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    background: #e5e7eb;
-    color: #1f2937;
-}
-
-.btn-primary,
-.btn:not([class*="btn-"]) {
-    background: #1E40AF;
-    color: #ffffff;
-}
-
-.btn-success {
-    background: #10b981;
-    color: #ffffff;
-}
-
-.btn-danger {
-    background: #ef4444;
-    color: #ffffff;
-}
-
-.btn-warning {
-    background: #f59e0b;
-    color: #ffffff;
-}
-
-.btn-secondary {
-    background: #6b7280;
-    color: #ffffff;
-}
-
-.btn-info {
-    background: #06b6d4;
-    color: #ffffff;
-}
+/* Note: Container, Cards, Forms, Buttons sont maintenant gérés par Bootstrap */
+/* Utilisez les classes Bootstrap : .container, .card, .form-control, .btn, etc. */
 
 /* Actions */
 .actions {
@@ -229,39 +64,7 @@ button {
     flex-wrap: wrap;
 }
 
-/* Tables */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-th {
-    background: #f8fafc;
-    color: #475569;
-    padding: 14px 16px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 13px;
-    border-bottom: 2px solid #cbd5e1;
-}
-
-td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    background: #ffffff;
-}
-
-tr:last-child td {
-    border-bottom: none;
-}
-
-tr:hover td {
-    background: #fafbfc;
-}
+/* Tables sont gérées par Bootstrap - utilisez .table, .table-hover, etc. */
 
 /* Status badges */
 .status-badge {
@@ -492,20 +295,13 @@ tr:hover td {
     margin: 0 8px;
 }
 
-/* Utilities */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-.mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
-.mb-3 { margin-bottom: 24px; }
-.p-1 { padding: 8px; }
-.p-2 { padding: 16px; }
-.p-3 { padding: 24px; }
+/* Utilities - Bootstrap fournit déjà toutes les classes utilitaires */
+/* Utilisez .text-center, .mt-*, .mb-*, .p-* de Bootstrap */
 
-/* Responsive */
+/* Responsive - Bootstrap gère le responsive par défaut */
+/* Utilisez les classes Bootstrap responsive : .col-md-*, .d-md-none, etc. */
+
+/* Styles spécifiques responsive pour composants custom uniquement */
 @media (max-width: 768px) {
     .header {
         flex-direction: column;
@@ -517,25 +313,6 @@ tr:hover td {
         font-size: 20px;
     }
     
-    .navigation {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .nav-link {
-        padding: 14px 20px;
-    }
-    
-    .container {
-        padding: 0 20px;
-        margin: 20px auto;
-    }
-    
-    .card,
-    .section {
-        padding: 20px;
-    }
-    
     .actions {
         flex-direction: column;
         align-items: stretch;
@@ -544,13 +321,5 @@ tr:hover td {
     .filter-bar {
         flex-direction: column;
         align-items: stretch;
-    }
-    
-    table {
-        font-size: 13px;
-    }
-    
-    th, td {
-        padding: 10px 12px;
     }
 }

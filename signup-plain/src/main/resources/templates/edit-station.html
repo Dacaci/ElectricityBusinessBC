@@ -24,42 +24,44 @@
                 <p>Chargement des informations...</p>
             </div>
             
-            <div id="formContainer" class="card" style="display: none;">
-                <form id="stationForm">
-                    <div class="form-group">
-                        <label for="name">Nom de la borne <span style="color: #ef4444;">*</span></label>
-                        <input type="text" id="name" name="name" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="locationId">Lieu <span style="color: #ef4444;">*</span></label>
-                        <select id="locationId" name="locationId" class="form-control" required>
-                            <option value="">Sélectionnez un lieu...</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="hourlyRate">Tarif horaire (€/h) <span style="color: #ef4444;">*</span></label>
-                        <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="plugType">Type de prise</label>
-                        <input type="text" id="plugType" name="plugType" class="form-control" value="TYPE2S" readonly style="background-color: #f8f9fa; color: #6c757d;">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="isActive" name="isActive"> 
-                            Borne active (disponible pour les réservations)
-                        </label>
-                    </div>
-                    
-                    <div class="actions">
-                        <a th:href="@{/stations}" class="btn btn-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                    </div>
-                </form>
+            <div id="formContainer" class="card shadow-sm" style="display: none;">
+                <div class="card-body">
+                    <form id="stationForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nom de la borne <span class="text-danger">*</span></label>
+                            <input type="text" id="name" name="name" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="locationId" class="form-label">Lieu <span class="text-danger">*</span></label>
+                            <select id="locationId" name="locationId" class="form-select" required>
+                                <option value="">Sélectionnez un lieu...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="hourlyRate" class="form-label">Tarif horaire (€/h) <span class="text-danger">*</span></label>
+                            <input type="number" id="hourlyRate" name="hourlyRate" class="form-control" step="0.01" min="0" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="plugType" class="form-label">Type de prise</label>
+                            <input type="text" id="plugType" name="plugType" class="form-control" value="TYPE2S" readonly>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" name="isActive">
+                            <label class="form-check-label" for="isActive">
+                                Borne active (disponible pour les réservations)
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/stations}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

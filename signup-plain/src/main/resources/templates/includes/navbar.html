@@ -10,19 +10,22 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/map}">Carte des bornes</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Tableau de bord</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/add-location}">Ajouter un lieu</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/locations}">Mes lieux</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/add-station}">Ajouter une borne</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/stations}">Mes bornes</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/reservations}">Réservations</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/add-reservation}">Réserver</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/reservations}">Mes réservations</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/map}">Carte des bornes</a></li>
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav align-items-center">
                     <li class="nav-item">
-                        <span class="navbar-text text-white me-3" id="welcomeMessage">Utilisateur :</span>
+                        <span class="navbar-text text-white me-3 d-flex align-items-center" id="welcomeMessage">Utilisateur :</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="logout(); return false;">
-                            <i class="bi bi-box-arrow-right"></i> Déconnexion
+                        <a class="nav-link d-flex align-items-center" href="#" onclick="logout(); return false;">
+                            <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
                         </a>
                     </li>
                 </ul>
@@ -109,6 +112,37 @@
         <style>
             body { background-color: #f8f9fa; }
             .container-main { margin-top: 20px; margin-bottom: 40px; }
+            
+            /* Styles cohérents pour la navbar Bootstrap - spécificité élevée */
+            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link {
+                color: rgba(255, 255, 255, 0.9);
+                transition: all 0.2s ease;
+            }
+            
+            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link:hover {
+                color: #fff !important;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+            
+            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link.active {
+                color: #fff !important;
+                background-color: rgba(255, 255, 255, 0.15);
+                border-radius: 4px;
+                font-weight: 600;
+            }
+            
+            /* Assurer que les icônes restent visibles */
+            .navbar.navbar-dark.bg-primary .navbar-nav .nav-link i {
+                color: inherit;
+            }
+            
+            /* Centrer verticalement le nom d'utilisateur */
+            .navbar.navbar-dark.bg-primary .navbar-nav .navbar-text {
+                display: flex;
+                align-items: center;
+                line-height: 1.5;
+            }
         </style>
     </th:block>
     

@@ -56,24 +56,24 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Quand ? </label>
-                        <div class="datetime-row">
-                            <div class="datetime-group">
-                                <label for="startDate">Date début</label>
-                                <input type="date" id="startDate" name="startDate" required onchange="calculatePrice()">
+                    <div class="mb-3">
+                        <label class="form-label">Quand ?</label>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Date début</label>
+                                <input type="date" id="startDate" name="startDate" class="form-control" required onchange="calculatePrice()">
                             </div>
-                            <div class="datetime-group">
-                                <label for="startTime">Heure début</label>
-                                <input type="time" id="startTime" name="startTime" required onchange="calculatePrice()">
+                            <div class="col-md-6">
+                                <label for="startTime" class="form-label">Heure début</label>
+                                <input type="time" id="startTime" name="startTime" class="form-control" required onchange="calculatePrice()">
                             </div>
-                            <div class="datetime-group">
-                                <label for="endDate">Date fin</label>
-                                <input type="date" id="endDate" name="endDate" required onchange="calculatePrice()">
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">Date fin</label>
+                                <input type="date" id="endDate" name="endDate" class="form-control" required onchange="calculatePrice()">
                             </div>
-                            <div class="datetime-group">
-                                <label for="endTime">Heure de fin</label>
-                                <input type="time" id="endTime" name="endTime" required onchange="calculatePrice()">
+                            <div class="col-md-6">
+                                <label for="endTime" class="form-label">Heure de fin</label>
+                                <input type="time" id="endTime" name="endTime" class="form-control" required onchange="calculatePrice()">
                             </div>
                         </div>
                     </div>
@@ -97,15 +97,15 @@
                     <div class="payment-section">
                         <h4>Informations de paiement</h4>
                         
-                        <div class="form-group">
-                            <label for="cardNumber">Numéro de la carte bancaire </label>
-                            <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Numéro de la carte bancaire</label>
+                            <input type="text" id="cardNumber" name="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expiryMonth">Mois d'expiration </label>
-                                <select id="expiryMonth" name="expiryMonth" required>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="expiryMonth" class="form-label">Mois d'expiration</label>
+                                <select id="expiryMonth" name="expiryMonth" class="form-select" required>
                                     <option value="">Mois</option>
                                     <option value="01">Janvier</option>
                                     <option value="02">Février</option>
@@ -122,22 +122,22 @@
                                 </select>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="expiryYear">Année d'expiration </label>
-                                <select id="expiryYear" name="expiryYear" required>
+                            <div class="col-md-4">
+                                <label for="expiryYear" class="form-label">Année d'expiration</label>
+                                <select id="expiryYear" name="expiryYear" class="form-select" required>
                                     <option value="">Année</option>
                                 </select>
                             </div>
                             
-                            <div class="form-group">
-                                <label for="cvv">CVV </label>
-                                <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
+                            <div class="col-md-4">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="text" id="cvv" name="cvv" class="form-control" placeholder="123" maxlength="4" required>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-reserve">Réserver</button>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Réserver</button>
                     </div>
                 </form>
             </div>

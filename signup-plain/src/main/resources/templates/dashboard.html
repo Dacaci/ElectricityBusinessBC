@@ -5,80 +5,58 @@
     <title>Tableau de bord - Electricity Business</title>
     
     <style>
-        /* Styles spécifiques minimaux */
-        body {
-            background-color: #f8f9fa;
-        }
+        /* Styles spécifiques pour composants custom uniquement */
         .filter-bar { 
             display: flex; 
-            gap: 15px; 
-            margin-bottom: 15px; 
+            gap: 1rem; 
             align-items: center;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            padding: 1rem;
+            background-color: var(--bs-gray-100);
+            border-radius: var(--bs-border-radius);
+            border: 1px solid var(--bs-border-color);
         }
-        .filter-bar label { font-size: 13px; color: #333; font-weight: 500; }
+        .filter-bar label { 
+            font-size: 0.875rem; 
+            color: var(--bs-body-color); 
+            font-weight: 500; 
+            margin-bottom: 0;
+        }
         .filter-bar input { 
-            padding: 6px 10px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px;
-            font-size: 13px;
+            font-size: 0.875rem;
         }
         .locations-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; 
+            gap: 1.25rem; 
         }
         .location-card { 
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 20px;
-            background-color: #fff;
+            border: 1px solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius);
         }
-        .location-card h4 { color: #333; margin-bottom: 15px; font-size: 16px; }
         .location-card .station { 
-            background-color: #f5f5f5; 
-            padding: 10px; 
-            margin: 8px 0; 
-            border-radius: 4px;
-            border: 1px solid #e5e7eb;
+            background-color: var(--bs-gray-100); 
+            padding: 0.625rem; 
+            margin: 0.5rem 0; 
+            border-radius: var(--bs-border-radius-sm);
+            border: 1px solid var(--bs-border-color-translucent);
         }
-        .location-card .station-name { font-weight: 600; color: #333; font-size: 13px; }
-        .location-card .station-rate { color: #666; font-size: 12px; margin-top: 3px; }
+        .location-card .station-name { 
+            font-weight: 600; 
+            color: var(--bs-body-color); 
+            font-size: 0.875rem; 
+        }
+        .location-card .station-rate { 
+            color: var(--bs-secondary-color); 
+            font-size: 0.75rem; 
+        }
         .location-actions { 
             display: flex; 
             flex-wrap: wrap; 
-            gap: 5px; 
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
+            gap: 0.5rem; 
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--bs-border-color);
         }
-        .no-data { 
-            text-align: center; 
-            padding: 40px; 
-            color: #999; 
-            font-size: 14px;
-        }
-        .pagination { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 10px; 
-            margin-top: 20px;
-        }
-        .pagination button { 
-            padding: 6px 12px; 
-            border: 1px solid #ccc; 
-            background-color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .pagination button:hover { background-color: #f5f5f5; }
-        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .pagination .page-info { color: #666; font-size: 13px; }
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -97,21 +75,6 @@
             }
             .location-actions .btn {
                 width: 100%;
-            }
-            .pagination {
-                flex-wrap: wrap;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .location-card {
-                padding: 15px;
-            }
-            .location-card h4 {
-                font-size: 14px;
-            }
-            .navbar-brand {
-                font-size: 16px;
             }
         }
     </style>
@@ -431,7 +394,8 @@
             if (past.length === 0) {
                 empty.style.display = 'block';
                 body.innerHTML = '';
-                pagination.innerHTML = '';
+                // Afficher la pagination même si vide (Page 1 sur 1)
+                pagination.innerHTML = generatePaginationControls(1, 1, 'changePastPage');
                 return;
             }
             
@@ -486,13 +450,13 @@
                 
                 return '<div class="location-card">' +
                     '<h4>' + (location.label || location.name || 'Lieu') + '</h4>' +
-                    '<p style="color: #7f8c8d; font-size: 12px; margin-bottom: 10px;">' + (location.address || '') + (location.city ? ', ' + location.city : '') + '</p>' +
+                    '<p class="text-muted small mb-2">' + (location.address || '') + (location.city ? ', ' + location.city : '') + '</p>' +
                     '<div>' +
                         locationStations.map(station => 
                             '<div class="station">' +
                                 '<div class="station-name">' + station.name + '</div>' +
                                 '<div class="station-rate">' + (station.hourlyRate ? station.hourlyRate.toFixed(2) : '0.00') + ' €/h</div>' +
-                                '<div style="margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap;">' +
+                                '<div class="mt-2 d-flex gap-1 flex-wrap">' +
                                     '<button class="btn btn-info btn-sm" onclick="window.location.href=\'/edit-station?id=' + station.id + '\'">Modifier</button>' +
                                     '<button class="btn btn-warning btn-sm" onclick="setStationRate(' + station.id + ')">Définir tarif</button>' +
                                     '<button class="btn btn-secondary btn-sm" onclick="uploadStationPhoto(' + station.id + ')">Téléverser 1 photo</button>' +
@@ -579,7 +543,8 @@
             if (treated.length === 0) {
                 empty.style.display = 'block';
                 body.innerHTML = '';
-                pagination.innerHTML = '';
+                // Afficher la pagination même si vide (Page 1 sur 1)
+                pagination.innerHTML = generatePaginationControls(1, 1, 'changeTreatedPage');
                 return;
             }
             
@@ -681,7 +646,8 @@
         }
         
         function generatePaginationControls(currentPage, totalPages, changeFunction) {
-            if (totalPages <= 1) return '';
+            // La pagination est toujours affichée, même avec une seule page
+            if (totalPages <= 0) totalPages = 1;
             
             let html = '';
             

@@ -14,49 +14,64 @@
 <div class="container">
   <h2>Ajouter une borne</h2>
 
-  <div class="row">
-    <label for="locationId">Lieu</label>
-    <select id="locationId" required></select>
-  </div>
+  <form id="stationForm">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="locationId" class="form-label">Lieu <span class="text-danger">*</span></label>
+        <select id="locationId" class="form-select" required></select>
+      </div>
+      
+      <div class="col-md-6">
+        <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
+        <input id="name" type="text" class="form-control" placeholder="Ex: Borne Maison" required>
+      </div>
+    </div>
 
-  <div class="row">
-    <label for="name">Nom</label>
-    <input id="name" type="text" placeholder="Ex: Borne Maison" required>
-  </div>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="power" class="form-label">Puissance (KVA)</label>
+        <input id="power" type="number" class="form-control" step="0.1" value="7.4">
+      </div>
+      
+      <div class="col-md-6">
+        <label for="hourlyRate" class="form-label">Tarif horaire (€/h)</label>
+        <input id="hourlyRate" type="number" class="form-control" step="0.01" min="0" placeholder="0.00">
+      </div>
+    </div>
 
-  <div class="row">
-    <label for="power">Puissance (KVA)</label>
-    <input id="power" type="number" step="0.1" value="7.4">
-  </div>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="latitude" class="form-label">Latitude</label>
+        <input id="latitude" type="number" class="form-control" step="0.000001" placeholder="48.8566">
+      </div>
+      
+      <div class="col-md-6">
+        <label for="longitude" class="form-label">Longitude</label>
+        <input id="longitude" type="number" class="form-control" step="0.000001" placeholder="2.3522">
+      </div>
+    </div>
 
-  <div class="row">
-    <label for="latitude">Latitude</label>
-    <input id="latitude" type="number" step="0.000001" placeholder="48.8566">
-  </div>
+    <div class="mb-3">
+      <button id="geoBtn" class="btn btn-outline-info" type="button">Utiliser ma position</button>
+    </div>
 
-  <div class="row">
-    <label for="longitude">Longitude</label>
-    <input id="longitude" type="number" step="0.000001" placeholder="2.3522">
-  </div>
+    <div class="mb-3">
+      <label for="instructions" class="form-label">Instructions</label>
+      <textarea id="instructions" class="form-control" rows="3" placeholder="Infos d'accès, badge, etc."></textarea>
+    </div>
 
-  <div class="row">
-    <button id="geoBtn" class="secondary" type="button">Utiliser ma position</button>
-  </div>
+    <div class="mb-3 form-check">
+      <input id="onFoot" type="checkbox" class="form-check-input">
+      <label class="form-check-label" for="onFoot">Sur pied</label>
+    </div>
 
-  <div class="row">
-    <label for="instructions">Instructions</label>
-    <textarea id="instructions" rows="3" placeholder="Infos d'accès, badge, etc."></textarea>
-  </div>
+    <div class="d-flex gap-2">
+      <button id="submitBtn" type="submit" class="btn btn-primary">Ajouter</button>
+      <a th:href="@{/stations}" class="btn btn-secondary">Annuler</a>
+    </div>
+  </form>
 
-  <div class="row">
-    <label><input id="onFoot" type="checkbox"> Sur pied</label>
-  </div>
-
-  <div class="row">
-    <button id="submitBtn">Ajouter</button>
-  </div>
-
-  <div id="msg" class="msg"></div>
+  <div id="msg" class="mt-3"></div>
 </div>
 
 <!-- Scripts -->
