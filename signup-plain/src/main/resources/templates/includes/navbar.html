@@ -220,6 +220,33 @@
             .navbar.navbar-dark.bg-primary .navbar-collapse {
                 overflow: visible !important;
             }
+            
+            /* En mode desktop, forcer l'affichage du collapse */
+            @media (min-width: 992px) {
+                .navbar.navbar-dark.bg-primary #navbarNav {
+                    display: flex !important;
+                    flex-direction: row !important;
+                }
+                
+                .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    margin-left: auto !important;
+                }
+            }
+            
+            /* En mode desktop, forcer l'affichage du collapse */
+            @media (min-width: 992px) {
+                .navbar.navbar-dark.bg-primary #navbarNav {
+                    display: flex !important;
+                    flex-direction: row !important;
+                }
+                
+                .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto {
+                    display: flex !important;
+                    flex-direction: row !important;
+                }
+            }
         </style>
     </th:block>
     

@@ -90,6 +90,23 @@ h1, h2, h3, h4, h5, h6 {
 /* Note: Container, Cards, Forms, Buttons sont maintenant gérés par Bootstrap */
 /* Utilisez les classes Bootstrap : .container, .card, .form-control, .btn, etc. */
 
+/* Limiter la largeur des champs de formulaire */
+.form-control,
+.form-select {
+    max-width: 600px;
+}
+
+/* Pour les champs dans les colonnes Bootstrap, respecter la largeur de la colonne */
+[class*="col-"] .form-control,
+[class*="col-"] .form-select {
+    max-width: 100%;
+}
+
+/* Textarea peut être un peu plus large mais pas trop */
+textarea.form-control {
+    max-width: 800px;
+}
+
 /* Actions */
 .actions {
     display: flex;
