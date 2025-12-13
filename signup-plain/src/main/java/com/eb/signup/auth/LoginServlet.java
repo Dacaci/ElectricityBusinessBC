@@ -29,7 +29,7 @@ public class LoginServlet extends HttpServlet {
     // Vérifier si l'utilisateur est déjà connecté
     HttpSession session = req.getSession(false);
     if (session != null && session.getAttribute("user") != null) {
-      resp.sendRedirect("dashboard");
+      resp.sendRedirect("map");
       return;
     }
     
@@ -83,8 +83,8 @@ public class LoginServlet extends HttpServlet {
       System.out.println("userId attribute type: " + user.getId().getClass().getName());
       System.out.println("========================");
       
-      // Rediriger vers le dashboard
-      resp.sendRedirect("dashboard");
+      // Rediriger vers la carte
+      resp.sendRedirect("map");
       
     } catch (Exception e) {
       throw new ServletException("Erreur lors de la connexion", e);
