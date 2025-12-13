@@ -174,10 +174,10 @@
                         <td>${locationLabel}</td>
                         <td>${formatDateTime(reservation.startTime)}</td>
                         <td>${formatDateTime(reservation.endTime)}</td>
-                        <td><span class="status-badge status-${reservation.status.toLowerCase()}">${getStatusLabel(reservation.status)}</span></td>
-                        <td>${reservation.totalAmount} €</td>
+                        <td>${getStatusBadge(reservation.status)}</td>
+                        <td>${reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00'} €</td>
                         <td>
-                            <div class="reservation-actions">
+                            <div class="d-flex gap-1 flex-wrap">
                                 ${getActionButtons(reservation)}
                             </div>
                         </td>
@@ -189,14 +189,33 @@
             noReservations.style.display = 'none';
         }
         
-        function getStatusLabel(status) {
-            const labels = {
-                'PENDING': 'En attente',
-                'CONFIRMED': 'Confirmée',
-                'CANCELLED': 'Annulée',
-                'COMPLETED': 'Terminée'
-            };
-            return labels[status] || status;
+        function getStatusBadge(status) {
+            let badgeClass = '';
+            let text = '';
+            
+            switch(status) {
+                case 'CONFIRMED':
+                    badgeClass = 'badge bg-success rounded-pill';
+                    text = 'Confirmée';
+                    break;
+                case 'COMPLETED':
+                    badgeClass = 'badge bg-info rounded-pill';
+                    text = 'Terminée';
+                    break;
+                case 'CANCELLED':
+                    badgeClass = 'badge bg-danger rounded-pill';
+                    text = 'Annulée';
+                    break;
+                case 'PENDING':
+                    badgeClass = 'badge bg-warning text-dark rounded-pill';
+                    text = 'En attente';
+                    break;
+                default:
+                    badgeClass = 'badge bg-secondary rounded-pill';
+                    text = status;
+            }
+            
+            return '<span class="' + badgeClass + '">' + text + '</span>';
         }
         
         function getActionButtons(reservation) {
@@ -209,22 +228,22 @@
             if (isClient) {
                 // EN TANT QUE CLIENT : Seulement "Annuler" pour ses propres réservations
                 if (reservation.status === 'PENDING' || reservation.status === 'CONFIRMED') {
-                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-warning">Annuler ma réservation</button>';
+                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-warning btn-sm">Annuler</button>';
                 }
             } else {
                 // EN TANT QUE PROPRIÉTAIRE : Peut confirmer/refuser les réservations sur ses stations
                 if (reservation.status === 'PENDING') {
-                    buttons += '<button onclick="confirmReservation(' + reservation.id + ')" class="btn btn-success">Accepter</button>';
-                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-danger">Refuser</button>';
+                    buttons += '<button onclick="confirmReservation(' + reservation.id + ')" class="btn btn-success btn-sm">Accepter</button>';
+                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-danger btn-sm">Refuser</button>';
                 } else if (reservation.status === 'CONFIRMED') {
-                    buttons += '<button onclick="completeReservation(' + reservation.id + ')" class="btn btn-info">Marquer comme terminée</button>';
-                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-warning">Annuler</button>';
+                    buttons += '<button onclick="completeReservation(' + reservation.id + ')" class="btn btn-info btn-sm">Terminée</button>';
+                    buttons += '<button onclick="cancelReservation(' + reservation.id + ')" class="btn btn-warning btn-sm">Annuler</button>';
                 }
             }
             
             // PDF et suppression pour tous
-            buttons += '<a href="' + API_BASE_URL + '/api/reservations/' + reservation.id + '/receipt.pdf" class="btn btn-secondary" target="_blank">PDF</a>';
-            buttons += '<button onclick="deleteReservation(' + reservation.id + ')" class="btn btn-danger">Supprimer</button>';
+            buttons += '<a href="' + API_BASE_URL + '/api/reservations/' + reservation.id + '/receipt.pdf" class="btn btn-secondary btn-sm" target="_blank">PDF</a>';
+            buttons += '<button onclick="deleteReservation(' + reservation.id + ')" class="btn btn-danger btn-sm">Supprimer</button>';
             
             return buttons;
         }

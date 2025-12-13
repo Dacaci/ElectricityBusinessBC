@@ -94,8 +94,8 @@
             <div class="card-header bg-white border-bottom">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-primary">Mes réservations en cours</h5>
-                    <a th:href="@{/add-reservation}" class="btn btn-primary">
-                        Nouvelle réservation
+                    <a th:href="@{/add-reservation}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Nouvelle réservation
                     </a>
                 </div>
             </div>
@@ -132,15 +132,15 @@
             </div>
             <div class="card-body">
             <div class="filter-bar">
-                <label>Date début :</label>
-                <input type="date" id="filterDateStart">
-                <label>Date fin :</label>
-                <input type="date" id="filterDateEnd">
+                <label class="form-label mb-0">Date début :</label>
+                <input type="date" id="filterDateStart" class="form-control form-control-sm">
+                <label class="form-label mb-0">Date fin :</label>
+                <input type="date" id="filterDateEnd" class="form-control form-control-sm">
                 <button class="btn btn-primary btn-sm" onclick="filterPastReservations()">
-                    Filtrer
+                    <i class="bi bi-funnel me-1"></i>Filtrer
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" onclick="resetPastFilter()">
-                    Réinitialiser
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser
                 </button>
             </div>
             <div id="pastReservationsLoading" class="loading">Chargement...</div>
@@ -166,8 +166,8 @@
                     <p class="mb-0">Aucune réservation passée</p>
                 </div>
                 <div class="d-flex justify-content-end mt-3">
-                    <a href="#" onclick="exportToExcel(); return false;" class="btn btn-success">
-                        Exporter les réservations passées au format Excel
+                    <a href="#" onclick="exportToExcel(); return false;" class="btn btn-success btn-sm">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel
                     </a>
                 </div>
             </div>
@@ -179,8 +179,8 @@
             <div class="card-header bg-white border-bottom">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-primary">Lieux de recharge</h5>
-                    <button class="btn btn-primary" onclick="window.location.href='/add-location'">
-                        Ajouter un lieu
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='/add-location'">
+                        <i class="bi bi-plus-circle me-1"></i> Ajouter un lieu
                     </button>
                 </div>
             </div>
@@ -358,7 +358,7 @@
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
                     '<td>' + getStatusBadge(reservation.status) + '</td>' +
                     '<td>' +
-                        (reservation.status === 'PENDING' ? '<button class="btn btn-danger btn-sm" onclick="cancelReservation(' + reservation.id + ')">Annuler</button>' : '') +
+                        (reservation.status === 'PENDING' ? '<button class="btn btn-danger btn-sm" onclick="cancelReservation(' + reservation.id + ')"><i class="bi bi-x-circle me-1"></i>Annuler</button>' : '') +
                     '</td>' +
                 '</tr>';
             }).join('');
@@ -458,10 +458,10 @@
                                 '<div class="station-rate">' + (station.hourlyRate ? station.hourlyRate.toFixed(2) : '0.00') + ' €/h</div>' +
                                 '<div class="mt-2 d-flex gap-1 flex-wrap">' +
                                     '<button class="btn btn-info btn-sm" onclick="window.location.href=\'/edit-station?id=' + station.id + '\'">Modifier</button>' +
-                                    '<button class="btn btn-warning btn-sm" onclick="setStationRate(' + station.id + ')">Définir tarif</button>' +
-                                    '<button class="btn btn-secondary btn-sm" onclick="uploadStationPhoto(' + station.id + ')">Téléverser 1 photo</button>' +
-                                    '<button class="btn btn-secondary btn-sm" onclick="uploadStationVideo(' + station.id + ')">Téléverser 1 vidéo</button>' +
-                                    '<button class="btn btn-danger btn-sm" onclick="deleteStation(' + station.id + ')">Supprimer</button>' +
+                                    '<button class="btn btn-warning btn-sm" onclick="setStationRate(' + station.id + ')">Tarif</button>' +
+                                    '<button class="btn btn-secondary btn-sm" onclick="uploadStationPhoto(' + station.id + ')"><i class="bi bi-image me-1"></i>Photo</button>' +
+                                    '<button class="btn btn-secondary btn-sm" onclick="uploadStationVideo(' + station.id + ')"><i class="bi bi-camera-video me-1"></i>Vidéo</button>' +
+                                    '<button class="btn btn-danger btn-sm" onclick="deleteStation(' + station.id + ')"><i class="bi bi-trash me-1"></i>Supprimer</button>' +
                                 '</div>' +
                             '</div>'
                         ).join('') +

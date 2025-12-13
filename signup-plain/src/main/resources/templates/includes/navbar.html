@@ -24,8 +24,8 @@
                         <span class="navbar-text text-white me-3" id="welcomeMessage">Utilisateur :</span>
                     </li>
                     <li class="nav-item d-flex align-items-center">
-                        <a class="nav-link text-white d-flex align-items-center" href="#" onclick="logout(); return false;" style="white-space: nowrap;">
-                            <i class="bi bi-box-arrow-right me-1"></i> <span>Déconnexion</span>
+                        <a class="nav-link d-flex align-items-center" href="#" onclick="logout(); return false;" style="white-space: nowrap; color: #ffffff !important;">
+                            <i class="bi bi-box-arrow-right me-1" style="color: #ffffff !important;"></i> <span style="color: #ffffff !important;">Déconnexion</span>
                         </a>
                     </li>
                 </ul>
@@ -201,11 +201,12 @@
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                color: rgba(255, 255, 255, 0.9) !important;
+                color: #ffffff !important;
             }
             
             .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .nav-link[onclick*="logout"]:hover {
-                color: #fff !important;
+                color: #ffffff !important;
+                background-color: rgba(255, 255, 255, 0.1) !important;
             }
             
             /* Forcer l'affichage du collapse quand il contient le bouton de déconnexion */

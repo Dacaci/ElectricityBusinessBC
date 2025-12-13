@@ -2,21 +2,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 
 /* Override Bootstrap font avec nos polices personnalisées */
-body { 
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    overflow-x: hidden;
+html {
+    overflow-x: hidden !important;
     width: 100%;
     max-width: 100vw;
 }
 
-html {
-    overflow-x: hidden;
+body { 
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden !important;
     width: 100%;
     max-width: 100vw;
+    position: relative;
 }
 
 * {
     box-sizing: border-box;
+}
+
+/* Empêcher tout débordement horizontal */
+.container,
+.container-fluid,
+.container-main,
+.row,
+[class*="col-"] {
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* S'assurer que les tableaux ne débordent pas */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Titres avec Poppins */
@@ -78,6 +101,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Tables sont gérées par Bootstrap - utilisez .table, .table-hover, etc. */
+
+/* Uniformiser les tailles de boutons dans les tableaux */
+.table .btn {
+    white-space: nowrap;
+    min-width: auto;
+}
+
+.table td .btn {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Limiter la largeur des boutons dans les actions */
+.location-actions .btn,
+.station-actions .btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
 
 /* Status badges */
 .status-badge {
@@ -245,30 +286,41 @@ h1, h2, h3, h4, h5, h6 {
     border-top: 1px solid #f1f5f9;
 }
 
-/* Filter bar */
+/* Filter bar - Bootstrap */
 .filter-bar {
     display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-    align-items: center;
-    padding: 16px;
-    background: #f8fafc;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: end;
+    padding: 1rem;
+    background-color: var(--bs-gray-100);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+    flex-wrap: wrap;
 }
 
-.filter-bar label {
-    font-size: 13px;
-    color: #475569;
+.filter-bar .form-label {
+    font-size: 0.875rem;
+    color: var(--bs-body-color);
     font-weight: 500;
+    margin-bottom: 0.25rem;
 }
 
 .filter-bar input,
 .filter-bar select {
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 13px;
+    max-width: 200px;
+}
+
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-bar input,
+    .filter-bar select {
+        max-width: 100%;
+    }
 }
 
 /* Pagination - Bootstrap gère maintenant la pagination */
