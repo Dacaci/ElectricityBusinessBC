@@ -86,14 +86,10 @@
 <body>
     <div th:replace="~{includes/backend-config :: backend-config}"></div>
     
-    <div class="header">
-        <h1>Electricity Business</h1>
-        <div class="user-info">
-            <span id="welcomeMessage">Utilisateur :</span>
-            <a href="#" onclick="logout(); return false;">Déconnexion</a>
-        </div>
-    </div>
+    <!-- Navbar Bootstrap -->
+    <div th:replace="~{includes/navbar :: navbar}"></div>
     
+    <div class="container-main">
     <div class="container">
         <div class="content">
             <div id="messageContainer"></div>
