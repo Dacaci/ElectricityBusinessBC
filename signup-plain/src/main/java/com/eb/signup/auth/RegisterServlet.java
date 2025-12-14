@@ -12,7 +12,8 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 
-@WebServlet(name="RegisterServlet", urlPatterns={"/register"})
+// DÉSACTIVÉ : RegisterController Spring est utilisé à la place
+// @WebServlet(name="RegisterServlet", urlPatterns={"/register"})
 public class RegisterServlet extends HttpServlet {
   private UserDao userDao;
   private EmailVerificationDao codeDao;
@@ -33,7 +34,12 @@ public class RegisterServlet extends HttpServlet {
     String host = envOr("MAIL_SMTP_HOST", "localhost");
     int port = Integer.parseInt(envOr("MAIL_SMTP_PORT", "1025"));
     String from = envOr("MAIL_FROM", "no-reply@eb.local");
-    mailer = new Mailer(host, port, from);
+    // Récupérer username et password (peuvent être null pour MailHog)
+    String username = System.getenv("MAIL_SMTP_USERNAME");
+    String password = System.getenv("MAIL_SMTP_PASSWORD");
+    if (username != null && username.isBlank()) username = null;
+    if (password != null && password.isBlank()) password = null;
+    mailer = new Mailer(host, port, from, username, password);
   }
 
   @Override protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -108,10 +114,20 @@ public class RegisterServlet extends HttpServlet {
       String codeHash = org.mindrot.jbcrypt.BCrypt.hashpw(code, org.mindrot.jbcrypt.BCrypt.gensalt(10));
       codeDao.createCode(userId, codeHash, Instant.now().plus(Duration.ofMinutes(15)));
 
-      // Log du code pour les tests
-      System.out.println("=== CODE DE VÉRIFICATION POUR " + email + " : " + code + " ===");
-      
-      mailer.sendCode(email, code);
+      // Envoyer l'email de vérification
+      try {
+        mailer.sendCode(email, code);
+        System.out.println("✅ Email de vérification envoyé avec succès à : " + email);
+      } catch (Exception mailException) {
+        // Log détaillé de l'erreur
+        System.err.println("❌ Échec de l'envoi d'email à " + email);
+        System.err.println("   Code généré (disponible dans les logs) : " + code);
+        System.err.println("   Erreur : " + mailException.getMessage());
+        mailException.printStackTrace();
+        
+        // En développement, on continue (le code est dans les logs)
+        // En production, vous pourriez vouloir notifier l'utilisateur ou réessayer
+      }
       
       // Rediriger vers la page de vérification
       resp.sendRedirect("verify");

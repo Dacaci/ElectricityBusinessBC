@@ -12,18 +12,19 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
-        body { 
+        html, body { 
             font-family: Arial, sans-serif; 
             margin: 0; 
+            padding: 0;
             background-color: white; 
             height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
+            width: 100vw;
+            overflow: hidden;
         }
         
         @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
+            html, body {
+                overflow: hidden;
             }
         }
         
@@ -62,6 +63,7 @@
             background: white;
             padding: 20px;
             border-bottom: 1px solid #ddd;
+            flex-shrink: 0;
         }
         
         .search-title {
@@ -73,10 +75,10 @@
         
         .search-form {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
             gap: 15px;
             align-items: end;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
@@ -106,26 +108,66 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
+            height: fit-content;
+            align-self: end;
+            white-space: nowrap;
         }
         
         .search-form .search-btn:hover {
             background: #1e293b;
         }
         
+        /* Conteneur principal sans scroll */
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden !important;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Navbar fixe en haut */
+        .navbar {
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1030;
+        }
+        
+        .container-fluid.p-0 {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden !important;
+            min-height: 0;
+            max-height: 100%;
+        }
+        
+        .search-section {
+            flex-shrink: 0;
+        }
+        
         .map-container {
-            height: calc(100vh - 220px);
+            flex: 1;
             position: relative;
             width: 100%;
             overflow: hidden;
+            min-height: 0;
         }
         
         @media (max-width: 768px) {
             .map-container {
-                height: calc(100vh - 280px);
+                flex: 1;
             }
             
             .search-form {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: 1fr 1fr !important;
+            }
+            
+            .search-form .form-group:last-child {
+                grid-column: 1 / -1;
             }
         }
         

@@ -21,7 +21,7 @@
                 </ul>
                 <ul class="navbar-nav ms-auto flex-nowrap align-items-center" id="userMenu">
                     <li class="nav-item d-flex align-items-center" id="welcomeItem" style="display: none;">
-                        <span class="navbar-text text-white me-3" id="welcomeMessage">Utilisateur :</span>
+                        <span class="navbar-text text-white me-3" id="welcomeMessage"></span>
                     </li>
                     <li class="nav-item d-flex align-items-center flex-shrink-0" id="logoutItem" style="display: none;">
                         <button class="btn btn-outline-light btn-sm d-flex align-items-center" onclick="logout(); return false;" style="white-space: nowrap; flex-shrink: 0;">
@@ -41,7 +41,8 @@
     <!-- Script pour mettre à jour le nom d'utilisateur et marquer le lien actif -->
     <script th:fragment="navbar-script">
         // Mettre à jour le message de bienvenue avec le nom de l'utilisateur
-        document.addEventListener('DOMContentLoaded', function() {
+        // Fonction pour mettre à jour l'affichage de la navbar selon l'état de connexion
+        function updateNavbarAuth() {
             // Vérifier si l'utilisateur est connecté
             const isUserLoggedIn = typeof isAuthenticated === 'function' && isAuthenticated();
             const welcomeItem = document.getElementById('welcomeItem');
@@ -56,17 +57,30 @@
                 if (loginItem) loginItem.style.display = 'none';
                 
                 // Mettre à jour le message de bienvenue
-                if (welcomeEl) {
+                if (welcomeEl && typeof getAuthUser === 'function') {
                     const user = getAuthUser();
                     if (user && user.firstName && user.lastName) {
                         welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
+                    } else if (user) {
+                        welcomeEl.textContent = 'Utilisateur : ' + (user.email || 'Connecté');
                     }
                 }
             } else {
-                // Afficher le bouton de connexion pour utilisateur non connecté
-                if (welcomeItem) welcomeItem.style.display = 'none';
-                if (logoutItem) logoutItem.style.display = 'none';
-                if (loginItem) loginItem.style.display = 'flex';
+                // Utilisateur non connecté : masquer welcomeItem et logoutItem, afficher loginItem
+                if (welcomeItem) {
+                    welcomeItem.style.display = 'none';
+                }
+                if (logoutItem) {
+                    logoutItem.style.display = 'none';
+                }
+                if (loginItem) {
+                    loginItem.style.display = 'flex';
+                }
+                
+                // Vider le message de bienvenue
+                if (welcomeEl) {
+                    welcomeEl.textContent = '';
+                }
                 
                 // Masquer les liens qui nécessitent une connexion
                 const protectedLinks = document.querySelectorAll('#navbarNav .nav-link[href*="/dashboard"], #navbarNav .nav-link[href*="/add-location"], #navbarNav .nav-link[href*="/locations"], #navbarNav .nav-link[href*="/add-station"], #navbarNav .nav-link[href*="/stations"], #navbarNav .nav-link[href*="/add-reservation"], #navbarNav .nav-link[href*="/reservations"]');
@@ -75,8 +89,25 @@
                     if (parent) parent.style.display = 'none';
                 });
             }
+        }
+        
+        // Initialiser la navbar dès que possible
+        (function() {
+            function initNavbar() {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        updateNavbarAuth();
+                    });
+                } else {
+                    updateNavbarAuth();
+                }
+            }
             
-            // Marquer le lien actif selon l'URL courante
+            initNavbar();
+        })();
+        
+        // Marquer le lien actif selon l'URL courante
+        document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('#navbarNav .nav-link');
             
@@ -154,7 +185,9 @@
             .navbar {
                 overflow-x: hidden !important;
                 max-width: 100vw;
+                flex-shrink: 0;
             }
+            
             
             .navbar .container-fluid {
                 max-width: 100%;
@@ -189,13 +222,14 @@
                 color: inherit;
             }
             
-            /* Centrer verticalement le nom d'utilisateur */
+            /* Centrer verticalement le nom d'utilisateur - SEULEMENT si visible */
             .navbar.navbar-dark.bg-primary .navbar-nav .navbar-text {
                 display: inline-flex;
                 align-items: center;
                 line-height: 1.5;
                 white-space: nowrap;
             }
+            
             
             /* Assurer que la partie droite de la navbar reste visible en mode responsive */
             .navbar.navbar-dark.bg-primary .navbar-nav.align-items-center {

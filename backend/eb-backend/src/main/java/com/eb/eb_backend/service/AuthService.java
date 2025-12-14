@@ -4,7 +4,9 @@ import com.eb.eb_backend.dto.CreateUserDto;
 import com.eb.eb_backend.dto.LoginRequest;
 import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.dto.UserDto;
+import com.eb.eb_backend.entity.EmailVerificationCode;
 import com.eb.eb_backend.entity.User;
+import com.eb.eb_backend.repository.EmailVerificationCodeRepository;
 import com.eb.eb_backend.repository.UserRepository;
 import com.eb.eb_backend.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 @Slf4j
@@ -27,6 +33,8 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
+    private final ResendEmailService resendEmailService;
+    private final EmailVerificationCodeRepository verificationCodeRepository;
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -76,33 +84,94 @@ public class AuthService implements UserDetailsService {
         
         User savedUser = userRepository.save(user);
         
+        // Générer un code OTP à 6 chiffres
         String verificationCode = generateVerificationCode();
+        
+        // Hasher le code avec BCrypt avant de le stocker
+        String codeHash = passwordEncoder.encode(verificationCode);
+        
+        // Créer et sauvegarder le code de vérification dans la DB (expiration 15 minutes)
+        EmailVerificationCode verificationCodeEntity = EmailVerificationCode.builder()
+                .user(savedUser)
+                .codeHash(codeHash)
+                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .attemptCount(0)
+                .build();
+        verificationCodeRepository.save(verificationCodeEntity);
+        
+        // Envoyer l'email via Resend
         try {
-            emailService.sendVerificationEmail(savedUser.getEmail(), verificationCode);
+            boolean emailSent = resendEmailService.sendVerificationEmail(savedUser.getEmail(), verificationCode);
+            if (!emailSent) {
+                log.warn("Failed to send verification email via Resend, but code was generated and saved");
+            }
         } catch (Exception e) {
-            log.error("Failed to send verification email, activating user anyway", e);
-            savedUser.setStatus(User.UserStatus.ACTIVE);
-            userRepository.save(savedUser);
+            log.error("Failed to send verification email via Resend", e);
+            // On continue quand même, le code est dans la DB
         }
         
         return new UserDto(savedUser);
     }
     
+    /**
+     * Génère un code OTP à 6 chiffres
+     */
     private String generateVerificationCode() {
-        return String.format("%06d", (int)(Math.random() * 1000000));
+        SecureRandom random = new SecureRandom();
+        return String.format("%06d", random.nextInt(1_000_000));
     }
     
-    public boolean verifyEmail(String email, String code) {
+    /**
+     * Vérifie le code OTP et active l'utilisateur si valide
+     */
+    @Transactional
+    public boolean verifyEmailCode(String email, String code) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email: " + email));
+        
+        // Trouver le code de vérification actif
+        EmailVerificationCode verificationCode = verificationCodeRepository
+                .findActiveByUserEmail(email, Instant.now())
+                .orElseThrow(() -> new IllegalArgumentException("Aucun code de vérification valide trouvé"));
+        
+        // Vérifier le nombre de tentatives (max 5)
+        if (verificationCode.getAttemptCount() >= 5) {
+            throw new IllegalArgumentException("Trop de tentatives. Veuillez demander un nouveau code.");
+        }
+        
+        // Incrémenter le compteur de tentatives
+        verificationCodeRepository.incrementAttemptCount(verificationCode.getId());
+        
+        // Vérifier le code (BCrypt compare)
+        if (!passwordEncoder.matches(code, verificationCode.getCodeHash())) {
+            throw new IllegalArgumentException("Code de vérification invalide");
+        }
+        
+        // Code valide : marquer comme utilisé et activer l'utilisateur
+        verificationCodeRepository.markAsUsed(verificationCode.getId(), Instant.now());
         
         if (user.getStatus() == User.UserStatus.PENDING) {
             user.setStatus(User.UserStatus.ACTIVE);
             userRepository.save(user);
-            emailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+            
+            // Envoyer un email de bienvenue
+            try {
+                emailService.sendWelcomeEmail(user.getEmail(), user.getFirstName());
+            } catch (Exception e) {
+                log.warn("Failed to send welcome email", e);
+            }
+            
             return true;
         }
         
         return false;
+    }
+    
+    /**
+     * Ancienne méthode de vérification (pour compatibilité)
+     */
+    @Deprecated
+    public boolean verifyEmail(String email, String code) {
+        return verifyEmailCode(email, code);
     }
 }

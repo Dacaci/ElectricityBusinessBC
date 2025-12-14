@@ -12,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -92,6 +95,58 @@ public class AuthController {
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erreur lors de la vérification");
+        }
+    }
+    
+    /**
+     * Route API pour vérifier le code OTP
+     * POST /api/auth/verify-code
+     * Body: { "email": "user@example.com", "code": "123456" }
+     */
+    @PostMapping("/verify-code")
+    public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String code = request.get("code");
+            
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email requis"));
+            }
+            
+            if (code == null || code.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Code requis"));
+            }
+            
+            boolean verified = authService.verifyEmailCode(email, code);
+            
+            if (verified) {
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Email vérifié avec succès"
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", "Code de vérification invalide"
+                ));
+            }
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", e.getMessage()
+            ));
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", "Utilisateur non trouvé"
+            ));
+        } catch (Exception e) {
+            log.error("Erreur lors de la vérification du code", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "error", "Erreur lors de la vérification: " + e.getMessage()
+            ));
         }
     }
     

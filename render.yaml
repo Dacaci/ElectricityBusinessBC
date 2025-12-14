@@ -32,14 +32,11 @@ services:
         generateValue: true
       - key: OPENCHARGEMAP_API_KEY
         value: bf16e0f8-2117-4dd4-b2a9-f5cdfcaa7eb4
-      - key: MAIL_HOST
-        value: sandbox.smtp.mailtrap.io
-      - key: MAIL_PORT
-        value: 2525
-      - key: MAIL_USERNAME
-        sync: false
-      - key: MAIL_PASSWORD
-        sync: false
+      # Resend Email API Configuration
+      - key: RESEND_API_KEY
+        value: re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh
+      - key: RESEND_FROM_EMAIL
+        value: onboarding@resend.dev
     healthCheckPath: /actuator/health
     autoDeploy: true
 
@@ -72,6 +69,18 @@ services:
         fromDatabase:
           name: electricity-business-db
           property: password
+      # Configuration Email Gmail - À CONFIGURER dans Render Dashboard
+      # Remplacez les valeurs par vos vraies informations Gmail
+      - key: MAIL_SMTP_HOST
+        value: smtp.gmail.com
+      - key: MAIL_SMTP_PORT
+        value: "587"
+      - key: MAIL_FROM
+        sync: false  # À définir manuellement : votre-email@gmail.com
+      - key: MAIL_SMTP_USERNAME
+        sync: false  # À définir manuellement : votre-email@gmail.com
+      - key: MAIL_SMTP_PASSWORD
+        sync: false  # À définir manuellement : votre_mot_de_passe_application_gmail
     autoDeploy: true
 
 databases:

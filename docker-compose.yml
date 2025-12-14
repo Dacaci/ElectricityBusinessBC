@@ -25,9 +25,16 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/eb
       - DB_USER=eb
       - DB_PASS=eb
+      # Configuration email - MailHog pour développement (sans authentification)
       - MAIL_SMTP_HOST=mailhog
       - MAIL_SMTP_PORT=1025
       - MAIL_FROM=no-reply@eb.local
+      # Pour utiliser Gmail, remplacez par :
+      # - MAIL_SMTP_HOST=smtp.gmail.com
+      # - MAIL_SMTP_PORT=587
+      # - MAIL_FROM=votre-email@gmail.com
+      # - MAIL_SMTP_USERNAME=votre-email@gmail.com
+      # - MAIL_SMTP_PASSWORD=votre_mot_de_passe_application_gmail
     depends_on:
       - db
       - mailhog
