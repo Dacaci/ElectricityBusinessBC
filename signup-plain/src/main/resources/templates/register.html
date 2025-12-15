@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
+    <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <title>Inscription - Electricity Business</title>
     <style>
         body {
@@ -25,7 +26,8 @@
                         <p class="text-muted">Rejoignez Electricity Business</p>
                     </div>
                     
-                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <!-- Conteneur pour les messages (serveur ou JavaScript) -->
+                    <div id="registerMessage" th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
                     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
                     
                     <form method="post" th:action="@{/register}" id="registerForm">
@@ -108,22 +110,120 @@
     </div>
     
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password !== confirmPassword) {
+        const form = document.getElementById('registerForm');
+        const messageDiv = document.getElementById('registerMessage');
+
+        if (form) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                // Les mots de passe ne correspondent pas (message déjà affiché par le navigateur)
-                return false;
-            }
-            
-            if (password.length < 8) {
-                e.preventDefault();
-                // Mot de passe trop court (validé par HTML5 minlength)
-                return false;
-            }
-        });
+
+                const firstName = document.getElementById('firstName').value.trim();
+                const lastName = document.getElementById('lastName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const dateOfBirth = document.getElementById('dateOfBirth').value;
+                const address = document.getElementById('address').value.trim();
+                const postalCode = document.getElementById('postalCode').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Réinitialiser le message
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                    messageDiv.className = 'alert';
+                    messageDiv.textContent = '';
+                }
+
+                // Validations côté client
+                if (!firstName || !lastName || !email || !password) {
+                    if (messageDiv) {
+                        messageDiv.className = 'alert alert-danger';
+                        messageDiv.textContent = 'Les champs marqués d\'un * sont obligatoires.';
+                        messageDiv.style.display = 'block';
+                    }
+                    return;
+                }
+
+                if (password.length < 8) {
+                    if (messageDiv) {
+                        messageDiv.className = 'alert alert-danger';
+                        messageDiv.textContent = 'Le mot de passe doit contenir au moins 8 caractères.';
+                        messageDiv.style.display = 'block';
+                    }
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    if (messageDiv) {
+                        messageDiv.className = 'alert alert-danger';
+                        messageDiv.textContent = 'Les mots de passe ne correspondent pas.';
+                        messageDiv.style.display = 'block';
+                    }
+                    return;
+                }
+
+                const payload = {
+                    firstName,
+                    lastName,
+                    email,
+                    phone: phone || null,
+                    dateOfBirth: dateOfBirth || null,
+                    address: address || null,
+                    postalCode: postalCode || null,
+                    city: city || null,
+                    password
+                };
+
+                try {
+                    const backendUrl = window.BACKEND_URL || 'http://localhost:8080';
+                    const response = await fetch(backendUrl + '/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        let errorText = 'Erreur lors de la création du compte.';
+                        try {
+                            const data = await response.json();
+                            if (data && data.message) {
+                                errorText = data.message;
+                            }
+                        } catch (err) {
+                            const txt = await response.text();
+                            if (txt) errorText = txt;
+                        }
+
+                        if (messageDiv) {
+                            messageDiv.className = 'alert alert-danger';
+                            messageDiv.textContent = errorText;
+                            messageDiv.style.display = 'block';
+                        }
+                        return;
+                    }
+
+                    if (messageDiv) {
+                        messageDiv.className = 'alert alert-success';
+                        messageDiv.textContent = 'Compte créé avec succès. Un code de vérification vous a été envoyé par email.';
+                        messageDiv.style.display = 'block';
+                    }
+
+                    // Rediriger vers la page de saisie du code après un court délai
+                    setTimeout(() => {
+                        window.location.href = '/verify';
+                    }, 2000);
+                } catch (error) {
+                    if (messageDiv) {
+                        messageDiv.className = 'alert alert-danger';
+                        messageDiv.textContent = 'Erreur de connexion au serveur. Veuillez réessayer plus tard.';
+                        messageDiv.style.display = 'block';
+                    }
+                }
+            });
+        }
     </script>
     <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
 </body>
