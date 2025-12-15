@@ -7,6 +7,20 @@
     <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Nouvelle Réservation - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .station-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .station-input-container select {
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
     <div th:replace="~{includes/navbar :: navbar}"></div>
@@ -25,9 +39,9 @@
                 <form id="reservationForm">
                     <div class="form-group">
                         <label for="stationId">Borne </label>
-                        <div class="station-input-container">
+                        <div class="station-input-container" style="max-width: 600px;">
                             <input type="text" id="stationSearch" placeholder="Rechercher une borne..." oninput="filterStations()" style="display: none;">
-                            <select id="stationId" name="stationId" required onchange="updateStationInfo()">
+                            <select id="stationId" name="stationId" required onchange="updateStationInfo()" class="form-select">
                                 <option value="">Sélectionnez une borne...</option>
                             </select>
                             <a th:href="@{/map}" class="find-station-link">Trouver une borne</a>
@@ -95,7 +109,7 @@
                     <div class="payment-section">
                         <h4>Informations de paiement</h4>
                         
-                        <div class="mb-3">
+                        <div class="mb-3" style="max-width: 600px;">
                             <label for="cardNumber" class="form-label">Numéro de la carte bancaire</label>
                             <input type="text" id="cardNumber" name="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
                         </div>
@@ -134,12 +148,9 @@
                         </div>
                     </div>
                     
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Réserver</button>
-                        </div>
+                    <div class="text-center" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px; max-width: 400px;">Créer la réservation</button>
+                    </div>
                     </form>
                 </div>
             </div>
