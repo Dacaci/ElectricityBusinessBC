@@ -3,11 +3,11 @@ package com.eb.inscription.servlet;
 import com.eb.inscription.dao.EmailVerificationCodeDAO;
 import com.eb.inscription.dao.UserDAO;
 import com.eb.inscription.model.User;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -24,9 +24,16 @@ public class VerifyServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         // Initialisation des DAO avec JDBC pur
-        String dbUrl = getServletContext().getInitParameter("db.url");
-        String dbUser = getServletContext().getInitParameter("db.username");
-        String dbPassword = getServletContext().getInitParameter("db.password");
+        // Utiliser getInitParameter() pour les init-param du Servlet (compatible avec ServletRegistrationBean)
+        // Fallback sur getServletContext().getInitParameter() pour compatibilité avec web.xml
+        String dbUrl = getInitParameter("db.url");
+        if (dbUrl == null) dbUrl = getServletContext().getInitParameter("db.url");
+        
+        String dbUser = getInitParameter("db.username");
+        if (dbUser == null) dbUser = getServletContext().getInitParameter("db.username");
+        
+        String dbPassword = getInitParameter("db.password");
+        if (dbPassword == null) dbPassword = getServletContext().getInitParameter("db.password");
         
         this.userDAO = new UserDAO(dbUrl, dbUser, dbPassword);
         this.codeDAO = new EmailVerificationCodeDAO(dbUrl, dbUser, dbPassword);

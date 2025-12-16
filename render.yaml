@@ -69,18 +69,11 @@ services:
         fromDatabase:
           name: electricity-business-db
           property: password
-      # Configuration Email Gmail - À CONFIGURER dans Render Dashboard
-      # Remplacez les valeurs par vos vraies informations Gmail
-      - key: MAIL_SMTP_HOST
-        value: smtp.gmail.com
-      - key: MAIL_SMTP_PORT
-        value: "587"
-      - key: MAIL_FROM
-        sync: false  # À définir manuellement : votre-email@gmail.com
-      - key: MAIL_SMTP_USERNAME
-        sync: false  # À définir manuellement : votre-email@gmail.com
-      - key: MAIL_SMTP_PASSWORD
-        sync: false  # À définir manuellement : votre_mot_de_passe_application_gmail
+      # Configuration Resend Email API (même que le backend)
+      - key: RESEND_API_KEY
+        value: re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh
+      - key: RESEND_FROM_EMAIL
+        value: onboarding@resend.dev
     autoDeploy: true
 
 databases:

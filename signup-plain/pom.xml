@@ -51,26 +51,20 @@
     </dependency>
 
     <!-- Servlet API pour les Servlets Java purs (sans Spring) -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.1</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- JSP API pour les vues JSP -->
-    <dependency>
-      <groupId>javax.servlet.jsp</groupId>
-      <artifactId>javax.servlet.jsp-api</artifactId>
-      <version>2.3.3</version>
-      <scope>provided</scope>
-    </dependency>
+    <!-- Spring Boot 3 utilise Jakarta EE, donc jakarta.servlet est fourni par spring-boot-starter-web -->
+    <!-- Pas besoin d'ajouter de dépendance supplémentaire -->
 
     <!-- Envoi d'e-mail -->
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>jakarta.mail</artifactId>
       <version>2.0.1</version>
+    </dependency>
+    
+    <!-- Jackson pour JSON (nécessaire pour Resend API) -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
   </dependencies>
 

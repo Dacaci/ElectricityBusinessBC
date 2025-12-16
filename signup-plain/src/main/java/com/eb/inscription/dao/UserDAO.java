@@ -82,6 +82,8 @@ public class UserDAO {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     user.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Échec de la récupération de l'ID généré pour l'utilisateur");
                 }
             }
         }

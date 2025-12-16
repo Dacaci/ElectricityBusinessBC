@@ -2,13 +2,13 @@ package com.eb.inscription.servlet;
 
 import com.eb.inscription.dao.EmailVerificationCodeDAO;
 import com.eb.inscription.dao.UserDAO;
-import com.eb.inscription.mail.Mailer;
+import com.eb.inscription.mail.ResendMailer;
 import com.eb.inscription.model.User;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -23,31 +23,45 @@ public class RegisterServlet extends HttpServlet {
     
     private UserDAO userDAO;
     private EmailVerificationCodeDAO codeDAO;
-    private Mailer mailer;
+    private ResendMailer resendMailer;
     
     @Override
     public void init() throws ServletException {
         super.init();
         // Initialisation des DAO avec JDBC pur (pas de Spring DI)
-        String dbUrl = getServletContext().getInitParameter("db.url");
-        String dbUser = getServletContext().getInitParameter("db.username");
-        String dbPassword = getServletContext().getInitParameter("db.password");
+        // Utiliser getInitParameter() pour les init-param du Servlet (compatible avec ServletRegistrationBean)
+        // Fallback sur getServletContext().getInitParameter() pour compatibilité avec web.xml
+        String dbUrl = getInitParameter("db.url");
+        if (dbUrl == null) dbUrl = getServletContext().getInitParameter("db.url");
+        
+        String dbUser = getInitParameter("db.username");
+        if (dbUser == null) dbUser = getServletContext().getInitParameter("db.username");
+        
+        String dbPassword = getInitParameter("db.password");
+        if (dbPassword == null) dbPassword = getServletContext().getInitParameter("db.password");
         
         this.userDAO = new UserDAO(dbUrl, dbUser, dbPassword);
         this.codeDAO = new EmailVerificationCodeDAO(dbUrl, dbUser, dbPassword);
         
-        // Initialisation du service mail (sans framework)
-        String mailHost = getServletContext().getInitParameter("mail.smtp.host");
-        String mailPort = getServletContext().getInitParameter("mail.smtp.port");
-        String mailFrom = getServletContext().getInitParameter("mail.from");
-        String mailUsername = getServletContext().getInitParameter("mail.smtp.username");
-        String mailPassword = getServletContext().getInitParameter("mail.smtp.password");
+        // Initialisation du service Resend (sans framework)
+        String resendApiKey = getInitParameter("resend.api.key");
+        if (resendApiKey == null) resendApiKey = getServletContext().getInitParameter("resend.api.key");
+        // Fallback sur variable d'environnement système
+        if (resendApiKey == null || resendApiKey.isEmpty()) {
+            resendApiKey = System.getenv("RESEND_API_KEY");
+        }
         
-        if (mailHost == null) mailHost = "localhost";
-        if (mailPort == null) mailPort = "1025";
-        if (mailFrom == null) mailFrom = "no-reply@eb.local";
+        String resendFromEmail = getInitParameter("resend.from.email");
+        if (resendFromEmail == null) resendFromEmail = getServletContext().getInitParameter("resend.from.email");
+        // Fallback sur variable d'environnement système
+        if (resendFromEmail == null || resendFromEmail.isEmpty()) {
+            resendFromEmail = System.getenv("RESEND_FROM_EMAIL");
+        }
+        if (resendFromEmail == null || resendFromEmail.isEmpty()) {
+            resendFromEmail = "onboarding@resend.dev";
+        }
         
-        this.mailer = new Mailer(mailHost, Integer.parseInt(mailPort), mailFrom, mailUsername, mailPassword);
+        this.resendMailer = new ResendMailer(resendApiKey, resendFromEmail);
     }
     
     /**
@@ -131,6 +145,11 @@ public class RegisterServlet extends HttpServlet {
             // Sauvegarder avec JDBC pur (pas de Spring Data JPA)
             userDAO.save(user);
             
+            // Vérifier que l'ID a été généré
+            if (user.getId() == null) {
+                throw new IllegalStateException("L'ID utilisateur n'a pas été généré après l'insertion");
+            }
+            
             // Générer un code OTP à 6 chiffres
             String code = generateRandomCode();
             // Hasher le code avec BCrypt
@@ -141,11 +160,11 @@ public class RegisterServlet extends HttpServlet {
             // Log du code pour les tests
             System.out.println("=== CODE DE VÉRIFICATION POUR " + email + " : " + code + " ===");
             
-            // Envoyer l'email avec le code
+            // Envoyer l'email avec le code via Resend
             try {
-                mailer.sendCode(email, code);
+                resendMailer.sendCode(email, code);
             } catch (Exception mailException) {
-                System.err.println("Erreur lors de l'envoi de l'email : " + mailException.getMessage());
+                System.err.println("Erreur lors de l'envoi de l'email via Resend : " + mailException.getMessage());
                 // On continue quand même, le code est loggé dans la console pour les tests
             }
             
