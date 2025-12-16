@@ -23,6 +23,22 @@
         <param-value>eb</param-value>
     </context-param>
     
+    <!-- Configuration du service mail (sans framework) -->
+    <context-param>
+        <param-name>mail.smtp.host</param-name>
+        <param-value>localhost</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>mail.smtp.port</param-name>
+        <param-value>1025</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>mail.from</param-name>
+        <param-value>no-reply@eb.local</param-value>
+    </context-param>
+    
     <!-- Configuration des Servlets (mapping manuel, pas de Spring @WebServlet) -->
     
     <!-- Servlet d'inscription -->

@@ -58,20 +58,19 @@ public class UserDAO {
      * Sauvegarder un utilisateur avec JDBC pur
      */
     public void save(User user) throws SQLException {
-        String sql = "INSERT INTO users (email, password, first_name, last_name, phone, enabled, verification_code, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (email, password_hash, first_name, last_name, phone, status, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getPassword());
+            stmt.setString(2, user.getPassword()); // Déjà hashé avec BCrypt
             stmt.setString(3, user.getFirstName());
             stmt.setString(4, user.getLastName());
             stmt.setString(5, user.getPhone());
-            stmt.setBoolean(6, user.isEnabled());
-            stmt.setString(7, user.getVerificationCode());
-            stmt.setTimestamp(8, Timestamp.valueOf(user.getCreatedAt()));
+            stmt.setString(6, "PENDING"); // Statut initial
+            stmt.setTimestamp(7, Timestamp.valueOf(user.getCreatedAt()));
             
             int affectedRows = stmt.executeUpdate();
             
@@ -112,7 +111,7 @@ public class UserDAO {
      * Activer un utilisateur (après vérification)
      */
     public void enableUser(String email) throws SQLException {
-        String sql = "UPDATE users SET enabled = true WHERE email = ?";
+        String sql = "UPDATE users SET status = 'ACTIVE' WHERE email = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -133,12 +132,14 @@ public class UserDAO {
         User user = new User();
         user.setId(rs.getLong("id"));
         user.setEmail(rs.getString("email"));
-        user.setPassword(rs.getString("password"));
+        user.setPassword(rs.getString("password_hash"));
         user.setFirstName(rs.getString("first_name"));
         user.setLastName(rs.getString("last_name"));
         user.setPhone(rs.getString("phone"));
-        user.setEnabled(rs.getBoolean("enabled"));
-        user.setVerificationCode(rs.getString("verification_code"));
+        // Vérifier le statut : enabled = true si status = 'ACTIVE'
+        String status = rs.getString("status");
+        user.setEnabled("ACTIVE".equals(status));
+        // Note: verification_code n'existe plus dans la table, on utilise email_verification_codes
         
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
@@ -148,6 +149,7 @@ public class UserDAO {
         return user;
     }
 }
+
 
 
 

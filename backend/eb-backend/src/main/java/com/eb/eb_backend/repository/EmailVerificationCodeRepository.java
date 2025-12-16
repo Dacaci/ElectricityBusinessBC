@@ -48,3 +48,5 @@ public interface EmailVerificationCodeRepository extends JpaRepository<EmailVeri
     @Query("UPDATE EmailVerificationCode c SET c.usedAt = :usedAt WHERE c.id = :id")
     void markAsUsed(@Param("id") Long id, @Param("usedAt") Instant usedAt);
 }
+
+

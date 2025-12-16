@@ -139,8 +139,8 @@
             <div class="form-group">
                 <label for="verificationCode">Code de vérification</label>
                 <input type="text" id="verificationCode" name="verificationCode" required 
-                       placeholder="Ex: ABC123" maxlength="6"
-                       style="text-transform: uppercase;">
+                       placeholder="Ex: 123456" maxlength="6" pattern="[0-9]{6}"
+                       style="text-align: center; font-size: 24px; letter-spacing: 8px;">
             </div>
             
             <button type="submit" class="btn btn-primary">Vérifier mon compte</button>
@@ -155,13 +155,14 @@
     </div>
     
     <script>
-        // Auto-uppercase du code
+        // Accepter uniquement les chiffres pour le code
         document.getElementById('verificationCode').addEventListener('input', function(e) {
-            e.target.value = e.target.value.toUpperCase();
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
     </script>
 </body>
 </html>
+
 
 
 

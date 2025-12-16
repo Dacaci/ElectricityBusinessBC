@@ -41,3 +41,5 @@ public class EmailVerificationCode {
     @Builder.Default
     private Instant createdAt = Instant.now();
 }
+
+

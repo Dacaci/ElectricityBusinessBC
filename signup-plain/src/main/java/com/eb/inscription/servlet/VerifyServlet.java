@@ -1,5 +1,6 @@
 package com.eb.inscription.servlet;
 
+import com.eb.inscription.dao.EmailVerificationCodeDAO;
 import com.eb.inscription.dao.UserDAO;
 import com.eb.inscription.model.User;
 import javax.servlet.ServletException;
@@ -17,16 +18,18 @@ import java.io.IOException;
 public class VerifyServlet extends HttpServlet {
     
     private UserDAO userDAO;
+    private EmailVerificationCodeDAO codeDAO;
     
     @Override
     public void init() throws ServletException {
         super.init();
-        // Initialisation du DAO avec JDBC pur
+        // Initialisation des DAO avec JDBC pur
         String dbUrl = getServletContext().getInitParameter("db.url");
         String dbUser = getServletContext().getInitParameter("db.username");
         String dbPassword = getServletContext().getInitParameter("db.password");
         
         this.userDAO = new UserDAO(dbUrl, dbUser, dbPassword);
+        this.codeDAO = new EmailVerificationCodeDAO(dbUrl, dbUser, dbPassword);
     }
     
     /**
@@ -81,13 +84,36 @@ public class VerifyServlet extends HttpServlet {
                 return;
             }
             
-            // Vérifier le code
-            if (!code.equals(user.getVerificationCode())) {
+            // Récupérer le code de vérification actif depuis email_verification_codes
+            EmailVerificationCodeDAO.EmailVerification verification = codeDAO.findActiveByUser(user.getId());
+            
+            if (verification == null) {
+                request.setAttribute("error", "Aucun code de vérification valide trouvé. Veuillez en demander un nouveau.");
+                request.setAttribute("email", email);
+                request.getRequestDispatcher("/WEB-INF/views/verify.jsp").forward(request, response);
+                return;
+            }
+            
+            // Vérifier si le code n'est pas expiré
+            if (verification.getExpiresAt().isBefore(java.time.Instant.now())) {
+                request.setAttribute("error", "Le code de vérification a expiré. Veuillez en demander un nouveau.");
+                request.setAttribute("email", email);
+                request.getRequestDispatcher("/WEB-INF/views/verify.jsp").forward(request, response);
+                return;
+            }
+            
+            // Vérifier le code avec BCrypt
+            if (!org.mindrot.jbcrypt.BCrypt.checkpw(code, verification.getCodeHash())) {
+                // Incrémenter le compteur de tentatives
+                codeDAO.incrementAttempt(verification.getId());
                 request.setAttribute("error", "Code de vérification incorrect");
                 request.setAttribute("email", email);
                 request.getRequestDispatcher("/WEB-INF/views/verify.jsp").forward(request, response);
                 return;
             }
+            
+            // Marquer le code comme utilisé
+            codeDAO.markUsed(verification.getId());
             
             // Activer l'utilisateur avec JDBC pur
             userDAO.enableUser(email);
@@ -103,6 +129,7 @@ public class VerifyServlet extends HttpServlet {
         }
     }
 }
+
 
 
 
