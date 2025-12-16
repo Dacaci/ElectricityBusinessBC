@@ -6,7 +6,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build JAR (Spring Boot)
+# Copy source code and build WAR (Spring Boot)
 COPY src ./src
 COPY src/main/webapp ./src/main/webapp
 RUN mvn clean package -DskipTests
@@ -15,8 +15,8 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copy the JAR file from build stage
-COPY --from=build /app/target/signup-plain.jar app.jar
+# Copy the WAR file from build stage
+COPY --from=build /app/target/signup-plain.war app.war
 
 # Expose port (Render injecte la variable PORT)
 EXPOSE 8080
@@ -27,4 +27,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
 
 # Run the Spring Boot application
 # Use PORT and BACKEND_URL environment variables from Render
-ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-http://localhost:8080} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-http://localhost:8080} -jar app.war"]

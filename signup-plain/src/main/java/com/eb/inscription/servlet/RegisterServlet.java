@@ -5,7 +5,6 @@ import com.eb.inscription.dao.UserDAO;
 import com.eb.inscription.mail.ResendMailer;
 import com.eb.inscription.model.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,9 +15,9 @@ import java.time.Instant;
 
 /**
  * Servlet d'inscription SANS FRAMEWORK Spring Boot
- * Utilise uniquement les Servlets Java standard (javax.servlet)
+ * Utilise uniquement les Servlets Java standard (jakarta.servlet)
+ * Enregistré manuellement via ServletConfig (pas d'annotation @WebServlet)
  */
-@WebServlet("/register-servlet")
 public class RegisterServlet extends HttpServlet {
     
     private UserDAO userDAO;

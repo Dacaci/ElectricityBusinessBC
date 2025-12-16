@@ -4,7 +4,6 @@ import com.eb.inscription.dao.EmailVerificationCodeDAO;
 import com.eb.inscription.dao.UserDAO;
 import com.eb.inscription.model.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,8 +12,8 @@ import java.io.IOException;
 /**
  * Servlet de vérification SANS FRAMEWORK Spring Boot
  * Utilise uniquement les Servlets Java standard
+ * Enregistré manuellement via ServletConfig (pas d'annotation @WebServlet)
  */
-@WebServlet("/verify-servlet")
 public class VerifyServlet extends HttpServlet {
     
     private UserDAO userDAO;

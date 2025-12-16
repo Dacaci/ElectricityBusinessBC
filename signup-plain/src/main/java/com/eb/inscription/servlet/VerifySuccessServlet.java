@@ -1,7 +1,6 @@
 package com.eb.inscription.servlet;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,8 +9,8 @@ import java.io.IOException;
 /**
  * Servlet pour la page de succès après vérification
  * SANS FRAMEWORK Spring Boot
+ * Enregistré manuellement via ServletConfig (pas d'annotation @WebServlet)
  */
-@WebServlet("/verify-success-servlet")
 public class VerifySuccessServlet extends HttpServlet {
     
     @Override
