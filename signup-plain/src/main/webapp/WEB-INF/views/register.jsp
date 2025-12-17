@@ -14,6 +14,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         .container { 
             background: white; 
@@ -21,51 +22,85 @@
             border-radius: 12px; 
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 600px;
-            margin: 20px;
+            max-width: 700px;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         h2 { 
             color: #333; 
             margin: 0;
-            font-weight: 400;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 28px;
         }
         .form-group { 
-            margin-bottom: 20px; 
-        }
-        .form-group.full-width {
-            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 20px;
         }
         label { 
-            display: block; 
-            margin-bottom: 8px; 
-            color: #555; 
+            min-width: 180px;
+            color: #333; 
             font-weight: 500;
             font-size: 14px;
+            text-align: right;
         }
-        .required { color: #e74c3c; }
-        input[type="text"], input[type="email"], input[type="password"], input[type="tel"] { 
-            width: 100%; 
+        .required { 
+            color: #e74c3c; 
+            margin-left: 2px;
+        }
+        input[type="text"], 
+        input[type="email"], 
+        input[type="password"], 
+        input[type="tel"], 
+        input[type="date"],
+        select { 
+            flex: 1;
             padding: 12px 16px; 
             border: 2px solid #e1e8ed; 
             border-radius: 8px; 
             font-size: 16px;
             transition: border-color 0.3s ease;
             box-sizing: border-box;
+            font-family: inherit;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #1E40AF;
             box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+        /* Date picker avec icône calendrier */
+        .date-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        .date-input-wrapper input[type="date"] {
+            width: 100%;
+            padding-right: 40px;
+        }
+        .date-input-wrapper::after {
+            content: "📅";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 18px;
+        }
+        /* Dropdown pour la ville */
+        .city-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        .city-wrapper select {
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
         }
         button { 
             width: 100%; 
@@ -77,26 +112,31 @@
             font-size: 16px; 
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
         }
         button:hover { 
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
         }
         .links { 
             text-align: center; 
             margin-top: 30px; 
             padding-top: 20px;
             border-top: 1px solid #e1e8ed;
+            color: #666;
+            font-size: 14px;
         }
         .links a { 
             color: #1E40AF; 
             text-decoration: none;
+            font-weight: 500;
         }
         .links a:hover {
             text-decoration: underline;
         }
         .message {
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
             font-size: 14px;
@@ -110,6 +150,16 @@
             background: #efe;
             color: #060;
             border: 1px solid #27ae60;
+        }
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            label {
+                min-width: auto;
+                text-align: left;
+            }
         }
     </style>
 </head>
@@ -152,9 +202,35 @@
             </div>
             
             <div class="form-group full-width">
-                <label for="phone">Téléphone</label>
-                <input type="tel" id="phone" name="phone" 
+                <label for="phone">Téléphone <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" required
                        placeholder="+33 6 12 34 56 78" value="<%= request.getParameter("phone") != null ? request.getParameter("phone") : "" %>">
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="dateOfBirth">Date de naissance <span class="required">*</span></label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" required
+                       value="<%= request.getParameter("dateOfBirth") != null ? request.getParameter("dateOfBirth") : "" %>">
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="address">Adresse <span class="required">*</span></label>
+                <input type="text" id="address" name="address" required
+                       placeholder="Ex: 123 Rue de la Paix" value="<%= request.getParameter("address") != null ? request.getParameter("address") : "" %>">
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="postalCode">Code postal <span class="required">*</span></label>
+                    <input type="text" id="postalCode" name="postalCode" required
+                           placeholder="Ex: 75001" value="<%= request.getParameter("postalCode") != null ? request.getParameter("postalCode") : "" %>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="city">Ville <span class="required">*</span></label>
+                    <input type="text" id="city" name="city" required
+                           placeholder="Ex: Paris" value="<%= request.getParameter("city") != null ? request.getParameter("city") : "" %>">
+                </div>
             </div>
             
             <div class="form-grid">
@@ -180,20 +256,58 @@
     </div>
     
     <script>
-        // Validation côté client (JavaScript vanilla)
+        // Gestion du dropdown "Autre" pour la ville
+        document.getElementById('city').addEventListener('change', function() {
+            const cityOtherInput = document.getElementById('cityOther');
+            if (this.value === 'Autre') {
+                cityOtherInput.style.display = 'block';
+                cityOtherInput.required = true;
+            } else {
+                cityOtherInput.style.display = 'none';
+                cityOtherInput.required = false;
+                cityOtherInput.value = '';
+            }
+        });
+        
+        // Si "Autre" est déjà sélectionné au chargement
+        if (document.getElementById('city').value === 'Autre') {
+            document.getElementById('cityOther').style.display = 'block';
+        }
+        
+        // Gestion de la soumission : utiliser cityOther si "Autre" est sélectionné
         document.querySelector('form').addEventListener('submit', function(e) {
+            const citySelect = document.getElementById('city');
+            const cityOtherInput = document.getElementById('cityOther');
+            
+            // Si "Autre" est sélectionné, remplacer la valeur du select par celle de l'input
+            if (citySelect.value === 'Autre') {
+                if (!cityOtherInput.value || cityOtherInput.value.trim() === '') {
+                    e.preventDefault();
+                    alert('Veuillez saisir votre ville');
+                    return false;
+                }
+                // Créer un input caché avec la valeur de la ville
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'city';
+                hiddenInput.value = cityOtherInput.value.trim();
+                citySelect.name = 'citySelect'; // Renommer l'ancien pour qu'il ne soit pas envoyé
+                this.appendChild(hiddenInput);
+            }
+            
+            // Validation des mots de passe
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
             if (password !== confirmPassword) {
                 e.preventDefault();
-                // Les mots de passe ne correspondent pas
+                alert('Les mots de passe ne correspondent pas');
                 return false;
             }
             
             if (password.length < 8) {
                 e.preventDefault();
-                // Mot de passe trop court
+                alert('Le mot de passe doit contenir au moins 8 caractères');
                 return false;
             }
         });

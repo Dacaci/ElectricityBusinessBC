@@ -2,6 +2,7 @@ package com.eb.inscription.dao;
 
 import com.eb.inscription.model.User;
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -58,8 +59,8 @@ public class UserDAO {
      * Sauvegarder un utilisateur avec JDBC pur
      */
     public void save(User user) throws SQLException {
-        String sql = "INSERT INTO users (email, password_hash, first_name, last_name, phone, status, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (email, password_hash, first_name, last_name, phone, date_of_birth, address, postal_code, city, status, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -69,8 +70,17 @@ public class UserDAO {
             stmt.setString(3, user.getFirstName());
             stmt.setString(4, user.getLastName());
             stmt.setString(5, user.getPhone());
-            stmt.setString(6, "PENDING"); // Statut initial
-            stmt.setTimestamp(7, Timestamp.valueOf(user.getCreatedAt()));
+            // Date de naissance (peut être null)
+            if (user.getDateOfBirth() != null) {
+                stmt.setDate(6, Date.valueOf(user.getDateOfBirth()));
+            } else {
+                stmt.setNull(6, Types.DATE);
+            }
+            stmt.setString(7, user.getAddress());
+            stmt.setString(8, user.getPostalCode());
+            stmt.setString(9, user.getCity());
+            stmt.setString(10, "PENDING"); // Statut initial
+            stmt.setTimestamp(11, Timestamp.valueOf(user.getCreatedAt()));
             
             int affectedRows = stmt.executeUpdate();
             
@@ -138,6 +148,17 @@ public class UserDAO {
         user.setFirstName(rs.getString("first_name"));
         user.setLastName(rs.getString("last_name"));
         user.setPhone(rs.getString("phone"));
+        
+        // Date de naissance
+        Date dateOfBirth = rs.getDate("date_of_birth");
+        if (dateOfBirth != null) {
+            user.setDateOfBirth(dateOfBirth.toLocalDate());
+        }
+        
+        user.setAddress(rs.getString("address"));
+        user.setPostalCode(rs.getString("postal_code"));
+        user.setCity(rs.getString("city"));
+        
         // Vérifier le statut : enabled = true si status = 'ACTIVE'
         String status = rs.getString("status");
         user.setEnabled("ACTIVE".equals(status));

@@ -148,8 +148,8 @@
                         </div>
                     </div>
                     
-                    <div class="text-center" style="margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px; max-width: 400px;">Créer la réservation</button>
+                    <div style="margin-top: 20px; text-align: left;">
+                        <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px; max-width: 400px;">Réserver</button>
                         </div>
                     </form>
                 </div>
@@ -166,12 +166,15 @@
             // L'utilisateur sera redirigé automatiquement
         } else {
         
-        // Récupérer l'ID de l'utilisateur depuis le token JWT
-        const CURRENT_USER_ID = getCurrentUserId();
-        
-        if (!CURRENT_USER_ID) {
-            console.error('Erreur d\'authentification');
-            window.location.href = '/login';
+        // Fonction pour récupérer l'ID utilisateur actuel (dynamique)
+        function getCurrentUserIdDynamic() {
+            const user = getAuthUser();
+            if (!user || !user.id) {
+                console.error('Erreur d\'authentification: utilisateur non trouvé');
+                window.location.href = '/login';
+                return null;
+            }
+            return user.id;
         }
         
         let stations = [];
@@ -179,6 +182,12 @@
         
         // Charger les données au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier l'authentification au chargement
+            const currentUserId = getCurrentUserIdDynamic();
+            if (!currentUserId) {
+                return; // Redirection déjà faite dans getCurrentUserIdDynamic
+            }
+            
             setMinDate();
             populateExpiryYears();
             setupCardNumberFormatting();
@@ -274,13 +283,19 @@
                 return;
             }
             
+            // Récupérer l'ID utilisateur actuel (dynamique, au moment du filtrage)
+            const currentUserId = getCurrentUserIdDynamic();
+            if (!currentUserId) {
+                return; // Redirection déjà faite
+            }
+            
             // Filtrer les stations actives ET qui n'appartiennent pas à l'utilisateur
             const activeStations = stations.filter(station => {
                 if (!station.isActive) return false;
                 
                 // Exclure les propres stations de l'utilisateur
                 const location = locations.find(loc => loc.id === station.locationId);
-                if (location && location.ownerId === CURRENT_USER_ID) {
+                if (location && location.ownerId === currentUserId) {
                     return false; // Ne pas afficher ses propres stations
                 }
                 
@@ -493,7 +508,7 @@
             } else {
                 const submitBtn = document.querySelector('button[type="submit"]');
                 if (submitBtn) {
-                    submitBtn.innerHTML = 'Créer la réservation';
+                    submitBtn.innerHTML = 'Réserver';
                     submitBtn.disabled = false;
                 }
             }

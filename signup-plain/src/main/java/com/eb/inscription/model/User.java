@@ -1,5 +1,6 @@
 package com.eb.inscription.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -14,6 +15,10 @@ public class User {
     private String firstName;
     private String lastName;
     private String phone;
+    private LocalDate dateOfBirth;
+    private String address;
+    private String postalCode;
+    private String city;
     private boolean enabled;
     private String verificationCode;
     private LocalDateTime createdAt;
@@ -80,6 +85,38 @@ public class User {
     
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+    
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+    
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+    
+    public String getAddress() {
+        return address;
+    }
+    
+    public void setAddress(String address) {
+        this.address = address;
+    }
+    
+    public String getPostalCode() {
+        return postalCode;
+    }
+    
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+    
+    public String getCity() {
+        return city;
+    }
+    
+    public void setCity(String city) {
+        this.city = city;
     }
     
     public boolean isEnabled() {

@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Servlet d'inscription SANS FRAMEWORK Spring Boot
@@ -88,14 +91,49 @@ public class RegisterServlet extends HttpServlet {
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String phone = request.getParameter("phone");
+        String dateOfBirthStr = request.getParameter("dateOfBirth");
+        String address = request.getParameter("address");
+        String postalCode = request.getParameter("postalCode");
+        // Gérer le cas "Autre" pour la ville
+        String city = request.getParameter("city");
+        if (city == null || city.isEmpty()) {
+            city = request.getParameter("cityOther");
+        }
         
         // Validation manuelle (pas de @Valid)
         if (email == null || email.trim().isEmpty() || 
             password == null || password.trim().isEmpty() ||
             firstName == null || firstName.trim().isEmpty() ||
-            lastName == null || lastName.trim().isEmpty()) {
+            lastName == null || lastName.trim().isEmpty() ||
+            phone == null || phone.trim().isEmpty() ||
+            dateOfBirthStr == null || dateOfBirthStr.trim().isEmpty() ||
+            address == null || address.trim().isEmpty() ||
+            postalCode == null || postalCode.trim().isEmpty() ||
+            city == null || city.trim().isEmpty()) {
             
             request.setAttribute("error", "Tous les champs obligatoires doivent être remplis");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        
+        // Validation et parsing de la date de naissance
+        LocalDate dateOfBirth = null;
+        try {
+            dateOfBirth = LocalDate.parse(dateOfBirthStr);
+            // Vérifier que la date n'est pas dans le futur
+            if (dateOfBirth.isAfter(LocalDate.now())) {
+                request.setAttribute("error", "La date de naissance ne peut pas être dans le futur");
+                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                return;
+            }
+            // Vérifier que l'utilisateur a au moins 18 ans (optionnel, à adapter selon vos besoins)
+            if (dateOfBirth.isAfter(LocalDate.now().minusYears(18))) {
+                request.setAttribute("error", "Vous devez avoir au moins 18 ans pour vous inscrire");
+                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+                return;
+            }
+        } catch (DateTimeParseException e) {
+            request.setAttribute("error", "Format de date de naissance invalide");
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             return;
         }
@@ -138,6 +176,10 @@ public class RegisterServlet extends HttpServlet {
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setPhone(phone);
+            user.setDateOfBirth(dateOfBirth);
+            user.setAddress(address);
+            user.setPostalCode(postalCode);
+            user.setCity(city);
             user.setEnabled(false);
             user.setCreatedAt(java.time.LocalDateTime.now());
             

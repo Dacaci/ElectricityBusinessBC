@@ -99,9 +99,15 @@
                 const data = await response.json();
                 
                 if (data.token && data.user) {
+                    // Nettoyer complètement l'ancien localStorage avant de sauvegarder les nouvelles données
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Sauvegarder les nouvelles données d'authentification
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
-                    console.log('Connexion réussie');
+                    console.log('✅ Connexion réussie pour utilisateur ID:', data.user.id);
+                    console.log('✅ Email:', data.user.email);
                     
                     // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
                     const urlParams = new URLSearchParams(window.location.search);
@@ -109,10 +115,11 @@
                     
                     if (returnUrl) {
                         // Rediriger vers l'URL de retour (ex: /add-reservation?stationId=123)
-                        window.location.href = decodeURIComponent(returnUrl);
+                        // Forcer un rechargement complet pour éviter les problèmes de cache
+                        window.location.replace(decodeURIComponent(returnUrl));
                     } else {
                         // Sinon, rediriger vers la carte par défaut
-                        window.location.href = '/map';
+                        window.location.replace('/map');
                     }
                 } else {
                     console.error('Erreur: Token ou données utilisateur manquantes');
