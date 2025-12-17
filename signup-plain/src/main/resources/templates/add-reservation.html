@@ -160,8 +160,8 @@
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
     <!-- jwt-utils.js chargé explicitement ici car nécessaire avant le script inline -->
-    <script th:src="@{/js/jwt-utils.js}"></script>
-    <script th:src="@{/js/auth.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}" onload="console.log('✅ jwt-utils.js chargé')"></script>
+    <script th:src="@{/js/auth.js}" onload="console.log('✅ auth.js chargé')"></script>
     <script>
         // Fonction pour récupérer l'ID utilisateur actuel (dynamique)
         function getCurrentUserIdDynamic() {
@@ -255,14 +255,22 @@
                 
                 console.log('🔄 Chargement des stations et lieux...');
                 console.log('🔧 API_BASE_URL:', API_BASE_URL);
+                console.log('🔧 authenticatedFetch disponible:', typeof authenticatedFetch);
+                
+                // Utiliser l'endpoint /api/stations/map qui retourne directement une liste (pas de pagination)
+                const stationsUrl = API_BASE_URL + '/api/stations/map';
+                const locationsUrl = API_BASE_URL + '/api/locations?size=1000';
+                
+                console.log('📡 Appel API stations:', stationsUrl);
+                console.log('📡 Appel API locations:', locationsUrl);
                 
                 // Utiliser authenticatedFetch pour envoyer le token JWT
                 const [stationsResponse, locationsResponse] = await Promise.all([
-                    authenticatedFetch(API_BASE_URL + '/api/stations?size=1000', {
+                    authenticatedFetch(stationsUrl, {
                         method: 'GET',
                         credentials: 'include'
                     }),
-                    authenticatedFetch(API_BASE_URL + '/api/locations?size=1000', {
+                    authenticatedFetch(locationsUrl, {
                         method: 'GET',
                         credentials: 'include'
                     })
@@ -286,10 +294,13 @@
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
                 
+                console.log('📦 Stations data type:', Array.isArray(stationsData) ? 'Array' : typeof stationsData);
+                console.log('📦 Locations data type:', Array.isArray(locationsData) ? 'Array' : typeof locationsData);
                 console.log('📦 Stations data:', stationsData);
                 console.log('📦 Locations data:', locationsData);
                 
                 // Gérer la pagination (Spring Data retourne {content: [...], totalElements: ...})
+                // /api/stations/map retourne directement une liste
                 stations = Array.isArray(stationsData) ? stationsData : (stationsData.content || []);
                 locations = Array.isArray(locationsData) ? locationsData : (locationsData.content || []);
                 
@@ -298,6 +309,7 @@
                 
                 if (stations.length === 0) {
                     console.warn('⚠️ Aucune station trouvée');
+                    showError('Aucune borne disponible pour réservation.');
                 }
                 
                 populateStationSelect();
@@ -305,6 +317,7 @@
                 
             } catch (error) {
                 console.error('❌ Erreur loadData:', error);
+                console.error('❌ Stack:', error.stack);
                 showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
@@ -331,18 +344,19 @@
             }
             
             // Filtrer les stations actives ET qui n'appartiennent pas à l'utilisateur
+            // Note: /api/stations/map retourne StationLocationDto avec ownerId directement
             const activeStations = stations.filter(station => {
                 // Vérifier que la station existe et a les propriétés nécessaires
                 if (!station || !station.id) return false;
                 
-                // Vérifier le statut (peut être isActive ou status)
+                // Vérifier le statut (StationLocationDto a isActive directement)
                 const isActive = station.isActive !== undefined ? station.isActive : 
                                 (station.status === 'ACTIVE' || station.status === 'active');
                 if (!isActive) return false;
                 
                 // Exclure les propres stations de l'utilisateur
-                const location = locations.find(loc => loc.id === station.locationId);
-                if (location && location.ownerId === currentUserId) {
+                // StationLocationDto a ownerId directement, pas besoin de chercher dans locations
+                if (station.ownerId && station.ownerId === currentUserId) {
                     return false; // Ne pas afficher ses propres stations
                 }
                 
@@ -358,8 +372,8 @@
             }
             
             activeStations.forEach(station => {
-                const location = locations.find(loc => loc.id === station.locationId);
-                const locationName = location ? location.label : 'Lieu inconnu';
+                // StationLocationDto a locationLabel directement
+                const locationName = station.locationLabel || station.locationDescription || 'Lieu inconnu';
                 
                 const option = document.createElement('option');
                 option.value = station.id;
@@ -404,11 +418,12 @@
             if (selectedOption && selectedOption.value && selectedOption.dataset && selectedOption.dataset.station) {
                 try {
                     const station = JSON.parse(selectedOption.dataset.station);
-                    const location = locations.find(loc => loc.id === station.locationId);
+                    // StationLocationDto a locationLabel directement
+                    const locationName = station.locationLabel || station.locationDescription || 'Lieu inconnu';
                     
                     document.getElementById('stationPlugType').textContent = station.plugType || '-';
                     document.getElementById('stationHourlyRate').textContent = `${station.hourlyRate || '0.00'} €/h`;
-                    document.getElementById('stationLocation').textContent = location ? location.label : 'Lieu inconnu';
+                    document.getElementById('stationLocation').textContent = locationName;
                     document.getElementById('stationStatus').textContent = station.isActive ? 'Active' : 'Inactive';
                     
                     document.getElementById('stationInfo').style.display = 'block';
@@ -644,6 +659,7 @@
         function waitForScriptsAndInit() {
             // Vérifier que authenticatedFetch est disponible
             if (typeof authenticatedFetch === 'function') {
+                console.log('✅ authenticatedFetch disponible');
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', initPage);
                 } else {
@@ -651,13 +667,29 @@
                 }
             } else {
                 // Réessayer après un court délai si les scripts ne sont pas encore chargés
-                console.log('⏳ En attente du chargement de jwt-utils.js...');
-                setTimeout(waitForScriptsAndInit, 100);
+                console.log('⏳ En attente du chargement de jwt-utils.js... (authenticatedFetch:', typeof authenticatedFetch, ')');
+                // Limiter à 50 tentatives (5 secondes max)
+                if (typeof waitForScriptsAndInit.attempts === 'undefined') {
+                    waitForScriptsAndInit.attempts = 0;
+                }
+                waitForScriptsAndInit.attempts++;
+                if (waitForScriptsAndInit.attempts < 50) {
+                    setTimeout(waitForScriptsAndInit, 100);
+                } else {
+                    console.error('❌ Timeout: jwt-utils.js n\'a pas pu être chargé après 5 secondes');
+                    showError('Erreur: Impossible de charger les scripts nécessaires. Veuillez recharger la page.');
+                }
             }
         }
         
-        // Démarrer l'attente
-        waitForScriptsAndInit();
+        // Attendre que le DOM soit prêt ET que les scripts soient chargés
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(waitForScriptsAndInit, 200);
+            });
+        } else {
+            setTimeout(waitForScriptsAndInit, 200);
+        }
     </script>
     <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
     <div th:replace="~{includes/navbar :: navbar-script}"></div>

@@ -146,7 +146,8 @@ async function authenticatedFetch(url, options = {}) {
     
     const response = await fetch(url, {
         ...options,
-        headers
+        headers,
+        credentials: 'include' // Important pour les cookies HTTPOnly
     });
     
     // Si la réponse est 401 (Unauthorized), déconnecter l'utilisateur
@@ -158,6 +159,9 @@ async function authenticatedFetch(url, options = {}) {
     
     return response;
 }
+
+// Exposer authenticatedFetch globalement pour être sûr qu'il est accessible
+window.authenticatedFetch = authenticatedFetch;
 
 /**
  * Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
