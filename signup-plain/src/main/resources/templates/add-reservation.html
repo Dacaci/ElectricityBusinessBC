@@ -159,27 +159,8 @@
 
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
-    <!-- jwt-utils.js est déjà chargé dans navbar.html, mais on doit s'assurer qu'il est chargé avant notre script -->
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
-        // Attendre que jwt-utils.js soit chargé (depuis navbar.html)
-        // Vérifier l'authentification une fois que les scripts sont prêts
-        function initReservationPage() {
-            // Vérifier que requireAuth est disponible
-            if (typeof requireAuth === 'undefined') {
-                console.error('jwt-utils.js n\'est pas chargé. Rechargement de la page...');
-                setTimeout(() => window.location.reload(), 100);
-                return;
-            }
-            
-            // Vérifier l'authentification
-            if (!requireAuth()) {
-                // L'utilisateur sera redirigé automatiquement
-                return;
-            }
-            
-            // Charger les données de réservation
-            loadReservationData();
-        
         // Fonction pour récupérer l'ID utilisateur actuel (dynamique)
         function getCurrentUserIdDynamic() {
             const user = getAuthUser();
@@ -426,7 +407,14 @@
             document.getElementById('priceCalculation').style.display = 'block';
         }
         
-        document.getElementById('reservationForm').addEventListener('submit', async function(e) {
+        function setupFormSubmit() {
+            const form = document.getElementById('reservationForm');
+            if (!form) {
+                console.error('Formulaire de réservation non trouvé');
+                return;
+            }
+            
+            form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
@@ -519,7 +507,8 @@
                 showError('Erreur lors de la création: ' + error.message);
                 showLoading(false);
             }
-        });
+            });
+        }
         
         function showLoading(show) {
             document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
@@ -550,7 +539,29 @@
             container.innerHTML = '<div class="success">' + message + '</div>';
         }
         
-        } // Fin du bloc else
+        // Initialiser la page une fois que le DOM est chargé
+        // jwt-utils.js est chargé juste avant, donc requireAuth sera disponible
+        function initPage() {
+            // Vérifier l'authentification
+            if (!requireAuth()) {
+                // L'utilisateur sera redirigé automatiquement vers /login
+                return;
+            }
+            
+            // Configurer le formulaire
+            setupFormSubmit();
+            
+            // Charger les données de réservation
+            loadReservationData();
+        }
+        
+        // S'assurer que le DOM est chargé avant d'initialiser
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            // Le DOM est déjà chargé, initialiser immédiatement
+            initPage();
+        }
     </script>
     <script th:src="@{/js/auth.js}"></script>
     <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
