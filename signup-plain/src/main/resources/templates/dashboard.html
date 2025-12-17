@@ -945,10 +945,10 @@
         }
         
         function logout() {
-                        // Déconnexion fluide sans popup
+                        // Déconnexion fluide sans popup - redirection vers la carte
             localStorage.clear();
             sessionStorage.clear();
-            window.location.replace('/login?message=logout');
+            window.location.replace('/map');
         }
     </script>
     <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>

@@ -19,7 +19,7 @@ public class LogoutController {
         if (session != null) {
             session.invalidate();
         }
-        return "redirect:/login?message=logout";
+        return "redirect:/map";
     }
 }
 

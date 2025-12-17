@@ -11,7 +11,10 @@ if (typeof window.JWT_UTILS_LOADED === 'undefined') {
     window.JWT_UTILS_LOADED = true;
 
 // Clé pour stocker les informations utilisateur dans localStorage (pas le token !)
-var JWT_USER_KEY = 'authUser';
+// Utiliser window pour éviter les conflits de déclaration
+if (typeof window.JWT_USER_KEY === 'undefined') {
+    window.JWT_USER_KEY = 'authUser';
+}
 
 /**
  * Sauvegarde les informations d'authentification
@@ -20,7 +23,7 @@ var JWT_USER_KEY = 'authUser';
  */
 function saveAuthData(token, user) {
     localStorage.setItem('authToken', token);
-    localStorage.setItem(JWT_USER_KEY, JSON.stringify(user));
+    localStorage.setItem(window.JWT_USER_KEY, JSON.stringify(user));
 }
 
 /**
@@ -36,7 +39,7 @@ function getAuthToken() {
  * @returns {object|null} Les informations utilisateur ou null
  */
 function getAuthUser() {
-    const userStr = localStorage.getItem(JWT_USER_KEY);
+    const userStr = localStorage.getItem(window.JWT_USER_KEY);
     return userStr ? JSON.parse(userStr) : null;
 }
 
@@ -46,7 +49,7 @@ function getAuthUser() {
  */
 function clearAuthData() {
     // Supprimer les infos utilisateur du localStorage
-    localStorage.removeItem(JWT_USER_KEY);
+    localStorage.removeItem(window.JWT_USER_KEY);
     
     // Nettoyer aussi les anciennes clés au cas où
     localStorage.removeItem('authToken');
@@ -67,9 +70,9 @@ async function forceLogout() {
     // Vider aussi sessionStorage
     sessionStorage.clear();
     
-    // Redirection
+    // Redirection vers la carte (accessible sans authentification)
     setTimeout(() => {
-        window.location.href = '/login?message=logout';
+        window.location.href = '/map';
     }, 100);
 }
 

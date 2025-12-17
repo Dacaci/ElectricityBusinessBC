@@ -56,6 +56,13 @@
                 if (logoutItem) logoutItem.style.display = 'flex';
                 if (loginItem) loginItem.style.display = 'none';
                 
+                // Afficher tous les liens protégés
+                const protectedLinks = document.querySelectorAll('#navbarNav .nav-link[href*="/dashboard"], #navbarNav .nav-link[href*="/add-location"], #navbarNav .nav-link[href*="/locations"], #navbarNav .nav-link[href*="/add-station"], #navbarNav .nav-link[href*="/stations"], #navbarNav .nav-link[href*="/add-reservation"], #navbarNav .nav-link[href*="/reservations"]');
+                protectedLinks.forEach(link => {
+                    const parent = link.closest('.nav-item');
+                    if (parent) parent.style.display = 'block';
+                });
+                
                 // Mettre à jour le message de bienvenue
                 if (welcomeEl && typeof getAuthUser === 'function') {
                     const user = getAuthUser();

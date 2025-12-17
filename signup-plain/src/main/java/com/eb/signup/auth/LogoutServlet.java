@@ -16,8 +16,8 @@ public class LogoutServlet extends HttpServlet {
       session.invalidate();
     }
     
-    // Rediriger vers la page de connexion avec un message
-    resp.sendRedirect("login?message=logout");
+    // Rediriger vers la carte (accessible sans authentification)
+    resp.sendRedirect("map");
   }
 
   @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

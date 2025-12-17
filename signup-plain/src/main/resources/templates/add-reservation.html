@@ -193,8 +193,25 @@
             loadData().then(() => {
                 if (preselectId) {
                     const select = document.getElementById('stationId');
-                    select.value = preselectId;
-                    updateStationInfo();
+                    const option = select.querySelector(`option[value="${preselectId}"]`);
+                    if (option) {
+                        // La station est disponible, la sélectionner
+                        select.value = preselectId;
+                        updateStationInfo();
+                    } else {
+                        // La station n'est pas disponible (probablement appartient à l'utilisateur)
+                        const station = stations.find(s => s.id == preselectId);
+                        if (station) {
+                            const location = locations.find(loc => loc.id === station.locationId);
+                            if (location && location.ownerId === getCurrentUserIdDynamic()) {
+                                showError('Vous ne pouvez pas réserver votre propre borne. Veuillez sélectionner une autre borne.');
+                            } else {
+                                showError('Cette borne n\'est pas disponible pour réservation.');
+                            }
+                        } else {
+                            showError('Borne introuvable.');
+                        }
+                    }
                 }
             });
         }

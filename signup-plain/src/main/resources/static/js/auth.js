@@ -1,6 +1,6 @@
 // Fonction de déconnexion
 function logout() {
-    // Déconnexion fluide : pas de popup, juste nettoyage et redirection
+    // Déconnexion fluide : pas de popup, juste nettoyage et redirection vers la carte
     try {
         localStorage.removeItem('authToken');
         localStorage.removeItem('authUser');
@@ -8,10 +8,10 @@ function logout() {
         localStorage.removeItem('auth_user');
         localStorage.clear();
         sessionStorage.clear();
-        window.location.replace('/login');
+        window.location.replace('/map');
     } catch (error) {
         console.error('Erreur lors de la déconnexion:', error);
-        window.location.replace('/login');
+        window.location.replace('/map');
     }
 }
 
