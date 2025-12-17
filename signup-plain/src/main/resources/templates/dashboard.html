@@ -719,8 +719,10 @@
         }
         
         function downloadReceipt(reservationId) {
-            showSuccess('Téléchargement du reçu pour la réservation #' + reservationId);
-            // TODO: Implémenter la génération de reçu PDF
+            // Ouvrir le PDF dans un nouvel onglet
+            const pdfUrl = API_BASE_URL + '/api/reservations/' + reservationId + '/receipt.pdf';
+            console.log('📄 Téléchargement du reçu PDF:', pdfUrl);
+            window.open(pdfUrl, '_blank');
         }
         
         function setStationRate(stationId) {
