@@ -29,7 +29,7 @@
                         </button>
                     </li>
                     <li class="nav-item d-flex align-items-center flex-shrink-0" id="loginItem" style="display: none;">
-                        <a th:href="@{/login}" class="btn btn-outline-light btn-sm d-flex align-items-center" style="white-space: nowrap; flex-shrink: 0;">
+                        <a href="/login" class="btn btn-outline-light btn-sm d-flex align-items-center" style="white-space: nowrap; flex-shrink: 0;">
                             <i class="bi bi-box-arrow-in-right me-1"></i> Connexion
                         </a>
                     </li>
@@ -101,17 +101,38 @@
         // Initialiser la navbar dès que possible
         (function() {
             function initNavbar() {
+                // Attendre que les scripts soient chargés (jwt-utils.js, auth.js)
+                function tryUpdateNavbar() {
+                    if (typeof isAuthenticated === 'function' && typeof getAuthUser === 'function') {
+                        updateNavbarAuth();
+                    } else {
+                        // Réessayer après un court délai si les fonctions ne sont pas encore disponibles
+                        setTimeout(tryUpdateNavbar, 100);
+                    }
+                }
+                
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', function() {
-                        updateNavbarAuth();
+                        // Attendre un peu pour que tous les scripts soient chargés
+                        setTimeout(tryUpdateNavbar, 200);
                     });
                 } else {
-                    updateNavbarAuth();
+                    setTimeout(tryUpdateNavbar, 200);
                 }
             }
             
             initNavbar();
+            
+            // Réexécuter lors des changements de localStorage (connexion/déconnexion)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'authUser' || e.key === 'authToken') {
+                    updateNavbarAuth();
+                }
+            });
         })();
+        
+        // Exposer la fonction globalement pour qu'elle puisse être appelée depuis d'autres scripts
+        window.updateNavbarAuth = updateNavbarAuth;
         
         // Marquer le lien actif selon l'URL courante
         document.addEventListener('DOMContentLoaded', function() {

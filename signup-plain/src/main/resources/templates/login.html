@@ -146,6 +146,11 @@
                         const urlParams = new URLSearchParams(window.location.search);
                         const returnUrl = urlParams.get('returnUrl');
                         
+                        // Mettre à jour la navbar AVANT la redirection
+                        if (typeof updateNavbarAuth === 'function') {
+                            updateNavbarAuth();
+                        }
+                        
                         if (returnUrl) {
                             // Rediriger vers l'URL de retour (ex: /add-reservation?stationId=123)
                             // Forcer un rechargement complet pour éviter les problèmes de cache
