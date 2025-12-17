@@ -253,31 +253,58 @@
             try {
                 showLoading(true);
                 
-                // Charger les stations et les lieux
+                console.log('🔄 Chargement des stations et lieux...');
+                console.log('🔧 API_BASE_URL:', API_BASE_URL);
+                
+                // Utiliser authenticatedFetch pour envoyer le token JWT
                 const [stationsResponse, locationsResponse] = await Promise.all([
-                    fetch(API_BASE_URL + '/api/stations', { credentials: 'include' }),
-                    fetch(API_BASE_URL + '/api/locations', { credentials: 'include' })
+                    authenticatedFetch(API_BASE_URL + '/api/stations?size=1000', {
+                        method: 'GET',
+                        credentials: 'include'
+                    }),
+                    authenticatedFetch(API_BASE_URL + '/api/locations?size=1000', {
+                        method: 'GET',
+                        credentials: 'include'
+                    })
                 ]);
                 
+                console.log('📡 Stations response status:', stationsResponse.status);
+                console.log('📡 Locations response status:', locationsResponse.status);
+                
                 if (!stationsResponse.ok) {
-                    throw new Error('Erreur lors du chargement des bornes');
+                    const errorText = await stationsResponse.text();
+                    console.error('❌ Erreur stations:', stationsResponse.status, errorText);
+                    throw new Error('Erreur lors du chargement des bornes (status: ' + stationsResponse.status + ')');
                 }
                 
                 if (!locationsResponse.ok) {
-                    throw new Error('Erreur lors du chargement des lieux');
+                    const errorText = await locationsResponse.text();
+                    console.error('❌ Erreur locations:', locationsResponse.status, errorText);
+                    throw new Error('Erreur lors du chargement des lieux (status: ' + locationsResponse.status + ')');
                 }
                 
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
                 
-                // Gérer la pagination
-                stations = stationsData.content || stationsData;
-                locations = locationsData.content || locationsData;
+                console.log('📦 Stations data:', stationsData);
+                console.log('📦 Locations data:', locationsData);
+                
+                // Gérer la pagination (Spring Data retourne {content: [...], totalElements: ...})
+                stations = Array.isArray(stationsData) ? stationsData : (stationsData.content || []);
+                locations = Array.isArray(locationsData) ? locationsData : (locationsData.content || []);
+                
+                console.log('✅ Stations chargées:', stations.length);
+                console.log('✅ Lieux chargés:', locations.length);
+                
+                if (stations.length === 0) {
+                    console.warn('⚠️ Aucune station trouvée');
+                }
                 
                 populateStationSelect();
                 showLoading(false);
                 
             } catch (error) {
+                console.error('❌ Erreur loadData:', error);
                 showError('Erreur lors du chargement: ' + error.message);
                 showLoading(false);
             }
@@ -305,7 +332,13 @@
             
             // Filtrer les stations actives ET qui n'appartiennent pas à l'utilisateur
             const activeStations = stations.filter(station => {
-                if (!station.isActive) return false;
+                // Vérifier que la station existe et a les propriétés nécessaires
+                if (!station || !station.id) return false;
+                
+                // Vérifier le statut (peut être isActive ou status)
+                const isActive = station.isActive !== undefined ? station.isActive : 
+                                (station.status === 'ACTIVE' || station.status === 'active');
+                if (!isActive) return false;
                 
                 // Exclure les propres stations de l'utilisateur
                 const location = locations.find(loc => loc.id === station.locationId);
@@ -315,6 +348,8 @@
                 
                 return true;
             });
+            
+            console.log('🔍 Stations filtrées (actives et non-propriétaires):', activeStations.length);
             
             if (activeStations.length === 0) {
                 showError('Aucune borne disponible pour réservation. Vous ne pouvez pas réserver vos propres bornes.');
