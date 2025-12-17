@@ -870,7 +870,22 @@
             function forceUpdateNavbar() {
                 if (typeof updateNavbarAuth === 'function') {
                     updateNavbarAuth();
-                    console.log('✅ Navbar mise à jour');
+                    console.log('✅ Navbar mise à jour via updateNavbarAuth()');
+                    
+                    // Double vérification après un court délai
+                    setTimeout(function() {
+                        const loginItem = document.getElementById('loginItem');
+                        const isUserLoggedIn = typeof isAuthenticated === 'function' && isAuthenticated();
+                        if (loginItem && isUserLoggedIn) {
+                            // Forcer le masquage si toujours visible
+                            if (loginItem.style.display !== 'none') {
+                                console.warn('⚠️ loginItem toujours visible, forcer le masquage');
+                                loginItem.style.display = 'none';
+                                loginItem.style.setProperty('display', 'none', 'important');
+                                loginItem.classList.add('d-none');
+                            }
+                        }
+                    }, 200);
                 } else if (typeof isAuthenticated === 'function' && typeof getAuthUser === 'function') {
                     // Si updateNavbarAuth n'est pas encore disponible, créer une mise à jour manuelle
                     const isUserLoggedIn = isAuthenticated();
@@ -880,9 +895,20 @@
                     const welcomeEl = document.getElementById('welcomeMessage');
                     
                     if (isUserLoggedIn) {
-                        if (welcomeItem) welcomeItem.style.display = 'flex';
-                        if (logoutItem) logoutItem.style.display = 'flex';
-                        if (loginItem) loginItem.style.display = 'none';
+                        if (welcomeItem) {
+                            welcomeItem.style.display = 'flex';
+                            welcomeItem.style.setProperty('display', 'flex', 'important');
+                        }
+                        if (logoutItem) {
+                            logoutItem.style.display = 'flex';
+                            logoutItem.style.setProperty('display', 'flex', 'important');
+                        }
+                        if (loginItem) {
+                            loginItem.style.display = 'none';
+                            loginItem.style.setProperty('display', 'none', 'important');
+                            loginItem.classList.add('d-none');
+                            loginItem.classList.remove('d-flex');
+                        }
                         
                         const user = getAuthUser();
                         if (welcomeEl && user) {
@@ -893,9 +919,20 @@
                             }
                         }
                     } else {
-                        if (welcomeItem) welcomeItem.style.display = 'none';
-                        if (logoutItem) logoutItem.style.display = 'none';
-                        if (loginItem) loginItem.style.display = 'flex';
+                        if (welcomeItem) {
+                            welcomeItem.style.display = 'none';
+                            welcomeItem.style.setProperty('display', 'none', 'important');
+                        }
+                        if (logoutItem) {
+                            logoutItem.style.display = 'none';
+                            logoutItem.style.setProperty('display', 'none', 'important');
+                        }
+                        if (loginItem) {
+                            loginItem.style.display = 'flex';
+                            loginItem.style.setProperty('display', 'flex', 'important');
+                            loginItem.classList.remove('d-none');
+                            loginItem.classList.add('d-flex');
+                        }
                         if (welcomeEl) welcomeEl.textContent = '';
                     }
                     console.log('✅ Navbar mise à jour manuellement');
@@ -915,6 +952,13 @@
             
             window.addEventListener('load', function() {
                 setTimeout(forceUpdateNavbar, 300);
+            });
+            
+            // Surveiller les changements dans localStorage pour mettre à jour la navbar
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'authUser' || e.key === 'authToken') {
+                    setTimeout(forceUpdateNavbar, 100);
+                }
             });
         })();
     </script>

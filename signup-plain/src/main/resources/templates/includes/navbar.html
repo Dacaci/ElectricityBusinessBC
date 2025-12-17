@@ -50,11 +50,25 @@
             const loginItem = document.getElementById('loginItem');
             const welcomeEl = document.getElementById('welcomeMessage');
             
+            console.log('🔍 updateNavbarAuth() appelée - isUserLoggedIn:', isUserLoggedIn);
+            
             if (isUserLoggedIn) {
                 // Afficher les éléments pour utilisateur connecté
-                if (welcomeItem) welcomeItem.style.display = 'flex';
-                if (logoutItem) logoutItem.style.display = 'flex';
-                if (loginItem) loginItem.style.display = 'none';
+                if (welcomeItem) {
+                    welcomeItem.style.display = 'flex';
+                    welcomeItem.style.setProperty('display', 'flex', 'important');
+                }
+                if (logoutItem) {
+                    logoutItem.style.display = 'flex';
+                    logoutItem.style.setProperty('display', 'flex', 'important');
+                }
+                if (loginItem) {
+                    loginItem.style.display = 'none';
+                    loginItem.style.setProperty('display', 'none', 'important');
+                    // Double vérification : cacher aussi via la classe CSS
+                    loginItem.classList.add('d-none');
+                    loginItem.classList.remove('d-flex');
+                }
                 
                 // Afficher tous les liens protégés
                 const protectedLinks = document.querySelectorAll('#navbarNav .nav-link[href*="/dashboard"], #navbarNav .nav-link[href*="/add-location"], #navbarNav .nav-link[href*="/locations"], #navbarNav .nav-link[href*="/add-station"], #navbarNav .nav-link[href*="/stations"], #navbarNav .nav-link[href*="/add-reservation"], #navbarNav .nav-link[href*="/reservations"]');
@@ -76,12 +90,17 @@
                 // Utilisateur non connecté : masquer welcomeItem et logoutItem, afficher loginItem
                 if (welcomeItem) {
                     welcomeItem.style.display = 'none';
+                    welcomeItem.style.setProperty('display', 'none', 'important');
                 }
                 if (logoutItem) {
                     logoutItem.style.display = 'none';
+                    logoutItem.style.setProperty('display', 'none', 'important');
                 }
                 if (loginItem) {
                     loginItem.style.display = 'flex';
+                    loginItem.style.setProperty('display', 'flex', 'important');
+                    loginItem.classList.remove('d-none');
+                    loginItem.classList.add('d-flex');
                 }
                 
                 // Vider le message de bienvenue
