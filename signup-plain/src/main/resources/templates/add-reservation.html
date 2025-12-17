@@ -160,8 +160,8 @@
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
     <!-- jwt-utils.js chargé explicitement ici car nécessaire avant le script inline -->
-    <!-- Il sera aussi chargé dans navbar.html mais avec vérification pour éviter double déclaration -->
     <script th:src="@{/js/jwt-utils.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
     <script>
         // Fonction pour récupérer l'ID utilisateur actuel (dynamique)
         function getCurrentUserIdDynamic() {
@@ -640,15 +640,25 @@
             loadReservationData();
         }
         
-        // S'assurer que le DOM est chargé avant d'initialiser
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-        } else {
-            // Le DOM est déjà chargé, initialiser immédiatement
-            initPage();
+        // S'assurer que le DOM est chargé ET que les scripts sont chargés avant d'initialiser
+        function waitForScriptsAndInit() {
+            // Vérifier que authenticatedFetch est disponible
+            if (typeof authenticatedFetch === 'function') {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initPage);
+                } else {
+                    initPage();
+                }
+            } else {
+                // Réessayer après un court délai si les scripts ne sont pas encore chargés
+                console.log('⏳ En attente du chargement de jwt-utils.js...');
+                setTimeout(waitForScriptsAndInit, 100);
+            }
         }
+        
+        // Démarrer l'attente
+        waitForScriptsAndInit();
     </script>
-    <script th:src="@{/js/auth.js}"></script>
     <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
     <div th:replace="~{includes/navbar :: navbar-script}"></div>
 </body>
