@@ -159,7 +159,7 @@
 
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
-    <script th:src="@{/js/jwt-utils.js}"></script>
+    <!-- jwt-utils.js est déjà chargé dans navbar.html, pas besoin de le recharger -->
     <script>
         // Vérifier l'authentification
         if (!requireAuth()) {
@@ -344,19 +344,31 @@
         
         function updateStationInfo() {
             const select = document.getElementById('stationId');
+            if (!select || !select.options || select.selectedIndex < 0) {
+                document.getElementById('stationInfo').style.display = 'none';
+                document.getElementById('priceCalculation').style.display = 'none';
+                return;
+            }
+            
             const selectedOption = select.options[select.selectedIndex];
             
-            if (selectedOption.value) {
-                const station = JSON.parse(selectedOption.dataset.station);
-                const location = locations.find(loc => loc.id === station.locationId);
-                
-                document.getElementById('stationPlugType').textContent = station.plugType;
-                document.getElementById('stationHourlyRate').textContent = `${station.hourlyRate} €/h`;
-                document.getElementById('stationLocation').textContent = location ? location.label : 'Lieu inconnu';
-                document.getElementById('stationStatus').textContent = station.isActive ? 'Active' : 'Inactive';
-                
-                document.getElementById('stationInfo').style.display = 'block';
-                calculatePrice();
+            if (selectedOption && selectedOption.value && selectedOption.dataset && selectedOption.dataset.station) {
+                try {
+                    const station = JSON.parse(selectedOption.dataset.station);
+                    const location = locations.find(loc => loc.id === station.locationId);
+                    
+                    document.getElementById('stationPlugType').textContent = station.plugType || '-';
+                    document.getElementById('stationHourlyRate').textContent = `${station.hourlyRate || '0.00'} €/h`;
+                    document.getElementById('stationLocation').textContent = location ? location.label : 'Lieu inconnu';
+                    document.getElementById('stationStatus').textContent = station.isActive ? 'Active' : 'Inactive';
+                    
+                    document.getElementById('stationInfo').style.display = 'block';
+                    calculatePrice();
+                } catch (e) {
+                    console.error('Erreur lors de la mise à jour des infos de la station:', e);
+                    document.getElementById('stationInfo').style.display = 'none';
+                    document.getElementById('priceCalculation').style.display = 'none';
+                }
             } else {
                 document.getElementById('stationInfo').style.display = 'none';
                 document.getElementById('priceCalculation').style.display = 'none';
