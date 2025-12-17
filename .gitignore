@@ -54,6 +54,11 @@ node_modules/
 # Fichiers SVG (maquettes - à ignorer sauf si nécessaire)
 *.svg
 
+# Dossiers de diagrammes et maquettes
+diagrammes-uml/
+maquettes-figma/
+maquette-*.svg
+
 # Fichiers compilés
 *.class
 *.jar

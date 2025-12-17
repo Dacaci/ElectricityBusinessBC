@@ -93,7 +93,20 @@ h1, h2, h3, h4, h5, h6 {
 /* Limiter la largeur des champs de formulaire */
 .form-control,
 .form-select {
-    max-width: 600px;
+    max-width: 500px;
+}
+
+/* Limiter la largeur des boutons dans les formulaires */
+form .btn {
+    max-width: 300px;
+}
+
+/* Exception pour les boutons dans les tableaux et actions */
+.table .btn,
+.actions .btn,
+.location-actions .btn,
+.station-actions .btn {
+    max-width: none;
 }
 
 /* Pour les champs dans les colonnes Bootstrap, respecter la largeur de la colonne */

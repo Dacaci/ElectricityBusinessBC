@@ -5,7 +5,7 @@
     <title>Connexion - Electricity Business</title>
     <style>
         body {
-            background: #f8f9fa;
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -13,6 +13,14 @@
         .login-card {
             max-width: 450px;
             margin: 0 auto;
+        }
+        .login-card .form-control {
+            max-width: 100%;
+        }
+        .login-card .btn {
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
         }
     </style>
 </head>
@@ -45,9 +53,11 @@
                             <input type="password" id="password" class="form-control form-control-lg" required>
                         </div>
                         
-                        <button type="button" class="btn btn-primary btn-lg w-100 mb-3" onclick="handleLogin()">
-                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
-                        </button>
+                        <div class="text-center mb-3">
+                            <button type="button" class="btn btn-primary btn-lg" style="max-width: 300px;" onclick="handleLogin()">
+                                <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                            </button>
+                        </div>
                         
                         <div class="text-center">
                             <a href="/register-servlet" class="text-decoration-none">Créer un compte</a>
