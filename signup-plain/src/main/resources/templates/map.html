@@ -343,7 +343,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script th:src="@{/js/config.js}"></script>
-    <script th:src="@{/js/jwt-utils.js}"></script>
+    <!-- jwt-utils.js est déjà chargé dans navbar.html, pas besoin de le recharger -->
     <script th:src="@{/js/auth.js}"></script>
     <script>
         // Variables globales
@@ -591,12 +591,14 @@
         // Réserver une station - Vérifier l'authentification d'abord
         function reserveStation(stationId) {
             // Vérifier si l'utilisateur est connecté
+            // La carte est accessible sans connexion, mais la réservation nécessite une connexion
             if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
                 // Rediriger vers login avec le paramètre de retour
                 const returnUrl = encodeURIComponent('/add-reservation?stationId=' + stationId);
                 window.location.href = '/login?returnUrl=' + returnUrl;
                 return;
             }
+            // Si authentifié, rediriger vers la page de réservation
             window.location.href = '/add-reservation?stationId=' + stationId;
         }
         
@@ -681,10 +683,16 @@
         
         // Charger les stations au démarrage
         document.addEventListener('DOMContentLoaded', function() {
-            // Afficher le nom de l'utilisateur
-            const user = getAuthUser();
-            if (user) {
-                document.getElementById('welcomeMessage').textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
+            // Afficher le nom de l'utilisateur (si connecté)
+            // La carte est accessible même sans connexion
+            if (typeof getAuthUser === 'function') {
+                const user = getAuthUser();
+                if (user && user.firstName && user.lastName) {
+                    const welcomeEl = document.getElementById('welcomeMessage');
+                    if (welcomeEl) {
+                        welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
+                    }
+                }
             }
             
             // Initialiser la carte Leaflet

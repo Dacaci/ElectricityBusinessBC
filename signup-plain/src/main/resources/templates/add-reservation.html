@@ -159,6 +159,8 @@
 
     <!-- Scripts -->
     <script th:src="@{/js/config.js}"></script>
+    <!-- jwt-utils.js chargé explicitement ici car nécessaire avant le script inline -->
+    <!-- Il sera aussi chargé dans navbar.html mais avec vérification pour éviter double déclaration -->
     <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
         // Fonction pour récupérer l'ID utilisateur actuel (dynamique)

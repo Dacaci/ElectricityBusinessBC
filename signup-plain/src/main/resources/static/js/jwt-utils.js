@@ -6,8 +6,12 @@
  * Seules les informations utilisateur sont stockées dans localStorage.
  */
 
+// Protection contre le double chargement
+if (typeof window.JWT_UTILS_LOADED === 'undefined') {
+    window.JWT_UTILS_LOADED = true;
+
 // Clé pour stocker les informations utilisateur dans localStorage (pas le token !)
-const JWT_USER_KEY = 'authUser';
+var JWT_USER_KEY = 'authUser';
 
 /**
  * Sauvegarde les informations d'authentification
@@ -169,3 +173,5 @@ function requireAuth() {
  * Si le token expire, le serveur retournera une erreur 401 et l'utilisateur
  * sera automatiquement déconnecté par authenticatedFetch().
  */
+
+} // Fin de la protection contre double chargement
