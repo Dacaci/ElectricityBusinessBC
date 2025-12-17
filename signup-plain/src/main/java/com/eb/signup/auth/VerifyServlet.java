@@ -1,5 +1,6 @@
 package com.eb.signup.auth;
 
+import com.eb.signup.auth.EmailVerificationDao;
 import com.eb.signup.user.UserDao;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -105,7 +106,7 @@ public class VerifyServlet extends HttpServlet {
     // Sinon construire depuis les variables séparées
     String host = envOr("DB_HOST", "172.17.0.1");
     String port = envOr("DB_PORT", "5432");
-    String name = envOr("DB_NAME", "electricity_business_avmm");
+    String name = envOr("DB_NAME", "eb"); // Standardisé sur "eb" comme dans docker-compose.yml
     return String.format("jdbc:postgresql://%s:%s/%s", host, port, name);
   }
 }

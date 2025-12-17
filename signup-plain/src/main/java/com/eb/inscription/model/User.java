@@ -6,12 +6,13 @@ import java.time.LocalDateTime;
 /**
  * Modèle User SANS JPA Entity
  * Simple POJO (Plain Old Java Object) pour les Servlets
+ * Utilise status (String) pour correspondre à la colonne DB et passwordHash pour la cohérence
  */
 public class User {
     
     private Long id;
     private String email;
-    private String password;
+    private String passwordHash; // Renommé de password pour cohérence avec la DB
     private String firstName;
     private String lastName;
     private String phone;
@@ -19,20 +20,20 @@ public class User {
     private String address;
     private String postalCode;
     private String city;
-    private boolean enabled;
+    private String status; // Utilise String au lieu de boolean enabled pour correspondre à la DB
     private String verificationCode;
     private LocalDateTime createdAt;
     
     // Constructeurs
     public User() {
         this.createdAt = LocalDateTime.now();
-        this.enabled = false;
+        this.status = "PENDING"; // Statut initial
     }
     
-    public User(String email, String password, String firstName, String lastName, String phone) {
+    public User(String email, String passwordHash, String firstName, String lastName, String phone) {
         this();
         this.email = email;
-        this.password = password;
+        this.passwordHash = passwordHash;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
@@ -55,12 +56,12 @@ public class User {
         this.email = email;
     }
     
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
     
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
     
     public String getFirstName() {
@@ -119,12 +120,26 @@ public class User {
         this.city = city;
     }
     
-    public boolean isEnabled() {
-        return enabled;
+    public String getStatus() {
+        return status;
     }
     
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    /**
+     * Méthode utilitaire pour vérifier si l'utilisateur est actif
+     */
+    public boolean isActive() {
+        return "ACTIVE".equals(status);
+    }
+    
+    /**
+     * Méthode utilitaire pour vérifier si l'utilisateur est en attente
+     */
+    public boolean isPending() {
+        return "PENDING".equals(status);
     }
     
     public String getVerificationCode() {

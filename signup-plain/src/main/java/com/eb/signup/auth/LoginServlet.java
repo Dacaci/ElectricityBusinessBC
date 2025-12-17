@@ -54,8 +54,8 @@ public class LoginServlet extends HttpServlet {
         return;
       }
       
-      // Vérifier le statut du compte
-      if (!"ACTIVE".equals(user.getStatus())) {
+      // Vérifier le statut du compte (doit être ACTIVE pour se connecter)
+      if (user.getStatus() == null || !"ACTIVE".equals(user.getStatus())) {
         req.setAttribute("error", "Compte non activé. Vérifiez votre email.");
         req.getRequestDispatcher("/login.jsp").forward(req, resp);
         return;
@@ -109,7 +109,7 @@ public class LoginServlet extends HttpServlet {
     // Sinon construire depuis les variables séparées
     String host = envOr("DB_HOST", "172.17.0.1");
     String port = envOr("DB_PORT", "5432");
-    String name = envOr("DB_NAME", "electricity_business_avmm");
+    String name = envOr("DB_NAME", "eb"); // Standardisé sur "eb" comme dans docker-compose.yml
     return String.format("jdbc:postgresql://%s:%s/%s", host, port, name);
   }
 }

@@ -66,7 +66,7 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getPassword()); // Déjà hashé avec BCrypt
+            stmt.setString(2, user.getPasswordHash()); // Déjà hashé avec BCrypt
             stmt.setString(3, user.getFirstName());
             stmt.setString(4, user.getLastName());
             stmt.setString(5, user.getPhone());
@@ -144,7 +144,7 @@ public class UserDAO {
         User user = new User();
         user.setId(rs.getLong("id"));
         user.setEmail(rs.getString("email"));
-        user.setPassword(rs.getString("password_hash"));
+        user.setPasswordHash(rs.getString("password_hash"));
         user.setFirstName(rs.getString("first_name"));
         user.setLastName(rs.getString("last_name"));
         user.setPhone(rs.getString("phone"));
@@ -159,9 +159,9 @@ public class UserDAO {
         user.setPostalCode(rs.getString("postal_code"));
         user.setCity(rs.getString("city"));
         
-        // Vérifier le statut : enabled = true si status = 'ACTIVE'
+        // Mapper directement le statut depuis la DB (String)
         String status = rs.getString("status");
-        user.setEnabled("ACTIVE".equals(status));
+        user.setStatus(status != null ? status : "PENDING");
         // Note: verification_code n'existe plus dans la table, on utilise email_verification_codes
         
         Timestamp createdAt = rs.getTimestamp("created_at");

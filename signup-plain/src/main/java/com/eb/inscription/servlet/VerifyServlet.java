@@ -83,7 +83,8 @@ public class VerifyServlet extends HttpServlet {
                 return;
             }
             
-            if (user.isEnabled()) {
+            // Vérifier si le compte est déjà actif
+            if (user.isActive()) {
                 request.setAttribute("error", "Ce compte est déjà vérifié");
                 request.setAttribute("email", email);
                 request.getRequestDispatcher("/WEB-INF/views/verify.jsp").forward(request, response);

@@ -60,6 +60,20 @@ public class RegisterController {
             model.addAttribute("error", "Les champs marqués d'un * sont obligatoires et le mot de passe doit contenir au moins 8 caractères");
             return "register";
         }
+        
+        // Validation du mot de passe (doit correspondre à la validation côté client)
+        if (!password.matches(".*[A-Z].*")) {
+            model.addAttribute("error", "Le mot de passe doit contenir au moins une majuscule");
+            return "register";
+        }
+        if (!password.matches(".*[a-z].*")) {
+            model.addAttribute("error", "Le mot de passe doit contenir au moins une minuscule");
+            return "register";
+        }
+        if (!password.matches(".*[0-9].*")) {
+            model.addAttribute("error", "Le mot de passe doit contenir au moins un chiffre");
+            return "register";
+        }
 
         // Validation de la confirmation du mot de passe
         if (!password.equals(confirmPassword)) {

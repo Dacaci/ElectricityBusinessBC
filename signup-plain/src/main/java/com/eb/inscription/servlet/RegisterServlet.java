@@ -145,9 +145,25 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
         
-        // Validation de la longueur du mot de passe
+        // Validation du mot de passe (doit correspondre à la validation côté client)
         if (password.length() < 8) {
             request.setAttribute("error", "Le mot de passe doit contenir au moins 8 caractères");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        // Vérifier qu'il contient au moins une majuscule, une minuscule et un chiffre
+        if (!password.matches(".*[A-Z].*")) {
+            request.setAttribute("error", "Le mot de passe doit contenir au moins une majuscule");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        if (!password.matches(".*[a-z].*")) {
+            request.setAttribute("error", "Le mot de passe doit contenir au moins une minuscule");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        if (!password.matches(".*[0-9].*")) {
+            request.setAttribute("error", "Le mot de passe doit contenir au moins un chiffre");
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
             return;
         }
@@ -172,7 +188,7 @@ public class RegisterServlet extends HttpServlet {
             user.setEmail(email);
             // Hasher le mot de passe avec BCrypt (sans framework)
             String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt(10));
-            user.setPassword(hashedPassword);
+            user.setPasswordHash(hashedPassword);
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setPhone(phone);
@@ -180,7 +196,7 @@ public class RegisterServlet extends HttpServlet {
             user.setAddress(address);
             user.setPostalCode(postalCode);
             user.setCity(city);
-            user.setEnabled(false);
+            user.setStatus("PENDING"); // Statut initial
             user.setCreatedAt(java.time.LocalDateTime.now());
             
             // Sauvegarder avec JDBC pur (pas de Spring Data JPA)
