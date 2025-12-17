@@ -18,20 +18,29 @@ if (typeof window.JWT_USER_KEY === 'undefined') {
 
 /**
  * Sauvegarde les informations d'authentification
- * @param {string} token - Le token JWT
- * @param {object} user - Les informations utilisateur
+ * NOTE: Le token JWT est maintenant dans un cookie HttpOnly côté serveur
+ * JavaScript ne peut pas y accéder (sécurité XSS)
+ * @param {string} token - Le token JWT (ignoré, stocké dans cookie HttpOnly)
+ * @param {object} user - Les informations utilisateur (stockées dans localStorage)
  */
 function saveAuthData(token, user) {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem(window.JWT_USER_KEY, JSON.stringify(user));
+    // Le token est dans un cookie HttpOnly, on ne le stocke plus dans localStorage
+    // Seules les infos utilisateur sont stockées
+    if (user) {
+        localStorage.setItem(window.JWT_USER_KEY, JSON.stringify(user));
+    }
 }
 
 /**
- * Récupère le token JWT depuis localStorage
- * @returns {string|null} Le token JWT ou null
+ * Récupère le token JWT
+ * NOTE: Le token est maintenant dans un cookie HttpOnly, inaccessible à JavaScript
+ * Cette fonction retourne toujours null car le token est géré côté serveur
+ * @returns {string|null} Toujours null (token dans cookie HttpOnly)
  */
 function getAuthToken() {
-    return localStorage.getItem('authToken');
+    // Le token est dans un cookie HttpOnly, JavaScript ne peut pas y accéder
+    // Le serveur récupère automatiquement le token depuis les cookies
+    return null;
 }
 
 /**
@@ -116,24 +125,21 @@ function getCurrentUserName() {
 }
 
 /**
- * Crée les headers pour les requêtes API avec le token JWT
- * @returns {object} Les headers avec Authorization
+ * Crée les headers pour les requêtes API
+ * NOTE: Le token JWT est dans un cookie HttpOnly, il est envoyé automatiquement
+ * Pas besoin d'ajouter le header Authorization
+ * @returns {object} Les headers (sans Authorization, le cookie est envoyé automatiquement)
  */
 function getAuthHeaders() {
-    const token = getAuthToken();
-    const headers = {
+    // Le token est dans un cookie HttpOnly, il est envoyé automatiquement avec credentials: 'include'
+    // Pas besoin d'ajouter le header Authorization
+    return {
         'Content-Type': 'application/json'
     };
-    
-    if (token) {
-        headers['Authorization'] = 'Bearer ' + token;
-    }
-    
-    return headers;
 }
 
 /**
- * Effectue une requête authentifiée avec le token JWT dans les headers
+ * Effectue une requête authentifiée avec le token JWT dans un cookie HttpOnly
  * @param {string} url - L'URL de la requête
  * @param {object} options - Les options de la requête
  * @returns {Promise<Response>} La réponse de la requête
@@ -144,15 +150,25 @@ async function authenticatedFetch(url, options = {}) {
         ...options.headers
     };
     
+    // IMPORTANT: credentials: 'include' est OBLIGATOIRE pour envoyer les cookies HttpOnly
     const response = await fetch(url, {
         ...options,
         headers,
-        credentials: 'include' // Important pour les cookies HTTPOnly
+        credentials: 'include' // OBLIGATOIRE pour les cookies HTTPOnly
     });
     
     // Si la réponse est 401 (Unauthorized), déconnecter l'utilisateur
     if (response.status === 401) {
         clearAuthData();
+        // Appeler l'API de logout pour supprimer le cookie côté serveur
+        try {
+            await fetch(window.API_BASE_URL + '/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (e) {
+            // Ignorer les erreurs de logout
+        }
         window.location.href = '/login';
         return response;
     }

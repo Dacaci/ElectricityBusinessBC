@@ -803,12 +803,10 @@
                 formData.append('type', 'IMAGE');
                 
                 try {
-                    const token = getToken();
+                    // Le token est dans un cookie HttpOnly, pas besoin de header Authorization
                     const response = await fetch(API_BASE_URL + '/api/medias/upload', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        },
+                        credentials: 'include', // IMPORTANT: pour envoyer le cookie HttpOnly
                         body: formData
                     });
                     
@@ -841,12 +839,10 @@
                 formData.append('type', 'VIDEO');
                 
                 try {
-                    const token = getToken();
+                    // Le token est dans un cookie HttpOnly, pas besoin de header Authorization
                     const response = await fetch(API_BASE_URL + '/api/medias/upload', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        },
+                        credentials: 'include', // IMPORTANT: pour envoyer le cookie HttpOnly
                         body: formData
                     });
                     
@@ -988,11 +984,27 @@
             setTimeout(() => container.innerHTML = '', 3000);
         }
         
-        function logout() {
-                        // Déconnexion fluide sans popup - redirection vers la carte
-            localStorage.clear();
+        async function logout() {
+            // Appeler l'API de logout pour supprimer le cookie HttpOnly côté serveur
+            try {
+                await fetch(API_BASE_URL + '/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include' // IMPORTANT: pour envoyer le cookie à supprimer
+                });
+            } catch (e) {
+                console.warn('Erreur lors de l\'appel API logout:', e);
+            }
+            
+            // Nettoyer le localStorage
+            if (typeof clearAuthData === 'function') {
+                clearAuthData();
+            } else {
+                localStorage.clear();
+            }
             sessionStorage.clear();
-            window.location.replace('/map');
+            
+            // Rediriger vers /login
+            window.location.replace('/login');
         }
     </script>
     <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>

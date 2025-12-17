@@ -69,6 +69,7 @@
     </div>
 
     <script th:src="@{/js/config.js}"></script>
+    <script th:src="@{/js/jwt-utils.js}"></script>
     <script>
         async function handleLogin() {
             const email = document.getElementById('email').value;
@@ -82,6 +83,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include', // IMPORTANT: pour recevoir le cookie HttpOnly
                     body: JSON.stringify({ 
                         email: email, 
                         password: password 
@@ -108,70 +110,50 @@
                 
                 const data = await response.json();
                 
-                if (data.token && data.user) {
-                    // Nettoyer complètement l'ancien localStorage avant de sauvegarder les nouvelles données
-                    localStorage.clear();
-                    sessionStorage.clear();
+                if (data.user) {
+                    // Le token JWT est maintenant dans un cookie HttpOnly (créé côté serveur)
+                    // On ne stocke plus le token dans localStorage (sécurité XSS)
                     
-                    // Sauvegarder les nouvelles données d'authentification
-                    localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('authUser', JSON.stringify(data.user));
+                    // Nettoyer l'ancien localStorage
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('auth_user');
                     
-                    // Vérifier que les données sont bien sauvegardées
-                    const savedToken = localStorage.getItem('authToken');
-                    const savedUser = localStorage.getItem('authUser');
+                    // Sauvegarder uniquement les infos utilisateur (pas le token)
+                    if (typeof saveAuthData === 'function') {
+                        saveAuthData(null, data.user); // token = null car dans cookie HttpOnly
+                    } else {
+                        localStorage.setItem('authUser', JSON.stringify(data.user));
+                    }
                     
                     console.log('✅ Connexion réussie pour utilisateur ID:', data.user.id);
                     console.log('✅ Email:', data.user.email);
-                    console.log('✅ Token sauvegardé:', savedToken ? 'Oui (' + savedToken.length + ' caractères)' : 'NON');
-                    console.log('✅ User sauvegardé:', savedUser ? 'Oui' : 'NON');
+                    console.log('✅ Token JWT stocké dans cookie HttpOnly (inaccessible à JavaScript)');
+                    console.log('✅ Infos utilisateur sauvegardées dans localStorage');
                     
                     // Vérifier que isAuthenticated() fonctionne maintenant
                     if (typeof isAuthenticated === 'function') {
                         const authStatus = isAuthenticated();
                         console.log('✅ isAuthenticated() retourne:', authStatus);
-                        if (!authStatus) {
-                            console.error('❌ ERREUR: isAuthenticated() retourne false après connexion !');
-                        }
                     }
                     
-                    // Vérifier une dernière fois que isAuthenticated() fonctionne avant de rediriger
-                    // Attendre un peu pour s'assurer que le localStorage est bien écrit et que jwt-utils.js est chargé
-                    setTimeout(() => {
-                        // Vérification finale de l'authentification
-                        if (typeof isAuthenticated === 'function') {
-                            const finalAuthCheck = isAuthenticated();
-                            console.log('🔍 Vérification finale isAuthenticated():', finalAuthCheck);
-                            if (!finalAuthCheck) {
-                                console.error('❌ ERREUR CRITIQUE: isAuthenticated() retourne false juste avant redirection !');
-                                console.error('Token:', localStorage.getItem('authToken') ? 'présent' : 'absent');
-                                console.error('User:', localStorage.getItem('authUser') ? 'présent' : 'absent');
-                                // Ne pas rediriger si l'authentification n'est pas confirmée
-                                alert('Erreur d\'authentification. Veuillez réessayer de vous connecter.');
-                                return;
-                            }
-                        }
-                        
-                        // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const returnUrl = urlParams.get('returnUrl');
-                        
-                        // Mettre à jour la navbar AVANT la redirection
-                        if (typeof updateNavbarAuth === 'function') {
-                            updateNavbarAuth();
-                        }
-                        
-                        if (returnUrl) {
-                            // Rediriger vers l'URL de retour (ex: /add-reservation?stationId=123)
-                            // Forcer un rechargement complet pour éviter les problèmes de cache
-                            window.location.replace(decodeURIComponent(returnUrl));
-                        } else {
-                            // Sinon, rediriger vers la carte par défaut
-                            window.location.replace('/map');
-                        }
-                    }, 200);
+                    // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('returnUrl');
+                    
+                    // Mettre à jour la navbar AVANT la redirection
+                    if (typeof updateNavbarAuth === 'function') {
+                        updateNavbarAuth();
+                    }
+                    
+                    // Rediriger vers /dashboard (comme demandé)
+                    if (returnUrl) {
+                        window.location.replace(decodeURIComponent(returnUrl));
+                    } else {
+                        window.location.replace('/dashboard');
+                    }
                 } else {
-                    console.error('Erreur: Token ou données utilisateur manquantes');
+                    console.error('Erreur: Données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);
                 }
                 
