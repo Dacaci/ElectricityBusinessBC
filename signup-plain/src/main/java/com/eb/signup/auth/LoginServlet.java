@@ -8,7 +8,8 @@ import jakarta.servlet.http.*;
 import javax.sql.DataSource;
 import java.io.IOException;
 
-@WebServlet(name="LoginServlet", urlPatterns={"/login"})
+// DÉSACTIVÉ : LoginController Spring est utilisé à la place avec JWT
+// @WebServlet(name="LoginServlet", urlPatterns={"/login"})
 public class LoginServlet extends HttpServlet {
   private UserDao userDao;
 

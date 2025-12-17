@@ -7,7 +7,8 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet(name="MapServlet", urlPatterns={"/map"})
+// DÉSACTIVÉ : MapController Spring est utilisé à la place avec JWT
+// @WebServlet(name="MapServlet", urlPatterns={"/map"})
 public class MapServlet extends HttpServlet {
 
   @Override protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

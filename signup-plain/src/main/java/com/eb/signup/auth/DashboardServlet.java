@@ -7,7 +7,8 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet(name="DashboardServlet", urlPatterns={"/dashboard"})
+// DÉSACTIVÉ : DashboardController Spring est utilisé à la place avec JWT
+// @WebServlet(name="DashboardServlet", urlPatterns={"/dashboard"})
 public class DashboardServlet extends HttpServlet {
 
   @Override protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

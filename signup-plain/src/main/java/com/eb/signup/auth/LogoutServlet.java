@@ -6,7 +6,8 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet(name="LogoutServlet", urlPatterns={"/logout"})
+// DÉSACTIVÉ : LogoutController Spring est utilisé à la place avec JWT
+// @WebServlet(name="LogoutServlet", urlPatterns={"/logout"})
 public class LogoutServlet extends HttpServlet {
 
   @Override protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
