@@ -544,12 +544,43 @@
         // Initialiser la page une fois que le DOM est chargé
         // jwt-utils.js est chargé juste avant, donc requireAuth sera disponible
         function initPage() {
-            // Vérifier l'authentification
-            if (!requireAuth()) {
-                // L'utilisateur sera redirigé automatiquement vers /login
-                return;
+            // Vérifier l'authentification IMMÉDIATEMENT et de manière STRICTE
+            // Si l'utilisateur n'est pas connecté, rediriger vers login AVANT tout
+            
+            // Utiliser requireAuth() qui est la fonction la plus fiable (vérifie token ET user)
+            if (typeof requireAuth === 'function') {
+                // requireAuth() redirige automatiquement vers /login si non authentifié
+                if (!requireAuth()) {
+                    // requireAuth() a déjà redirigé, on sort
+                    return;
+                }
+                // Si on arrive ici, requireAuth() a retourné true, l'utilisateur est authentifié
+            } else {
+                // Fallback si requireAuth n'est pas disponible : vérification manuelle stricte
+                let userIsAuthenticated = false;
+                
+                // Vérification stricte : l'utilisateur doit avoir des données utilisateur valides avec un ID
+                if (typeof getAuthUser === 'function') {
+                    const user = getAuthUser();
+                    // Vérifier que l'utilisateur existe et a un ID valide (nombre)
+                    if (user && user.id && typeof user.id === 'number') {
+                        userIsAuthenticated = true;
+                    }
+                }
+                
+                // Fallback : utiliser isAuthenticated() si disponible
+                if (!userIsAuthenticated && typeof isAuthenticated === 'function') {
+                    userIsAuthenticated = isAuthenticated();
+                }
+                
+                // Si pas authentifié, rediriger immédiatement
+                if (!userIsAuthenticated) {
+                    window.location.href = '/login';
+                    return;
+                }
             }
             
+            // Si on arrive ici, l'utilisateur est authentifié
             // Configurer le formulaire
             setupFormSubmit();
             

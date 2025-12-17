@@ -57,17 +57,15 @@
         let isDeletingLocation = false; // Protection contre les double-clics
         let CURRENT_USER_ID = null;
         
-        // Récupérer l'ID de l'utilisateur depuis le token JWT (sera null si pas authentifié)
-        if (typeof getCurrentUserId === 'function') {
-            CURRENT_USER_ID = getCurrentUserId();
-        }
-        
-        // Vérifier l'authentification
+        // Vérifier l'authentification EN PREMIER
         if (!requireAuth()) {
             // L'utilisateur sera redirigé automatiquement par requireAuth()
         } else {
-        
-                                        } // Fermer le bloc else
+            // Récupérer l'ID de l'utilisateur depuis le token JWT (seulement si authentifié)
+            if (typeof getCurrentUserId === 'function') {
+                CURRENT_USER_ID = getCurrentUserId();
+            }
+        } // Fin du bloc else (utilisateur authentifié)
         
         // ========== FONCTIONS GLOBALES (définies en dehors du bloc else) ==========
         

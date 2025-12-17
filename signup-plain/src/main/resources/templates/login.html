@@ -106,21 +106,55 @@
                     // Sauvegarder les nouvelles données d'authentification
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
+                    
+                    // Vérifier que les données sont bien sauvegardées
+                    const savedToken = localStorage.getItem('authToken');
+                    const savedUser = localStorage.getItem('authUser');
+                    
                     console.log('✅ Connexion réussie pour utilisateur ID:', data.user.id);
                     console.log('✅ Email:', data.user.email);
+                    console.log('✅ Token sauvegardé:', savedToken ? 'Oui (' + savedToken.length + ' caractères)' : 'NON');
+                    console.log('✅ User sauvegardé:', savedUser ? 'Oui' : 'NON');
                     
-                    // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const returnUrl = urlParams.get('returnUrl');
-                    
-                    if (returnUrl) {
-                        // Rediriger vers l'URL de retour (ex: /add-reservation?stationId=123)
-                        // Forcer un rechargement complet pour éviter les problèmes de cache
-                        window.location.replace(decodeURIComponent(returnUrl));
-                    } else {
-                        // Sinon, rediriger vers la carte par défaut
-                        window.location.replace('/map');
+                    // Vérifier que isAuthenticated() fonctionne maintenant
+                    if (typeof isAuthenticated === 'function') {
+                        const authStatus = isAuthenticated();
+                        console.log('✅ isAuthenticated() retourne:', authStatus);
+                        if (!authStatus) {
+                            console.error('❌ ERREUR: isAuthenticated() retourne false après connexion !');
+                        }
                     }
+                    
+                    // Vérifier une dernière fois que isAuthenticated() fonctionne avant de rediriger
+                    // Attendre un peu pour s'assurer que le localStorage est bien écrit et que jwt-utils.js est chargé
+                    setTimeout(() => {
+                        // Vérification finale de l'authentification
+                        if (typeof isAuthenticated === 'function') {
+                            const finalAuthCheck = isAuthenticated();
+                            console.log('🔍 Vérification finale isAuthenticated():', finalAuthCheck);
+                            if (!finalAuthCheck) {
+                                console.error('❌ ERREUR CRITIQUE: isAuthenticated() retourne false juste avant redirection !');
+                                console.error('Token:', localStorage.getItem('authToken') ? 'présent' : 'absent');
+                                console.error('User:', localStorage.getItem('authUser') ? 'présent' : 'absent');
+                                // Ne pas rediriger si l'authentification n'est pas confirmée
+                                alert('Erreur d\'authentification. Veuillez réessayer de vous connecter.');
+                                return;
+                            }
+                        }
+                        
+                        // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const returnUrl = urlParams.get('returnUrl');
+                        
+                        if (returnUrl) {
+                            // Rediriger vers l'URL de retour (ex: /add-reservation?stationId=123)
+                            // Forcer un rechargement complet pour éviter les problèmes de cache
+                            window.location.replace(decodeURIComponent(returnUrl));
+                        } else {
+                            // Sinon, rediriger vers la carte par défaut
+                            window.location.replace('/map');
+                        }
+                    }, 200);
                 } else {
                     console.error('Erreur: Token ou données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);

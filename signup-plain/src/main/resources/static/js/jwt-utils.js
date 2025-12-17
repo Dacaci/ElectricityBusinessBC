@@ -80,7 +80,9 @@ async function forceLogout() {
 function isAuthenticated() {
     const token = getAuthToken();
     const user = getAuthUser();
-    return token !== null && user !== null;
+    // Vérifier que le token existe, n'est pas vide, et que l'utilisateur existe avec un ID valide
+    return token !== null && token !== '' && token !== undefined &&
+           user !== null && user !== undefined && user.id !== null && user.id !== undefined;
 }
 
 /**

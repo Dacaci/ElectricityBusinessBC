@@ -590,14 +590,31 @@
         
         // Réserver une station - Vérifier l'authentification d'abord
         function reserveStation(stationId) {
-            // Vérifier si l'utilisateur est connecté
             // La carte est accessible sans connexion, mais la réservation nécessite une connexion
-            if (typeof isAuthenticated === 'function' && !isAuthenticated()) {
+            // Vérifier si l'utilisateur est connecté de manière stricte
+            let isUserAuthenticated = false;
+            
+            // Utiliser isAuthenticated() qui est la fonction la plus fiable
+            if (typeof isAuthenticated === 'function') {
+                isUserAuthenticated = isAuthenticated();
+            } else {
+                // Fallback : vérification manuelle stricte
+                if (typeof getAuthUser === 'function') {
+                    const user = getAuthUser();
+                    // Vérifier que l'utilisateur existe et a un ID valide (nombre)
+                    if (user && user.id && typeof user.id === 'number') {
+                        isUserAuthenticated = true;
+                    }
+                }
+            }
+            
+            if (!isUserAuthenticated) {
                 // Rediriger vers login avec le paramètre de retour
                 const returnUrl = encodeURIComponent('/add-reservation?stationId=' + stationId);
                 window.location.href = '/login?returnUrl=' + returnUrl;
                 return;
             }
+            
             // Si authentifié, rediriger vers la page de réservation
             window.location.href = '/add-reservation?stationId=' + stationId;
         }
