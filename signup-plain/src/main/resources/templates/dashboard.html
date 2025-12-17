@@ -112,7 +112,7 @@
                             <th>Borne, Lieu, Ville</th>
                             <th>Montant réglé</th>
                             <th>Statut</th>
-                            <th>Actions</th>
+                            <th>Actions / Reçu</th>
                         </tr>
                     </thead>
                     <tbody id="currentReservationsBody"></tbody>
@@ -350,6 +350,16 @@
                 const location = allLocations.find(l => l.id === station?.locationId);
                 const city = location?.city || 'N/A';
                 
+                let actions = '';
+                if (reservation.status === 'PENDING') {
+                    actions += '<button class="btn btn-danger btn-sm" onclick="cancelReservation(' + reservation.id + ')"><i class="bi bi-x-circle me-1"></i>Annuler</button>';
+                }
+                // Bouton PDF pour les réservations acceptées (CONFIRMED) ou terminées (COMPLETED)
+                if (reservation.status === 'CONFIRMED' || reservation.status === 'COMPLETED') {
+                    if (actions) actions += ' ';
+                    actions += '<button class="btn btn-info btn-sm" onclick="downloadReceipt(' + reservation.id + ')"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</button>';
+                }
+                
                 return '<tr>' +
                     '<td>' + formatDateTime(reservation.startTime) + '</td>' +
                     '<td>' + formatDateTime(reservation.endTime) + '</td>' +
@@ -357,9 +367,7 @@
                     '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '<br>' + city + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
                     '<td>' + getStatusBadge(reservation.status) + '</td>' +
-                    '<td>' +
-                        (reservation.status === 'PENDING' ? '<button class="btn btn-danger btn-sm" onclick="cancelReservation(' + reservation.id + ')"><i class="bi bi-x-circle me-1"></i>Annuler</button>' : '') +
-                    '</td>' +
+                    '<td>' + actions + '</td>' +
                 '</tr>';
             }).join('');
         }
@@ -371,13 +379,19 @@
             const empty = document.getElementById('pastReservationsEmpty');
             const pagination = document.getElementById('pastPagination');
             
-            // Réservations passées = COMPLETED, REFUSED, ou CANCELLED dont la date est passée
+            // Réservations passées = COMPLETED, REFUSED, CONFIRMED (date passée), ou CANCELLED dont la date est passée
             const now = new Date();
             const past = allReservations.filter(r => {
                 if (r.userId !== CURRENT_USER_ID) return false;
                 
                 // COMPLETED et REFUSED sont toujours dans les réservations passées
                 if (r.status === 'COMPLETED' || r.status === 'REFUSED') return true;
+                
+                // CONFIRMED seulement si la date de fin est passée (réservation acceptée mais terminée)
+                if (r.status === 'CONFIRMED') {
+                    const endTime = new Date(r.endTime);
+                    return endTime < now;
+                }
                 
                 // CANCELLED seulement si la date de fin est passée
                 if (r.status === 'CANCELLED') {
@@ -718,11 +732,40 @@
             return html;
         }
         
-        function downloadReceipt(reservationId) {
-            // Ouvrir le PDF dans un nouvel onglet
-            const pdfUrl = API_BASE_URL + '/api/reservations/' + reservationId + '/receipt.pdf';
-            console.log('📄 Téléchargement du reçu PDF:', pdfUrl);
-            window.open(pdfUrl, '_blank');
+        async function downloadReceipt(reservationId) {
+            try {
+                console.log('📄 Téléchargement du reçu PDF pour la réservation #' + reservationId);
+                const response = await authenticatedFetch(API_BASE_URL + '/api/reservations/' + reservationId + '/receipt.pdf');
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showError('Réservation non trouvée');
+                    } else {
+                        showError('Erreur lors du téléchargement du PDF');
+                    }
+                    return;
+                }
+                
+                // Créer un blob à partir de la réponse
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                // Créer un lien de téléchargement
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'receipt-' + reservationId + '.pdf';
+                document.body.appendChild(link);
+                link.click();
+                
+                // Nettoyer
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                showSuccess('Reçu PDF téléchargé avec succès');
+            } catch (error) {
+                console.error('Erreur lors du téléchargement du PDF:', error);
+                showError('Erreur lors du téléchargement du PDF');
+            }
         }
         
         function setStationRate(stationId) {
