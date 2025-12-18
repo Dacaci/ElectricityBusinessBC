@@ -93,7 +93,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Limiter la largeur des champs de formulaire */
 .form-control,
 .form-select {
-    max-width: 500px;
+    max-width: 300px;
 }
 
 /* Limiter la largeur des boutons dans les formulaires */
@@ -117,7 +117,7 @@ form .btn {
 
 /* Textarea peut être un peu plus large mais pas trop */
 textarea.form-control {
-    max-width: 800px;
+    max-width: 450px;
 }
 
 /* Actions */
