@@ -36,12 +36,17 @@ public class AuthController {
             
             // Créer un cookie HTTPOnly pour le token JWT (protection XSS)
             // Gestion dynamique du HTTPS : secure = true si HTTPS, false si HTTP (localhost)
+            boolean isSecure = request.isSecure();
+            // En production HTTPS cross-origin, utiliser SameSite=None (obligatoire avec Secure)
+            // En localhost HTTP, utiliser SameSite=Lax (même domaine ou ports différents)
+            String sameSite = isSecure ? "None" : "Lax";
+            
             ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", response.getToken())
                 .httpOnly(true)       // Protection contre XSS - JavaScript ne peut pas accéder au cookie
-                .secure(request.isSecure())  // Dynamique : true en HTTPS (production), false en HTTP (localhost)
-                .path("/")            // Cookie disponible pour toutes les routes
-                .maxAge(24 * 60 * 60) // 24 heures
-                .sameSite("Lax")      // Lax pour même domaine, None si cross-domain nécessaire
+                .secure(isSecure)      // Dynamique : true en HTTPS (production), false en HTTP (localhost)
+                .path("/")             // Cookie disponible pour toutes les routes
+                .maxAge(24 * 60 * 60)  // 24 heures
+                .sameSite(sameSite)    // None pour cross-origin HTTPS, Lax pour localhost HTTP
                 .build();
             
             httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
@@ -156,12 +161,15 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse httpResponse) {
         // Supprimer le cookie JWT en le remplaçant par un cookie expiré
+        boolean isSecure = request.isSecure();
+        String sameSite = isSecure ? "None" : "Lax";
+        
         ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", "")
             .httpOnly(true)
-            .secure(request.isSecure())  // Dynamique : true en HTTPS, false en HTTP
+            .secure(isSecure)  // Dynamique : true en HTTPS, false en HTTP
             .path("/")
             .maxAge(0)           // Expire immédiatement
-            .sameSite("Lax")
+            .sameSite(sameSite)  // None pour cross-origin HTTPS, Lax pour localhost HTTP
             .build();
         
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());

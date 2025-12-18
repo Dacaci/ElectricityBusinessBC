@@ -17,12 +17,15 @@ public class LogoutController {
     @PostMapping("/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // Supprimer le cookie JWT (même nom, maxAge=0)
+        boolean isSecure = request.isSecure();
+        String sameSite = isSecure ? "None" : "Lax";
+        
         ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", "")
             .httpOnly(true)
-            .secure(request.isSecure())  // Dynamique : true en HTTPS, false en HTTP
+            .secure(isSecure)  // Dynamique : true en HTTPS, false en HTTP
             .path("/")
             .maxAge(0)           // Expire immédiatement
-            .sameSite("Lax")
+            .sameSite(sameSite)  // None pour cross-origin HTTPS, Lax pour localhost HTTP
             .build();
         
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
