@@ -87,14 +87,15 @@ async function forceLogout() {
 
 /**
  * Vérifie si l'utilisateur est connecté
- * @returns {boolean} true si connecté, false sinon
+ * NOTE: Le token est dans un cookie HttpOnly, on vérifie uniquement la présence des infos utilisateur
+ * La vérification réelle du token est faite côté serveur
+ * @returns {boolean} true si les infos utilisateur existent, false sinon
  */
 function isAuthenticated() {
-    const token = getAuthToken();
     const user = getAuthUser();
-    // Vérifier que le token existe, n'est pas vide, et que l'utilisateur existe avec un ID valide
-    return token !== null && token !== '' && token !== undefined &&
-           user !== null && user !== undefined && user.id !== null && user.id !== undefined;
+    // Vérifier que l'utilisateur existe avec un ID valide
+    // Le token est vérifié côté serveur via le cookie HttpOnly
+    return user !== null && user !== undefined && user.id !== null && user.id !== undefined;
 }
 
 /**
