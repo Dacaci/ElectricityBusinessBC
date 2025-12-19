@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/migration-thymeleaf ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feature/migration-thymeleaf ]
 
 jobs:
   # Job 1: Build et test Backend
@@ -30,7 +30,18 @@ jobs:
     - name: Run Backend Tests
       working-directory: ./backend/eb-backend
       run: mvn test
-      continue-on-error: true
+      
+    - name: Generate JaCoCo Report
+      working-directory: ./backend/eb-backend
+      run: mvn jacoco:report
+      
+    - name: Upload JaCoCo Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: jacoco-report
+        path: backend/eb-backend/target/site/jacoco/**
+        retention-days: 7
       
     - name: Upload Backend Artifact
       uses: actions/upload-artifact@v4
