@@ -77,12 +77,12 @@ jobs:
         path: signup-plain/target/*.war
         retention-days: 1
 
-  # Job 3: Build Docker Images (uniquement sur push vers main)
+  # Job 3: Build Docker Images (sur push vers main ou feature/migration-thymeleaf)
   docker-build:
     name: Build Docker Images
     runs-on: ubuntu-latest
     needs: [backend-build, frontend-build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/migration-thymeleaf')
     
     steps:
     - name: Checkout code
