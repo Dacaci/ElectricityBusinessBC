@@ -37,10 +37,10 @@ services:
         value: re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh
       - key: RESEND_FROM_EMAIL
         value: onboarding@resend.dev
-      # Option pour désactiver Flyway si la base n'est pas accessible
-      # Décommentez la ligne suivante pour désactiver Flyway temporairement :
-      # - key: FLYWAY_ENABLED
-      #   value: "false"
+      # Désactiver Flyway temporairement si la base n'est pas accessible
+      # Une fois la base créée et accessible, remettez cette valeur à "true" ou supprimez cette ligne
+      - key: FLYWAY_ENABLED
+        value: "false"
     healthCheckPath: /actuator/health
     autoDeploy: true
 
