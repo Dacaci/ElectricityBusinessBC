@@ -28,5 +28,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
 # -Xmx512m: Maximum heap size of 512MB
 # -Xms256m: Initial heap size of 256MB
 # Use prod profile by default (can be overridden by SPRING_PROFILES_ACTIVE env var)
-ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod}", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -jar app.jar"]
 
