@@ -27,6 +27,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
 # Run the application with increased memory
 # -Xmx512m: Maximum heap size of 512MB
 # -Xms256m: Initial heap size of 256MB
-# SPRING_PROFILES_ACTIVE will be set by Render env vars, but we keep prod as fallback
-ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]
+# Use prod profile by default (can be overridden by SPRING_PROFILES_ACTIVE env var)
+ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod}", "-jar", "app.jar"]
 
