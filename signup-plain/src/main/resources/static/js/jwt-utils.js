@@ -27,8 +27,8 @@ function saveAuthData(token, user) {
     // Le token est dans un cookie HttpOnly, on ne le stocke plus dans localStorage
     // Seules les infos utilisateur sont stockées
     if (user) {
-        localStorage.setItem(window.JWT_USER_KEY, JSON.stringify(user));
-    }
+    localStorage.setItem(window.JWT_USER_KEY, JSON.stringify(user));
+}
 }
 
 /**

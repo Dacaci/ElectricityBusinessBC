@@ -2,12 +2,10 @@ package com.eb.eb_backend.controller;
 
 import com.eb.eb_backend.dto.LoginRequest;
 import com.eb.eb_backend.dto.LoginResponse;
-import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.service.AuthService;
 import com.eb.eb_backend.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -82,16 +80,6 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
     }
-    @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody com.eb.eb_backend.dto.CreateUserDto createUserDto) {
-        try {
-            UserDto userDto = authService.register(createUserDto);
-            return ResponseEntity.ok(userDto);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-    
     @PostMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String email, @RequestParam String code) {
         try {

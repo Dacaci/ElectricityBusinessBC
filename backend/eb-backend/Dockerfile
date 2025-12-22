@@ -20,12 +20,13 @@ COPY --from=build /app/target/eb-backend-*.jar app.jar
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+# Health check - increased start period for database connection
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 # Run the application with increased memory
 # -Xmx512m: Maximum heap size of 512MB
 # -Xms256m: Initial heap size of 256MB
-ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+# SPRING_PROFILES_ACTIVE will be set by Render env vars, but we keep prod as fallback
+ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]
 

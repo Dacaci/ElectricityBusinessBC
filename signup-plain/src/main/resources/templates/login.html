@@ -55,8 +55,8 @@
                         
                         <div class="text-center mb-3">
                             <button type="button" class="btn btn-primary btn-lg" style="max-width: 300px;" onclick="handleLogin()">
-                                <i class="bi bi-box-arrow-in-right"></i> Se connecter
-                            </button>
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                        </button>
                         </div>
                         
                         <div class="text-center">
@@ -135,23 +135,23 @@
                     if (typeof isAuthenticated === 'function') {
                         const authStatus = isAuthenticated();
                         console.log('✅ isAuthenticated() retourne:', authStatus);
-                    }
-                    
-                    // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const returnUrl = urlParams.get('returnUrl');
-                    
+                        }
+                        
+                        // Vérifier s'il y a un paramètre returnUrl pour rediriger après connexion
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const returnUrl = urlParams.get('returnUrl');
+                        
                     // Mettre à jour la navbar AVANT la redirection
                     if (typeof updateNavbarAuth === 'function') {
                         updateNavbarAuth();
                     }
                     
                     // Rediriger vers /dashboard (comme demandé)
-                    if (returnUrl) {
-                        window.location.replace(decodeURIComponent(returnUrl));
-                    } else {
+                        if (returnUrl) {
+                            window.location.replace(decodeURIComponent(returnUrl));
+                        } else {
                         window.location.replace('/dashboard');
-                    }
+                        }
                 } else {
                     console.error('Erreur: Données utilisateur manquantes');
                     console.error('Réponse du serveur:', data);

@@ -15,10 +15,10 @@ async function logout() {
         if (typeof clearAuthData === 'function') {
             clearAuthData();
         } else {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('authUser');
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('auth_user');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('authUser');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
         }
         
         localStorage.clear();

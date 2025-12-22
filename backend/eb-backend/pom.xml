@@ -204,6 +204,22 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<excludes>
+						<!-- Exclure les DTO (getters/setters simples) -->
+						<exclude>**/dto/**</exclude>
+						<!-- Exclure les Entity (getters/setters simples) -->
+						<exclude>**/entity/**</exclude>
+						<!-- Exclure les Config (configuration Spring) -->
+						<exclude>**/config/**</exclude>
+						<!-- Exclure les classes de sécurité (filtres, etc.) -->
+						<exclude>**/security/**</exclude>
+						<!-- Exclure les utilitaires -->
+						<exclude>**/util/**</exclude>
+						<!-- Exclure la classe principale -->
+						<exclude>**/EbBackendApplication.class</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -37,6 +37,11 @@ public class StationDto {
     private Long ownerId;
     private Long locationId;
     
+    // Getter pour compatibilité frontend (isActive)
+    public Boolean getIsActive() {
+        return status == StationStatus.ACTIVE;
+    }
+    
     // Constructeur pour conversion depuis l'entité
     public StationDto(Station station) {
         this.id = station.getId();

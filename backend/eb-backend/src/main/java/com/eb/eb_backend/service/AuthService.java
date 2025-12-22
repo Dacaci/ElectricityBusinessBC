@@ -1,6 +1,5 @@
 package com.eb.eb_backend.service;
 
-import com.eb.eb_backend.dto.CreateUserDto;
 import com.eb.eb_backend.dto.LoginRequest;
 import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.dto.UserDto;
@@ -19,9 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 @Slf4j
@@ -33,7 +30,6 @@ public class AuthService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
-    private final ResendEmailService resendEmailService;
     private final EmailVerificationCodeRepository verificationCodeRepository;
     
     @Override
@@ -63,62 +59,6 @@ public class AuthService implements UserDetailsService {
         UserDto userDto = new UserDto(user);
         String token = jwtUtil.generateToken(user.getEmail(), java.util.Map.of("uid", user.getId()));
         return new LoginResponse(token, userDto);
-    }
-    
-    public UserDto register(CreateUserDto createUserDto) {
-        if (userRepository.existsByEmail(createUserDto.getEmail())) {
-            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
-        }
-        
-        User user = new User();
-        user.setFirstName(createUserDto.getFirstName());
-        user.setLastName(createUserDto.getLastName());
-        user.setEmail(createUserDto.getEmail());
-        user.setPhone(createUserDto.getPhone());
-        user.setDateOfBirth(createUserDto.getDateOfBirth());
-        user.setAddress(createUserDto.getAddress());
-        user.setPostalCode(createUserDto.getPostalCode());
-        user.setCity(createUserDto.getCity());
-        user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
-        user.setStatus(User.UserStatus.PENDING);
-        
-        User savedUser = userRepository.save(user);
-        
-        // Générer un code OTP à 6 chiffres
-        String verificationCode = generateVerificationCode();
-        
-        // Hasher le code avec BCrypt avant de le stocker
-        String codeHash = passwordEncoder.encode(verificationCode);
-        
-        // Créer et sauvegarder le code de vérification dans la DB (expiration 15 minutes)
-        EmailVerificationCode verificationCodeEntity = EmailVerificationCode.builder()
-                .user(savedUser)
-                .codeHash(codeHash)
-                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
-                .attemptCount(0)
-                .build();
-        verificationCodeRepository.save(verificationCodeEntity);
-        
-        // Envoyer l'email via Resend
-        try {
-            boolean emailSent = resendEmailService.sendVerificationEmail(savedUser.getEmail(), verificationCode);
-            if (!emailSent) {
-                log.warn("Failed to send verification email via Resend, but code was generated and saved");
-            }
-        } catch (Exception e) {
-            log.error("Failed to send verification email via Resend", e);
-            // On continue quand même, le code est dans la DB
-        }
-        
-        return new UserDto(savedUser);
-    }
-    
-    /**
-     * Génère un code OTP à 6 chiffres
-     */
-    private String generateVerificationCode() {
-        SecureRandom random = new SecureRandom();
-        return String.format("%06d", random.nextInt(1_000_000));
     }
     
     /**
