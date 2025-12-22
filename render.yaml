@@ -81,7 +81,7 @@ services:
 
 databases:
   - name: electricity-business-db
-    databaseName: electricity_business
+    databaseName: electricity_business_avmm  # Nom réel de la base sur Render
     user: eb_user
     plan: basic  # Plan Basic pour éviter l'expiration
 
