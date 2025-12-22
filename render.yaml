@@ -37,10 +37,9 @@ services:
         value: re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh
       - key: RESEND_FROM_EMAIL
         value: onboarding@resend.dev
-      # Désactiver Flyway temporairement si la base n'est pas accessible
-      # Une fois la base créée et accessible, remettez cette valeur à "true" ou supprimez cette ligne
-      - key: FLYWAY_ENABLED
-        value: "false"
+      # Flyway activé maintenant que la base Basic est disponible
+      # - key: FLYWAY_ENABLED
+      #   value: "false"
     healthCheckPath: /actuator/health
     autoDeploy: true
 
@@ -84,5 +83,5 @@ databases:
   - name: electricity-business-db
     databaseName: electricity_business
     user: eb_user
-    plan: free
+    plan: basic  # Plan Basic pour éviter l'expiration
 
