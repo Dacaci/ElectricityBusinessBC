@@ -17,6 +17,9 @@ spring:
     enabled: ${FLYWAY_ENABLED:true}
     baseline-on-migrate: true
     validate-on-migrate: false
+    # Pour désactiver Flyway temporairement sur Render :
+    # Ajoutez la variable d'environnement FLYWAY_ENABLED=false dans le dashboard Render
+    # Cela permet de démarrer l'app même si la base n'est pas accessible
 
 server:
   port: ${PORT:8080}

@@ -7,6 +7,8 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 # Copy source code and build
+# IMPORTANT: -DskipTests est nécessaire car les tests nécessitent une base de données
+# qui n'est pas accessible pendant le build Docker sur Render
 COPY src ./src
 RUN mvn clean package -DskipTests
 
