@@ -5,10 +5,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * DAO avec JDBC PUR (pas de Spring Data JPA ni Hibernate)
- * Accès direct à la base de données PostgreSQL
- */
 public class UserDAO {
     
     private final String dbUrl;
@@ -20,7 +16,6 @@ public class UserDAO {
         this.dbUsername = dbUsername;
         this.dbPassword = dbPassword;
         
-        // Charger le driver JDBC PostgreSQL
         try {
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
@@ -28,16 +23,10 @@ public class UserDAO {
         }
     }
     
-    /**
-     * Obtenir une connexion JDBC (pas de Spring DataSource)
-     */
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
     }
     
-    /**
-     * Vérifier si un email existe déjà
-     */
     public boolean existsByEmail(String email) throws SQLException {
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
         
@@ -55,9 +44,6 @@ public class UserDAO {
         return false;
     }
     
-    /**
-     * Sauvegarder un utilisateur avec JDBC pur
-     */
     public void save(User user) throws SQLException {
         String sql = "INSERT INTO users (email, password_hash, first_name, last_name, phone, date_of_birth, address, postal_code, city, status, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -66,11 +52,10 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getPasswordHash()); // Déjà hashé avec BCrypt
+            stmt.setString(2, user.getPasswordHash());
             stmt.setString(3, user.getFirstName());
             stmt.setString(4, user.getLastName());
             stmt.setString(5, user.getPhone());
-            // Date de naissance (peut être null)
             if (user.getDateOfBirth() != null) {
                 stmt.setDate(6, Date.valueOf(user.getDateOfBirth()));
             } else {
@@ -79,7 +64,7 @@ public class UserDAO {
             stmt.setString(7, user.getAddress());
             stmt.setString(8, user.getPostalCode());
             stmt.setString(9, user.getCity());
-            stmt.setString(10, "PENDING"); // Statut initial
+            stmt.setString(10, "PENDING");
             stmt.setTimestamp(11, Timestamp.valueOf(user.getCreatedAt()));
             
             int affectedRows = stmt.executeUpdate();
@@ -88,7 +73,6 @@ public class UserDAO {
                 throw new SQLException("Échec de l'insertion, aucune ligne affectée");
             }
             
-            // Récupérer l'ID généré
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     user.setId(generatedKeys.getLong(1));
@@ -99,9 +83,6 @@ public class UserDAO {
         }
     }
     
-    /**
-     * Trouver un utilisateur par email
-     */
     public User findByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM users WHERE email = ?";
         
@@ -119,9 +100,6 @@ public class UserDAO {
         return null;
     }
     
-    /**
-     * Activer un utilisateur (après vérification)
-     */
     public void enableUser(String email) throws SQLException {
         String sql = "UPDATE users SET status = 'ACTIVE' WHERE email = ?";
         
@@ -137,9 +115,6 @@ public class UserDAO {
         }
     }
     
-    /**
-     * Mapper un ResultSet vers un objet User (pas d'ORM, tout manuel)
-     */
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getLong("id"));
@@ -149,7 +124,6 @@ public class UserDAO {
         user.setLastName(rs.getString("last_name"));
         user.setPhone(rs.getString("phone"));
         
-        // Date de naissance
         Date dateOfBirth = rs.getDate("date_of_birth");
         if (dateOfBirth != null) {
             user.setDateOfBirth(dateOfBirth.toLocalDate());
@@ -159,10 +133,8 @@ public class UserDAO {
         user.setPostalCode(rs.getString("postal_code"));
         user.setCity(rs.getString("city"));
         
-        // Mapper directement le statut depuis la DB (String)
         String status = rs.getString("status");
         user.setStatus(status != null ? status : "PENDING");
-        // Note: verification_code n'existe plus dans la table, on utilise email_verification_codes
         
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
