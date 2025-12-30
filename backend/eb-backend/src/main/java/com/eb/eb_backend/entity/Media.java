@@ -30,9 +30,17 @@ public class Media {
     @Column(name = "mime_type")
     private String mimeType;
     
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "station_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "station_id")
     private Station station;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -130,6 +138,22 @@ public class Media {
     
     public void setStation(Station station) {
         this.station = station;
+    }
+    
+    public Location getLocation() {
+        return location;
+    }
+    
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+    
+    public User getUser() {
+        return user;
+    }
+    
+    public void setUser(User user) {
+        this.user = user;
     }
     
     public LocalDateTime getCreatedAt() {

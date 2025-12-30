@@ -1,4 +1,4 @@
-package com.eb.frontend.config;
+package com.eb.inscription.config;
 
 import com.eb.inscription.servlet.RegisterServlet;
 import com.eb.inscription.servlet.VerifyServlet;
@@ -8,7 +8,6 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 /**
  * Configuration pour enregistrer les Servlets du module d'inscription (sans framework)
  * dans le contexte Spring Boot
@@ -16,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ServletConfig {
 
-    @Value("${spring.datasource.url:jdbc:postgresql://localhost:5433/eb}")
+    @Value("${spring.datasource.url:jdbc:postgresql://localhost:5441/eb}")
     private String dbUrl;
 
     @Value("${spring.datasource.username:eb}")
@@ -39,7 +38,7 @@ public class ServletConfig {
     @Value("${DB_HOST:}")
     private String dbHost;
     
-    @Value("${DB_PORT:5433}")
+    @Value("${DB_PORT:5441}")
     private String dbPort;
     
     @Value("${DB_NAME:eb}")

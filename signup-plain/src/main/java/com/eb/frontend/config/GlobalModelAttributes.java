@@ -13,6 +13,9 @@ public class GlobalModelAttributes {
     @Value("${backend.url:http://localhost:8080}")
     private String backendUrl;
 
+    @Value("${inscription.url:http://localhost:8082}")
+    private String inscriptionUrl;
+
     /**
      * Injecte l'URL du backend dans tous les modèles Thymeleaf
      * Cette variable sera disponible sous le nom "backendUrl" dans tous les templates
@@ -21,7 +24,21 @@ public class GlobalModelAttributes {
     public String backendUrl() {
         return backendUrl;
     }
+
+    /**
+     * Injecte l'URL du module d'inscription dans tous les modèles Thymeleaf
+     * Cette variable sera disponible sous le nom "inscriptionUrl" dans tous les templates
+     */
+    @ModelAttribute("inscriptionUrl")
+    public String inscriptionUrl() {
+        return inscriptionUrl;
+    }
 }
+
+
+
+
+
 
 
 

@@ -1,22 +1,20 @@
-package com.eb.frontend;
+package com.eb.inscription;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.eb.frontend", "com.eb.signup"})
-public class FrontendApplication extends SpringBootServletInitializer {
+public class InscriptionApplication extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(FrontendApplication.class);
+        return application.sources(InscriptionApplication.class);
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(FrontendApplication.class, args);
+        SpringApplication.run(InscriptionApplication.class, args);
     }
 }
 

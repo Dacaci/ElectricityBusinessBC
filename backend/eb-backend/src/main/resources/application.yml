@@ -3,7 +3,7 @@ spring:
     name: electricity-business-api
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/eb
+    url: jdbc:postgresql://localhost:5441/eb
     username: eb
     password: eb
     driver-class-name: org.postgresql.Driver

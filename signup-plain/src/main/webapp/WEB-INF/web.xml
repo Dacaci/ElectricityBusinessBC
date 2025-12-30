@@ -10,7 +10,7 @@
     <!-- Configuration de la base de données (pas de Spring DataSource) -->
     <context-param>
         <param-name>db.url</param-name>
-        <param-value>jdbc:postgresql://localhost:5433/eb</param-value>
+        <param-value>jdbc:postgresql://localhost:5441/eb</param-value>
     </context-param>
     
     <context-param>

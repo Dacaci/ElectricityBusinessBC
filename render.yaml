@@ -72,7 +72,41 @@ services:
         fromDatabase:
           name: electricity-business-db
           property: password
-      # Configuration Resend Email API (même que le backend)
+      - key: INSCRIPTION_URL
+        fromService:
+          type: web
+          name: electricity-business-inscription
+          property: host
+    autoDeploy: true
+
+  # Inscription Module Service
+  - type: web
+    name: electricity-business-inscription
+    runtime: docker
+    dockerfilePath: ./inscription-module/Dockerfile
+    dockerContext: ./inscription-module
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: electricity-business-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: electricity-business-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: electricity-business-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: electricity-business-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: electricity-business-db
+          property: password
+      # Configuration Resend Email API
       - key: RESEND_API_KEY
         value: re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh
       - key: RESEND_FROM_EMAIL

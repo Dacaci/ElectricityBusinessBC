@@ -56,7 +56,7 @@
                         </div>
                         <h3 class="card-title">S'inscrire</h3>
                         <p class="card-text text-muted">Créez votre compte pour accéder à la plateforme</p>
-                        <a href="/register-servlet" class="btn btn-primary">
+                        <a th:href="${inscriptionUrl} + '/register-servlet'" class="btn btn-primary">
                             Créer un compte
                         </a>
                     </div>
@@ -71,7 +71,7 @@
                         </div>
                         <h3 class="card-title">Vérifier le compte</h3>
                         <p class="card-text text-muted">Activez votre compte avec le code reçu par email</p>
-                        <a th:href="@{/verify}" class="btn btn-outline-primary">
+                        <a th:href="${inscriptionUrl} + '/verify-servlet'" class="btn btn-outline-primary">
                             Vérifier
                         </a>
                     </div>

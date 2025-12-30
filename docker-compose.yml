@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: eb
       POSTGRES_PASSWORD: eb
       POSTGRES_DB: eb
-    ports: ["5433:5432"]
+    ports: ["5441:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -14,13 +14,32 @@ services:
     image: mailhog/mailhog
     ports: ["1026:1025", "8026:8025"]
 
-  signup-app:
+  frontend-app:
     build:
       context: ./signup-plain
       dockerfile_inline: |
         FROM tomcat:10.1-jdk21
         COPY target/signup-plain.war /usr/local/tomcat/webapps/ROOT.war
     ports: ["8081:8080"]
+    environment:
+      - BACKEND_URL=http://backend-app:8080
+      - INSCRIPTION_URL=http://inscription-app:8080
+      - DB_URL=jdbc:postgresql://db:5432/eb
+      - DB_USER=eb
+      - DB_PASS=eb
+    depends_on:
+      - db
+      - backend-app
+      - inscription-app
+
+  inscription-app:
+    build:
+      context: ./inscription-module
+      dockerfile_inline: |
+        FROM eclipse-temurin:17-jre
+        COPY target/inscription-module.war /app.war
+        CMD ["java", "-jar", "/app.war"]
+    ports: ["8082:8080"]
     environment:
       - DB_URL=jdbc:postgresql://db:5432/eb
       - DB_USER=eb
@@ -29,12 +48,9 @@ services:
       - MAIL_SMTP_HOST=mailhog
       - MAIL_SMTP_PORT=1025
       - MAIL_FROM=no-reply@eb.local
-      # Pour utiliser Gmail, remplacez par :
-      # - MAIL_SMTP_HOST=smtp.gmail.com
-      # - MAIL_SMTP_PORT=587
-      # - MAIL_FROM=votre-email@gmail.com
-      # - MAIL_SMTP_USERNAME=votre-email@gmail.com
-      # - MAIL_SMTP_PASSWORD=votre_mot_de_passe_application_gmail
+      # Configuration Resend Email API
+      - RESEND_API_KEY=re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh
+      - RESEND_FROM_EMAIL=onboarding@resend.dev
     depends_on:
       - db
       - mailhog
