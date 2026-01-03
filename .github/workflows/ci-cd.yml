@@ -67,14 +67,14 @@ jobs:
         cache: maven
         
     - name: Build Frontend with Maven
-      working-directory: ./signup-plain
+      working-directory: ./frontend-app
       run: mvn clean package -DskipTests
       
     - name: Upload Frontend Artifact
       uses: actions/upload-artifact@v4
       with:
         name: frontend-war
-        path: signup-plain/target/*.war
+        path: frontend-app/target/*.war
         retention-days: 1
 
   # Job 3: Build Docker Images (sur push vers main ou feature/migration-thymeleaf)
@@ -96,7 +96,7 @@ jobs:
       run: docker build -t electricity-business-backend:latest .
       
     - name: Build Frontend Docker Image
-      working-directory: ./signup-plain
+      working-directory: ./frontend-app
       run: docker build -t electricity-business-frontend:latest .
       
     - name: Test Backend Docker Image
