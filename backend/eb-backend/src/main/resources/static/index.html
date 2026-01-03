@@ -719,21 +719,27 @@
             
             try {
                 const response = await fetch(`${API_BASE}/test`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
                 
                 resultsDiv.innerHTML = `
                     <div class="alert alert-success">
                         <strong>API Test réussi !</strong><br>
-                        Message: ${data.message}<br>
-                        Timestamp: ${new Date(data.timestamp).toLocaleString()}<br>
-                        Status: ${data.status}
+                        Message: ${data.message || 'OK'}<br>
+                        Timestamp: ${data.timestamp ? new Date(data.timestamp).toLocaleString() : 'N/A'}<br>
+                        Status: ${data.status || 'OK'}
                     </div>
                 `;
             } catch (error) {
                 resultsDiv.innerHTML = `
                     <div class="alert alert-error">
                         <strong>Erreur lors du test de l'API</strong><br>
-                        ${error.message}
+                        ${error.message}<br>
+                        <small>Vérifiez que le backend est démarré et accessible.</small>
                     </div>
                 `;
             }
@@ -790,12 +796,24 @@
         }
         
         async function checkServicesStatus() {
-            // Check API Backend
+            // Check API Backend - utiliser /api/test ou fallback sur /actuator/health
             try {
                 const response = await fetch(`${API_BASE}/test`);
-                document.getElementById('api-backend-status').innerHTML = 'Connecté';
+                if (response.ok) {
+                    document.getElementById('api-backend-status').innerHTML = 'Connecté';
+                } else {
+                    // Fallback sur health check
+                    const healthResponse = await fetch(`${window.location.origin}/actuator/health`);
+                    document.getElementById('api-backend-status').innerHTML = healthResponse.ok ? 'Connecté (via health)' : 'Erreur de connexion';
+                }
             } catch (error) {
-                document.getElementById('api-backend-status').innerHTML = 'Erreur de connexion';
+                // Fallback sur health check en cas d'erreur
+                try {
+                    const healthResponse = await fetch(`${window.location.origin}/actuator/health`);
+                    document.getElementById('api-backend-status').innerHTML = healthResponse.ok ? 'Connecté (via health)' : 'Erreur de connexion';
+                } catch (e) {
+                    document.getElementById('api-backend-status').innerHTML = 'Erreur de connexion';
+                }
             }
             
             // Check Database (via users API)
