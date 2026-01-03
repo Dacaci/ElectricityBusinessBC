@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import jakarta.annotation.PostConstruct;
 
 
 /**
@@ -15,13 +19,19 @@ import org.springframework.web.client.HttpServerErrorException;
 @Service
 public class BackendProxyService {
 
+    private static final Logger log = LoggerFactory.getLogger(BackendProxyService.class);
+
     @Value("${backend.url:http://localhost:8080}")
     private String backendUrl;
+    
+    @PostConstruct
+    public void init() {
+        log.info("🔧 BackendProxyService initialisé avec backend.url: {}", backendUrl);
+    }
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    public BackendProxyService() {
-        this.restTemplate = new RestTemplate();
+    {
         this.restTemplate.setRequestFactory(
             new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
                 setConnectTimeout(30000);
@@ -43,6 +53,7 @@ public class BackendProxyService {
     public ResponseEntity<byte[]> getBinary(String path, HttpHeaders requestHeaders) {
         try {
             String url = backendUrl + path;
+            log.debug("🔄 Proxy Binary: GET {}", url);
             
             HttpHeaders headers = new HttpHeaders();
             if (requestHeaders != null) {
@@ -71,7 +82,13 @@ public class BackendProxyService {
                 .headers(responseHeaders)
                 .body(response.getBody());
 
+        } catch (ResourceAccessException e) {
+            log.error("❌ Impossible de se connecter au backend (binary) à {}: {}", backendUrl + path, e.getMessage());
+            return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(null);
         } catch (Exception e) {
+            log.error("❌ Erreur lors de la récupération du fichier binaire: {}", e.getMessage(), e);
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(null);
@@ -112,6 +129,7 @@ public class BackendProxyService {
     private ResponseEntity<String> executeRequest(HttpMethod method, String path, String body, HttpHeaders requestHeaders) {
         try {
             String url = backendUrl + path;
+            log.debug("🔄 Proxy: {} {}", method, url);
             
             // Copier les headers de la requête (sauf Host et Origin)
             HttpHeaders headers = new HttpHeaders();
@@ -147,6 +165,7 @@ public class BackendProxyService {
                 .body(response.getBody());
 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.warn("⚠️ Erreur HTTP du backend: {} {}", e.getStatusCode(), e.getMessage());
             HttpHeaders responseHeaders = new HttpHeaders();
             if (e.getResponseHeaders() != null) {
                 e.getResponseHeaders().forEach((key, value) -> {
@@ -157,7 +176,13 @@ public class BackendProxyService {
                 .status(e.getStatusCode())
                 .headers(responseHeaders)
                 .body(e.getResponseBodyAsString());
+        } catch (ResourceAccessException e) {
+            log.error("❌ Impossible de se connecter au backend à {}: {}", backendUrl, e.getMessage());
+            return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body("{\"error\":\"Backend non disponible: " + e.getMessage() + "\"}");
         } catch (Exception e) {
+            log.error("❌ Erreur lors de la communication avec le backend: {}", e.getMessage(), e);
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("{\"error\":\"Erreur lors de la communication avec le backend: " + e.getMessage() + "\"}");
