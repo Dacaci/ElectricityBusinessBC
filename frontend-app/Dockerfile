@@ -8,7 +8,6 @@ RUN mvn dependency:go-offline -B
 
 # Copy source code and build WAR (Spring Boot)
 COPY src ./src
-COPY src/main/webapp ./src/main/webapp
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime with Java
