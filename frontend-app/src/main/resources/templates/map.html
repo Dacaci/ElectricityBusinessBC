@@ -390,7 +390,7 @@
             const currentZoom = keepMapPosition ? map.getZoom() : null;
             
             try {
-                const response = await fetch((window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080') + '/api/stations/map', { credentials: 'include' });
+                const response = await fetch((window.API_BASE_URL || window.location.origin) + '/api/stations/map', { credentials: 'include' });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -508,7 +508,7 @@
             stationsLayer.clearLayers();
             
             try {
-                const response = await fetch(`${window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080'}/api/stations/nearby?latitude=${lat}&longitude=${lng}&radiusKm=${radius}`, { credentials: 'include' });
+                const response = await fetch(`${window.API_BASE_URL || window.location.origin}/api/stations/nearby?latitude=${lat}&longitude=${lng}&radiusKm=${radius}`, { credentials: 'include' });
                 
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
@@ -777,7 +777,7 @@
                     maxResults = 50;
                 }
                 
-                const apiBase = window.BACKEND_URL || window.API_BASE_URL || 'http://localhost:8080';
+                const apiBase = window.API_BASE_URL || window.location.origin;
                 const url = apiBase + '/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
                 
                 fetch(url)
