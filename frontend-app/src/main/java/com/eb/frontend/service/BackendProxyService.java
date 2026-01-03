@@ -1,6 +1,5 @@
 package com.eb.frontend.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -139,8 +138,6 @@ public class BackendProxyService {
             log.warn("⚠️ Backend non accessible au démarrage: {} - Cela peut être normal si le backend est en sleep mode sur Render", e.getMessage());
         }
     }
-
-    private final RestTemplate restTemplate;
     
     // Initialisation du RestTemplate avec une meilleure gestion HTTPS et timeouts pour Render
     {
