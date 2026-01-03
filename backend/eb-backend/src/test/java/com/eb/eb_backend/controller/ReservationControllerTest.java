@@ -53,7 +53,6 @@ class ReservationControllerTest {
 
     @Test
     void testCreateReservationEndpoint() throws Exception {
-        // Arrange
         CreateReservationDto createDto = new CreateReservationDto();
         createDto.setStationId(1L);
         createDto.setStartTime(LocalDateTime.now().plusDays(1));
@@ -67,7 +66,6 @@ class ReservationControllerTest {
         when(reservationService.createReservation(anyLong(), any(CreateReservationDto.class)))
                 .thenReturn(reservationDto);
 
-        // Act & Assert
         mockMvc.perform(post("/api/reservations")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDto))

@@ -1,7 +1,7 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.eb</groupId>
-  <artifactId>signup-plain</artifactId>
+  <artifactId>frontend-app</artifactId>
   <version>1.0.0</version>
   <packaging>war</packaging>
 
@@ -85,7 +85,7 @@
   </dependencies>
 
   <build>
-    <finalName>signup-plain</finalName>
+    <finalName>frontend-app</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

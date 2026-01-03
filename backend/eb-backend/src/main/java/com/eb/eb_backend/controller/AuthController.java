@@ -4,7 +4,6 @@ import com.eb.eb_backend.dto.LoginRequest;
 import com.eb.eb_backend.dto.LoginResponse;
 import com.eb.eb_backend.service.AuthService;
 import com.eb.eb_backend.security.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,39 +26,21 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, 
-                                   HttpServletRequest request,
                                    HttpServletResponse httpResponse) {
         try {
             LoginResponse response = authService.login(loginRequest);
             
-            // Créer un cookie HTTPOnly pour le token JWT (protection XSS)
-            // Gestion dynamique du HTTPS : secure = true si HTTPS, false si HTTP (localhost)
-            boolean isSecure = request.isSecure();
-            // En production HTTPS cross-origin, utiliser SameSite=None (obligatoire avec Secure)
-            // En localhost HTTP, utiliser SameSite=Lax (même domaine ou ports différents)
-            String sameSite = isSecure ? "None" : "Lax";
-            
             ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", response.getToken())
-                .httpOnly(true)       // Protection contre XSS - JavaScript ne peut pas accéder au cookie
-                .secure(isSecure)      // Dynamique : true en HTTPS (production), false en HTTP (localhost)
-                .path("/")             // Cookie disponible pour toutes les routes
-                .maxAge(24 * 60 * 60)  // 24 heures
-                .sameSite(sameSite)    // None pour cross-origin HTTPS, Lax pour localhost HTTP
+                .httpOnly(true)
+                .path("/")
+                .maxAge(24 * 60 * 60)
                 .build();
             
             httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
             
-            // Retourner uniquement les infos utilisateur (le token est dans le cookie HttpOnly)
             return ResponseEntity.ok(new LoginResponse(null, response.getUser()));
-        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
-            log.error("Login failed - User not found: {}", loginRequest.getEmail());
-            return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");
-        } catch (org.springframework.security.authentication.BadCredentialsException e) {
-            log.error("Login failed - Bad credentials: {}", loginRequest.getEmail());
-            return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");
         } catch (Exception e) {
-            log.error("Login failed for email: {}", loginRequest.getEmail(), e);
-            return ResponseEntity.badRequest().body("Erreur lors de la connexion: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Email ou mot de passe incorrect");
         }
     }
     
@@ -147,17 +128,11 @@ public class AuthController {
     }
     
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse httpResponse) {
-        // Supprimer le cookie JWT en le remplaçant par un cookie expiré
-        boolean isSecure = request.isSecure();
-        String sameSite = isSecure ? "None" : "Lax";
-        
+    public ResponseEntity<String> logout(HttpServletResponse httpResponse) {
         ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", "")
             .httpOnly(true)
-            .secure(isSecure)  // Dynamique : true en HTTPS, false en HTTP
             .path("/")
-            .maxAge(0)           // Expire immédiatement
-            .sameSite(sameSite)  // None pour cross-origin HTTPS, Lax pour localhost HTTP
+            .maxAge(0)
             .build();
         
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());

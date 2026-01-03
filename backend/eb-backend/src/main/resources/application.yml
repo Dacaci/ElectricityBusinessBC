@@ -10,7 +10,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate  # Flyway gère la création des tables, Hibernate valide seulement
     show-sql: true
     properties:
       hibernate:
@@ -42,14 +42,6 @@ openchargemap:
   api:
     url: https://api.openchargemap.io/v3/poi
     key: bf16e0f8-2117-4dd4-b2a9-f5cdfcaa7eb4
-
-# Resend Email API Configuration
-# La clé API est définie par défaut mais peut être surchargée via variable d'environnement RESEND_API_KEY
-resend:
-  api:
-    key: ${RESEND_API_KEY:re_DnZqhwCr_FRSCMb9V3XmLHhd46YYbkiyh}
-  from:
-    email: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
 
 # Actuator endpoints
 management:

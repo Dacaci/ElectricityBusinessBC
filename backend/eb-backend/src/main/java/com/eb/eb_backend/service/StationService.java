@@ -28,36 +28,32 @@ public class StationService {
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
     
-    public StationDto createStation(Long ownerId, StationDto stationDto) {
+    public StationDto createStation(Long ownerId, StationDto dto) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
         
-        Location location = locationRepository.findById(stationDto.getLocationId())
-                .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + stationDto.getLocationId()));
+        Location location = locationRepository.findById(dto.getLocationId())
+                .orElseThrow(() -> new IllegalArgumentException("Lieu introuvable: " + dto.getLocationId()));
         
-        // Vérifier que le lieu appartient au propriétaire
         if (!location.getOwner().getId().equals(ownerId)) {
-            throw new IllegalArgumentException("Le lieu n'appartient pas au propriétaire");
+            throw new IllegalArgumentException("Lieu non autorisé");
         }
         
-        // Vérifier l'unicité du nom pour ce propriétaire
-        if (stationRepository.existsByOwnerAndName(owner, stationDto.getName())) {
-            throw new IllegalArgumentException("Une borne avec ce nom existe déjà pour ce propriétaire");
+        if (stationRepository.existsByOwnerAndName(owner, dto.getName())) {
+            throw new IllegalArgumentException("Nom déjà utilisé");
         }
         
         Station station = new Station();
-        // Le propriétaire est maintenant déterminé via location.owner
         station.setLocation(location);
-        station.setName(stationDto.getName());
-        station.setHourlyRate(stationDto.getHourlyRate());
-        station.setPlugType(stationDto.getPlugType() != null ? stationDto.getPlugType() : "TYPE_2S");
-        station.setStatus(stationDto.getStatus() != null ? stationDto.getStatus() : com.eb.eb_backend.entity.StationStatus.ACTIVE);
-        station.setPower(stationDto.getPower());
-        station.setInstructions(stationDto.getInstructions());
-        station.setOnFoot(stationDto.getOnFoot() != null ? stationDto.getOnFoot() : false);
+        station.setName(dto.getName());
+        station.setHourlyRate(dto.getHourlyRate());
+        station.setPlugType(dto.getPlugType() != null ? dto.getPlugType() : "TYPE_2S");
+        station.setStatus(dto.getStatus() != null ? dto.getStatus() : com.eb.eb_backend.entity.StationStatus.ACTIVE);
+        station.setPower(dto.getPower());
+        station.setInstructions(dto.getInstructions());
+        station.setOnFoot(dto.getOnFoot() != null ? dto.getOnFoot() : false);
         
-        Station savedStation = stationRepository.save(station);
-        return new StationDto(savedStation);
+        return new StationDto(stationRepository.save(station));
     }
     
     @Transactional(readOnly = true)
@@ -69,17 +65,14 @@ public class StationService {
     @Transactional(readOnly = true)
     public Page<StationDto> getStationsByOwner(Long ownerId, Pageable pageable) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
-        
-        return stationRepository.findByOwner(owner, pageable)
-                .map(StationDto::new);
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
+        return stationRepository.findByOwner(owner, pageable).map(StationDto::new);
     }
     
     @Transactional(readOnly = true)
     public List<StationDto> getActiveStationsByOwner(Long ownerId) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
         return stationRepository.findByOwnerAndStatusActive(owner)
                 .stream()
                 .map(StationDto::new)
@@ -89,8 +82,7 @@ public class StationService {
     @Transactional(readOnly = true)
     public List<StationDto> getStationsByLocation(Long locationId) {
         Location location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + locationId));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Lieu introuvable: " + locationId));
         return stationRepository.findByLocationAndStatus(location, com.eb.eb_backend.entity.StationStatus.ACTIVE)
                 .stream()
                 .map(StationDto::new)
@@ -103,60 +95,52 @@ public class StationService {
                 .map(StationDto::new);
     }
     
-    public StationDto updateStation(Long id, StationDto stationDto) {
+    public StationDto updateStation(Long id, StationDto dto) {
         Station station = stationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Borne introuvable: " + id));
         
-        // Vérifier l'unicité du nom si changé
-        if (!station.getName().equals(stationDto.getName()) && 
-            stationRepository.existsByOwnerAndName(station.getLocation().getOwner(), stationDto.getName())) {
-            throw new IllegalArgumentException("Une borne avec ce nom existe déjà pour ce propriétaire");
+        if (!station.getName().equals(dto.getName()) && 
+            stationRepository.existsByOwnerAndName(station.getLocation().getOwner(), dto.getName())) {
+            throw new IllegalArgumentException("Nom déjà utilisé");
         }
         
-        station.setName(stationDto.getName());
-        station.setHourlyRate(stationDto.getHourlyRate());
-        station.setPlugType(stationDto.getPlugType() != null ? stationDto.getPlugType() : "TYPE_2S");
-        station.setStatus(stationDto.getStatus());
-        station.setPower(stationDto.getPower());
-        station.setInstructions(stationDto.getInstructions());
-        station.setOnFoot(stationDto.getOnFoot());
+        station.setName(dto.getName());
+        station.setHourlyRate(dto.getHourlyRate());
+        station.setPlugType(dto.getPlugType() != null ? dto.getPlugType() : "TYPE_2S");
+        station.setStatus(dto.getStatus());
+        station.setPower(dto.getPower());
+        station.setInstructions(dto.getInstructions());
+        station.setOnFoot(dto.getOnFoot());
         
-        Station savedStation = stationRepository.save(station);
-        return new StationDto(savedStation);
+        return new StationDto(stationRepository.save(station));
     }
     
     public void deleteStation(Long id) {
         if (!stationRepository.existsById(id)) {
-            throw new IllegalArgumentException("Borne non trouvée avec l'ID: " + id);
+            throw new IllegalArgumentException("Borne introuvable: " + id);
         }
         stationRepository.deleteById(id);
     }
     
     public StationDto activateStation(Long id) {
         Station station = stationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Borne introuvable: " + id));
         station.setStatus(com.eb.eb_backend.entity.StationStatus.ACTIVE);
-        Station savedStation = stationRepository.save(station);
-        return new StationDto(savedStation);
+        return new StationDto(stationRepository.save(station));
     }
     
     public StationDto deactivateStation(Long id) {
         Station station = stationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Borne introuvable: " + id));
         station.setStatus(com.eb.eb_backend.entity.StationStatus.INACTIVE);
-        Station savedStation = stationRepository.save(station);
-        return new StationDto(savedStation);
+        return new StationDto(stationRepository.save(station));
     }
     
     public StationDto updateHourlyRate(Long id, BigDecimal hourlyRate) {
         Station station = stationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Borne non trouvée avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Borne introuvable: " + id));
         station.setHourlyRate(hourlyRate);
-        Station savedStation = stationRepository.save(station);
-        return new StationDto(savedStation);
+        return new StationDto(stationRepository.save(station));
     }
     
     @Transactional(readOnly = true)
@@ -169,21 +153,14 @@ public class StationService {
     
     @Transactional(readOnly = true)
     public List<StationLocationDto> getNearbyStations(BigDecimal latitude, BigDecimal longitude, Double radiusKm) {
-        // Formule de Haversine pour calculer la distance entre deux points géographiques
-        // Rayon de la Terre en kilomètres (utilisé dans le calcul)
-        // double earthRadius = 6371.0; // Commenté car non utilisé dans cette implémentation simplifiée
-        
-        // Conversion du rayon de km en degrés (approximation)
-        double latDelta = radiusKm / 111.0; // 1 degré de latitude ≈ 111 km
+        double latDelta = radiusKm / 111.0;
         double lonDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(latitude.doubleValue())));
         
-        // Créer une bounding box pour filtrer les stations
         BigDecimal minLat = latitude.subtract(BigDecimal.valueOf(latDelta));
         BigDecimal maxLat = latitude.add(BigDecimal.valueOf(latDelta));
         BigDecimal minLon = longitude.subtract(BigDecimal.valueOf(lonDelta));
         BigDecimal maxLon = longitude.add(BigDecimal.valueOf(lonDelta));
         
-        // Récupérer toutes les stations actives dans la bounding box
         List<Station> stations = stationRepository.findByStatus(com.eb.eb_backend.entity.StationStatus.ACTIVE);
         
         return stations.stream()
@@ -191,11 +168,9 @@ public class StationService {
                     BigDecimal stationLat = station.getLocation().getLatitude();
                     BigDecimal stationLon = station.getLocation().getLongitude();
                     
-                    // Vérifier si la station est dans la bounding box
                     if (stationLat.compareTo(minLat) >= 0 && stationLat.compareTo(maxLat) <= 0 &&
                         stationLon.compareTo(minLon) >= 0 && stationLon.compareTo(maxLon) <= 0) {
                         
-                        // Calculer la distance exacte avec la formule de Haversine
                         double distance = calculateHaversineDistance(
                             latitude.doubleValue(), longitude.doubleValue(),
                             stationLat.doubleValue(), stationLon.doubleValue()
@@ -224,64 +199,32 @@ public class StationService {
         return earthRadius * c;
     }
     
-    /**
-     * Rechercher les bornes disponibles par ville et période
-     * Équivalent SQL:
-     * SELECT * FROM bornes b 
-     * JOIN lieux l ON l.id = b.id_lieux
-     * LEFT JOIN reservations r ON r.id_borne = b.id 
-     *   AND r.date_debut < endTime AND r.date_fin > startTime
-     * WHERE b.city = city AND r.id IS NULL
-     */
     @Transactional(readOnly = true)
     public List<StationDto> findAvailableStationsByCityAndPeriod(
             String city, 
             java.time.LocalDateTime startTime, 
             java.time.LocalDateTime endTime) {
         
-        // Récupérer toutes les stations avec status ACTIVE
-        // Note: La recherche par ville n'est plus possible sans l'entité Address
-        // On retourne toutes les stations actives
         List<Station> stationsInCity = stationRepository.findAll().stream()
-                .filter(station -> 
-                    station.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE
-                )
+                .filter(s -> s.getStatus() == com.eb.eb_backend.entity.StationStatus.ACTIVE)
                 .collect(Collectors.toList());
         
-        // Filtrer les stations qui n'ont pas de réservations conflictuelles
         return stationsInCity.stream()
                 .filter(station -> {
-                    // Vérifier si la station a des réservations qui se chevauchent avec la période
                     boolean hasConflict = station.getReservations().stream()
-                            .anyMatch(reservation -> {
-                                // Une réservation est en conflit si :
-                                // - Elle commence avant la fin de la période demandée
-                                // - ET elle se termine après le début de la période demandée
-                                return reservation.getStartTime().isBefore(endTime)
-                                        && reservation.getEndTime().isAfter(startTime);
-                            });
-                    
-                    return !hasConflict; // Disponible si pas de conflit
+                            .anyMatch(r -> r.getStartTime().isBefore(endTime) && r.getEndTime().isAfter(startTime));
+                    return !hasConflict;
                 })
                 .map(StationDto::new)
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Rechercher les bornes avec le statut spécifique pour un propriétaire
-     * Équivalent SQL:
-     * SELECT * FROM utilisateurs u
-     * JOIN lieux l ON l.id_utilisateur = u.id
-     * JOIN bornes b ON b.id_lieux = l.id
-     * WHERE b.status = 'PENDING' AND u.id = ownerId
-     */
     @Transactional(readOnly = true)
     public List<StationDto> findStationsByOwnerAndStatus(Long ownerId, com.eb.eb_backend.entity.StationStatus status) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
         return stationRepository.findByOwner(owner, Pageable.unpaged()).stream()
-                .filter(station -> station.getStatus() == status)
+                .filter(s -> s.getStatus() == status)
                 .map(StationDto::new)
                 .collect(Collectors.toList());
     }

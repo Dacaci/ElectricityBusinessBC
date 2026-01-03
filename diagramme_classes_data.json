@@ -1,0 +1,231 @@
+{
+  "project": "Electricity Business - Diagramme de Classes UML",
+  "description": "Application Spring Boot de location de bornes électriques",
+  "entities": [
+    {
+      "name": "User",
+      "type": "Entity",
+      "attributes": [
+        {"name": "id", "type": "Long", "primaryKey": true},
+        {"name": "firstName", "type": "String", "nullable": false, "maxLength": 100},
+        {"name": "lastName", "type": "String", "nullable": false, "maxLength": 100},
+        {"name": "email", "type": "String", "nullable": false, "unique": true, "maxLength": 255},
+        {"name": "phone", "type": "String", "maxLength": 20},
+        {"name": "dateOfBirth", "type": "LocalDate"},
+        {"name": "address", "type": "String", "maxLength": 1000},
+        {"name": "postalCode", "type": "String", "maxLength": 10},
+        {"name": "city", "type": "String", "maxLength": 100},
+        {"name": "passwordHash", "type": "String", "nullable": false},
+        {"name": "status", "type": "UserStatus", "enum": ["PENDING", "ACTIVE", "INACTIVE", "SUSPENDED"]},
+        {"name": "createdAt", "type": "LocalDateTime"},
+        {"name": "updatedAt", "type": "LocalDateTime"}
+      ],
+      "methods": [
+        {"name": "getFullName", "returnType": "String"},
+        {"name": "isActive", "returnType": "boolean"}
+      ],
+      "relations": [
+        {"target": "Location", "type": "OneToMany", "field": "locations", "cardinality": "1 to *"},
+        {"target": "Reservation", "type": "OneToMany", "field": "reservations", "cardinality": "1 to *"},
+        {"target": "EmailVerificationCode", "type": "OneToMany", "field": "emailVerificationCodes", "cardinality": "1 to *"},
+        {"target": "Media", "type": "OneToMany", "field": "medias", "cardinality": "1 to *"}
+      ]
+    },
+    {
+      "name": "Location",
+      "type": "Entity",
+      "attributes": [
+        {"name": "id", "type": "Long", "primaryKey": true},
+        {"name": "label", "type": "String", "nullable": false, "maxLength": 255},
+        {"name": "latitude", "type": "BigDecimal", "nullable": false},
+        {"name": "longitude", "type": "BigDecimal", "nullable": false},
+        {"name": "description", "type": "String", "maxLength": 1000},
+        {"name": "isActive", "type": "Boolean", "nullable": false, "default": true},
+        {"name": "createdAt", "type": "LocalDateTime"},
+        {"name": "updatedAt", "type": "LocalDateTime"}
+      ],
+      "relations": [
+        {"target": "User", "type": "ManyToOne", "field": "owner", "cardinality": "* to 1", "required": true},
+        {"target": "Station", "type": "OneToMany", "field": "stations", "cardinality": "1 to *"},
+        {"target": "Media", "type": "OneToMany", "field": "medias", "cardinality": "1 to *", "optional": true}
+      ]
+    },
+    {
+      "name": "Station",
+      "type": "Entity",
+      "attributes": [
+        {"name": "id", "type": "Long", "primaryKey": true},
+        {"name": "name", "type": "String", "nullable": false, "maxLength": 255},
+        {"name": "hourlyRate", "type": "BigDecimal", "nullable": false},
+        {"name": "status", "type": "StationStatus", "enum": ["PENDING", "ACTIVE", "INACTIVE", "MAINTENANCE"]},
+        {"name": "power", "type": "BigDecimal"},
+        {"name": "plugType", "type": "String", "maxLength": 20, "default": "TYPE_2S"},
+        {"name": "instructions", "type": "String"},
+        {"name": "onFoot", "type": "Boolean", "default": false},
+        {"name": "createdAt", "type": "LocalDateTime"},
+        {"name": "updatedAt", "type": "LocalDateTime"}
+      ],
+      "methods": [
+        {"name": "getOwner", "returnType": "User"}
+      ],
+      "relations": [
+        {"target": "Location", "type": "ManyToOne", "field": "location", "cardinality": "* to 1", "required": true},
+        {"target": "Reservation", "type": "OneToMany", "field": "reservations", "cardinality": "1 to *"},
+        {"target": "Media", "type": "OneToMany", "field": "medias", "cardinality": "1 to *", "optional": true}
+      ]
+    },
+    {
+      "name": "Reservation",
+      "type": "Entity",
+      "attributes": [
+        {"name": "id", "type": "Long", "primaryKey": true},
+        {"name": "startTime", "type": "LocalDateTime", "nullable": false},
+        {"name": "endTime", "type": "LocalDateTime", "nullable": false},
+        {"name": "totalAmount", "type": "BigDecimal", "nullable": false},
+        {"name": "status", "type": "ReservationStatus", "enum": ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "REFUSED"]},
+        {"name": "notes", "type": "String", "maxLength": 1000},
+        {"name": "createdAt", "type": "LocalDateTime"},
+        {"name": "updatedAt", "type": "LocalDateTime"}
+      ],
+      "methods": [
+        {"name": "isPending", "returnType": "boolean"},
+        {"name": "isConfirmed", "returnType": "boolean"},
+        {"name": "isCancelled", "returnType": "boolean"},
+        {"name": "isCompleted", "returnType": "boolean"},
+        {"name": "getDurationInHours", "returnType": "long"},
+        {"name": "isValidDateRange", "returnType": "boolean"},
+        {"name": "isValidDuration", "returnType": "boolean"}
+      ],
+      "relations": [
+        {"target": "User", "type": "ManyToOne", "field": "user", "cardinality": "* to 1", "required": true},
+        {"target": "Station", "type": "ManyToOne", "field": "station", "cardinality": "* to 1", "required": true}
+      ]
+    },
+    {
+      "name": "Media",
+      "type": "Entity",
+      "attributes": [
+        {"name": "id", "type": "Long", "primaryKey": true},
+        {"name": "name", "type": "String", "nullable": false},
+        {"name": "url", "type": "String", "nullable": false},
+        {"name": "type", "type": "MediaType", "enum": ["IMAGE", "VIDEO"]},
+        {"name": "description", "type": "String"},
+        {"name": "fileSize", "type": "Long"},
+        {"name": "mimeType", "type": "String"},
+        {"name": "createdAt", "type": "LocalDateTime"},
+        {"name": "updatedAt", "type": "LocalDateTime"}
+      ],
+      "relations": [
+        {"target": "Station", "type": "ManyToOne", "field": "station", "cardinality": "* to 1", "optional": true},
+        {"target": "Location", "type": "ManyToOne", "field": "location", "cardinality": "* to 1", "optional": true},
+        {"target": "User", "type": "ManyToOne", "field": "user", "cardinality": "* to 1", "optional": true}
+      ]
+    },
+    {
+      "name": "EmailVerificationCode",
+      "type": "Entity",
+      "attributes": [
+        {"name": "id", "type": "Long", "primaryKey": true},
+        {"name": "codeHash", "type": "String", "nullable": false},
+        {"name": "expiresAt", "type": "Instant", "nullable": false},
+        {"name": "attemptCount", "type": "Integer", "default": 0},
+        {"name": "usedAt", "type": "Instant"},
+        {"name": "createdAt", "type": "Instant"}
+      ],
+      "relations": [
+        {"target": "User", "type": "ManyToOne", "field": "user", "cardinality": "* to 1", "required": true}
+      ]
+    }
+  ],
+  "services": [
+    {
+      "name": "ReservationService",
+      "type": "Service",
+      "stereotype": "<<Service>>",
+      "dependencies": [
+        "ReservationRepository",
+        "StationRepository",
+        "UserRepository"
+      ],
+      "keyMethods": [
+        {"name": "createReservation", "params": ["userId: Long", "dto: CreateReservationDto"], "returnType": "ReservationDto"},
+        {"name": "confirmReservation", "params": ["reservationId: Long", "ownerId: Long"], "returnType": "ReservationDto"},
+        {"name": "refuseReservation", "params": ["reservationId: Long", "ownerId: Long"], "returnType": "ReservationDto"},
+        {"name": "cancelReservation", "params": ["reservationId: Long", "userId: Long"], "returnType": "ReservationDto"},
+        {"name": "completeReservation", "params": ["reservationId: Long", "ownerId: Long"], "returnType": "ReservationDto"},
+        {"name": "getReservationsByUser", "params": ["userId: Long", "pageable: Pageable"], "returnType": "Page<ReservationDto>"},
+        {"name": "getReservationsByStation", "params": ["stationId: Long", "pageable: Pageable"], "returnType": "Page<ReservationDto>"}
+      ],
+      "uses": ["Reservation", "Station", "User"]
+    },
+    {
+      "name": "UserService",
+      "type": "Service",
+      "stereotype": "<<Service>>",
+      "dependencies": ["UserRepository", "PasswordEncoder"],
+      "keyMethods": [
+        {"name": "createUser", "params": ["dto: CreateUserDto"], "returnType": "UserDto"},
+        {"name": "updateUser", "params": ["id: Long", "dto: UserDto"], "returnType": "UserDto"},
+        {"name": "getUserById", "params": ["id: Long"], "returnType": "Optional<UserDto>"},
+        {"name": "activateUser", "params": ["id: Long"], "returnType": "UserDto"},
+        {"name": "deactivateUser", "params": ["id: Long"], "returnType": "UserDto"}
+      ],
+      "uses": ["User"]
+    },
+    {
+      "name": "StationService",
+      "type": "Service",
+      "stereotype": "<<Service>>",
+      "dependencies": ["StationRepository", "LocationRepository", "UserRepository"],
+      "keyMethods": [
+        {"name": "createStation", "params": ["ownerId: Long", "dto: StationDto"], "returnType": "StationDto"},
+        {"name": "updateStation", "params": ["id: Long", "dto: StationDto"], "returnType": "StationDto"},
+        {"name": "getStationsByOwner", "params": ["ownerId: Long", "pageable: Pageable"], "returnType": "Page<StationDto>"},
+        {"name": "getNearbyStations", "params": ["lat: BigDecimal", "lon: BigDecimal", "radiusKm: Double"], "returnType": "List<StationLocationDto>"}
+      ],
+      "uses": ["Station", "Location", "User"]
+    },
+    {
+      "name": "LocationService",
+      "type": "Service",
+      "stereotype": "<<Service>>",
+      "dependencies": ["LocationRepository", "UserRepository"],
+      "keyMethods": [
+        {"name": "createLocation", "params": ["ownerId: Long", "dto: LocationDto"], "returnType": "LocationDto"},
+        {"name": "updateLocation", "params": ["id: Long", "dto: LocationDto"], "returnType": "LocationDto"},
+        {"name": "getLocationsByOwner", "params": ["ownerId: Long", "pageable: Pageable"], "returnType": "Page<LocationDto>"}
+      ],
+      "uses": ["Location", "User"]
+    },
+    {
+      "name": "AuthService",
+      "type": "Service",
+      "stereotype": "<<Service>>",
+      "dependencies": ["UserRepository", "PasswordEncoder", "JwtUtil", "EmailService", "EmailVerificationCodeRepository"],
+      "keyMethods": [
+        {"name": "login", "params": ["request: LoginRequest"], "returnType": "LoginResponse"},
+        {"name": "loadUserByUsername", "params": ["email: String"], "returnType": "UserDetails"},
+        {"name": "verifyEmailCode", "params": ["email: String", "code: String"], "returnType": "boolean"}
+      ],
+      "uses": ["User", "EmailVerificationCode"]
+    }
+  ],
+  "diagramNotes": {
+    "primaryEntities": ["User", "Location", "Station", "Reservation"],
+    "keyService": "ReservationService",
+    "mainRelationships": [
+      "User (1) → (*) Location",
+      "Location (1) → (*) Station",
+      "Station (1) → (*) Reservation",
+      "User (1) → (*) Reservation"
+    ],
+    "displayOptions": {
+      "showAttributes": true,
+      "showMethods": true,
+      "showCardinalities": true,
+      "highlightPrimaryEntities": true,
+      "showServiceMethods": true
+    }
+  }
+}
+

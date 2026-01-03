@@ -39,7 +39,6 @@ class AuthControllerTest {
 
     @Test
     void testLoginEndpointSuccess() throws Exception {
-        // Arrange
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password123");
@@ -54,7 +53,6 @@ class AuthControllerTest {
         
         when(authService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 
-        // Act & Assert
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
@@ -66,7 +64,6 @@ class AuthControllerTest {
 
     @Test
     void testLogoutEndpoint() throws Exception {
-        // Act & Assert
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"));

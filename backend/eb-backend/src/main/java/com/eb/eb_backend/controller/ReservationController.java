@@ -29,26 +29,17 @@ public class ReservationController {
     private final SecurityUtil securityUtil;
     
     @PostMapping
-    public ResponseEntity<?> createReservation(
+    public ResponseEntity<ReservationDto> createReservation(
             @Valid @RequestBody CreateReservationDto createReservationDto,
             HttpServletRequest request) {
-        try {
-            Long userId = securityUtil.getCurrentUserId(request);
-            
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié");
-            }
-            
-            ReservationDto reservationDto = reservationService.createReservation(userId, createReservationDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
-            
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erreur lors de la création de la réservation: " + e.getMessage());
+        Long userId = securityUtil.getCurrentUserId(request);
+        
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        
+        ReservationDto reservationDto = reservationService.createReservation(userId, createReservationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }
     
     @GetMapping("/{id}")
@@ -102,34 +93,22 @@ public class ReservationController {
     public ResponseEntity<Page<ReservationDto>> getReservationsByUser(
             @PathVariable Long userId,
             Pageable pageable) {
-        try {
-            Page<ReservationDto> reservations = reservationService.getReservationsByUser(userId, pageable);
-            return ResponseEntity.ok(reservations);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Page<ReservationDto> reservations = reservationService.getReservationsByUser(userId, pageable);
+        return ResponseEntity.ok(reservations);
     }
     
     @GetMapping("/station/{stationId}")
     public ResponseEntity<Page<ReservationDto>> getReservationsByStation(
             @PathVariable Long stationId,
             Pageable pageable) {
-        try {
-            Page<ReservationDto> reservations = reservationService.getReservationsByStation(stationId, pageable);
-            return ResponseEntity.ok(reservations);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Page<ReservationDto> reservations = reservationService.getReservationsByStation(stationId, pageable);
+        return ResponseEntity.ok(reservations);
     }
     
     @GetMapping("/user/{userId}/upcoming")
     public ResponseEntity<List<ReservationDto>> getUpcomingUserReservations(@PathVariable Long userId) {
-        try {
-            List<ReservationDto> reservations = reservationService.getUpcomingUserReservations(userId);
-            return ResponseEntity.ok(reservations);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<ReservationDto> reservations = reservationService.getUpcomingUserReservations(userId);
+        return ResponseEntity.ok(reservations);
     }
     
     /**
@@ -138,12 +117,8 @@ public class ReservationController {
      */
     @GetMapping("/user/{userId}/past")
     public ResponseEntity<List<ReservationDto>> getPastUserReservations(@PathVariable Long userId) {
-        try {
-            List<ReservationDto> reservations = reservationService.getPastUserReservations(userId);
-            return ResponseEntity.ok(reservations);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<ReservationDto> reservations = reservationService.getPastUserReservations(userId);
+        return ResponseEntity.ok(reservations);
     }
     
     /**
@@ -152,109 +127,73 @@ public class ReservationController {
      */
     @GetMapping("/user/{userId}/current")
     public ResponseEntity<List<ReservationDto>> getCurrentUserReservations(@PathVariable Long userId) {
-        try {
-            List<ReservationDto> reservations = reservationService.getCurrentUserReservations(userId);
-            return ResponseEntity.ok(reservations);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<ReservationDto> reservations = reservationService.getCurrentUserReservations(userId);
+        return ResponseEntity.ok(reservations);
     }
     
     @GetMapping("/station/{stationId}/upcoming")
     public ResponseEntity<List<ReservationDto>> getUpcomingStationReservations(@PathVariable Long stationId) {
-        try {
-            List<ReservationDto> reservations = reservationService.getUpcomingStationReservations(stationId);
-            return ResponseEntity.ok(reservations);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<ReservationDto> reservations = reservationService.getUpcomingStationReservations(stationId);
+        return ResponseEntity.ok(reservations);
     }
     
     @PutMapping("/{id}/confirm")
     public ResponseEntity<ReservationDto> confirmReservation(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            Long userId = securityUtil.getCurrentUserId(request);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            ReservationDto reservationDto = reservationService.confirmReservation(id, userId);
-            return ResponseEntity.ok(reservationDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        Long userId = securityUtil.getCurrentUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        ReservationDto reservationDto = reservationService.confirmReservation(id, userId);
+        return ResponseEntity.ok(reservationDto);
     }
     
     @PutMapping("/{id}/refuse")
     public ResponseEntity<ReservationDto> refuseReservation(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            Long userId = securityUtil.getCurrentUserId(request);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            ReservationDto reservationDto = reservationService.refuseReservation(id, userId);
-            return ResponseEntity.ok(reservationDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        Long userId = securityUtil.getCurrentUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        ReservationDto reservationDto = reservationService.refuseReservation(id, userId);
+        return ResponseEntity.ok(reservationDto);
     }
     
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ReservationDto> cancelReservation(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            Long userId = securityUtil.getCurrentUserId(request);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            ReservationDto reservationDto = reservationService.cancelReservation(id, userId);
-            return ResponseEntity.ok(reservationDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            // Log l'erreur pour le debug
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
+        Long userId = securityUtil.getCurrentUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        ReservationDto reservationDto = reservationService.cancelReservation(id, userId);
+        return ResponseEntity.ok(reservationDto);
     }
     
     @PutMapping("/{id}/complete")
     public ResponseEntity<ReservationDto> completeReservation(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            Long userId = securityUtil.getCurrentUserId(request);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            ReservationDto reservationDto = reservationService.completeReservation(id, userId);
-            return ResponseEntity.ok(reservationDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        Long userId = securityUtil.getCurrentUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        ReservationDto reservationDto = reservationService.completeReservation(id, userId);
+        return ResponseEntity.ok(reservationDto);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            Long userId = securityUtil.getCurrentUserId(request);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            reservationService.deleteReservation(id, userId);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        Long userId = securityUtil.getCurrentUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        reservationService.deleteReservation(id, userId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/receipt.pdf")
     public ResponseEntity<byte[]> getReservationReceipt(@PathVariable Long id) {
-        try {
-            byte[] pdf = receiptService.generateReservationReceiptPdf(id);
-            return ResponseEntity.ok()
-                    .header("Content-Type", "application/pdf")
-                    .header("Content-Disposition", "inline; filename=receipt-" + id + ".pdf")
-                    .body(pdf);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        byte[] pdf = receiptService.generateReservationReceiptPdf(id);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "inline; filename=receipt-" + id + ".pdf")
+                .body(pdf);
     }
 
     @GetMapping("/export.xlsx")

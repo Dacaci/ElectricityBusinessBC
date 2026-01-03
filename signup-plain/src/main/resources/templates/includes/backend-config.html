@@ -1,7 +1,0 @@
-<!-- Fragment Thymeleaf pour la configuration du backend -->
-<script th:fragment="backend-config" th:inline="javascript">
-    /*[# th:with="url=${backendUrl ?: 'http://localhost:8080'}"]*/
-    window.BACKEND_URL = /*[[${url}]]*/ 'http://localhost:8080';
-    console.log('Backend URL configuré:', window.BACKEND_URL);
-    /*[/]*/
-</script>

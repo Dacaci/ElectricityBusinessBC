@@ -21,27 +21,24 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     
-    public UserDto createUser(CreateUserDto createUserDto) {
-        // Vérifier si l'email existe déjà
-        if (userRepository.existsByEmail(createUserDto.getEmail())) {
-            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
+    public UserDto createUser(CreateUserDto dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email déjà utilisé");
         }
         
-        // Créer l'utilisateur
         User user = new User();
-        user.setFirstName(createUserDto.getFirstName());
-        user.setLastName(createUserDto.getLastName());
-        user.setEmail(createUserDto.getEmail());
-        user.setPhone(createUserDto.getPhone());
-        user.setDateOfBirth(createUserDto.getDateOfBirth());
-        user.setAddress(createUserDto.getAddress());
-        user.setPostalCode(createUserDto.getPostalCode());
-        user.setCity(createUserDto.getCity());
-        user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setAddress(dto.getAddress());
+        user.setPostalCode(dto.getPostalCode());
+        user.setCity(dto.getCity());
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setStatus(User.UserStatus.PENDING);
         
-        User savedUser = userRepository.save(user);
-        return new UserDto(savedUser);
+        return new UserDto(userRepository.save(user));
     }
     
     @Transactional(readOnly = true)
@@ -68,52 +65,46 @@ public class UserService {
                 .map(UserDto::new);
     }
     
-    public UserDto updateUser(Long id, UserDto userDto) {
+    public UserDto updateUser(Long id, UserDto dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable: " + id));
         
-        // Vérifier si l'email est changé et s'il existe déjà
-        if (!user.getEmail().equals(userDto.getEmail()) && 
-            userRepository.existsByEmail(userDto.getEmail())) {
-            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
+        if (!user.getEmail().equals(dto.getEmail()) && 
+            userRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email déjà utilisé");
         }
         
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setEmail(userDto.getEmail());
-        user.setPhone(userDto.getPhone());
-        user.setDateOfBirth(userDto.getDateOfBirth());
-        user.setAddress(userDto.getAddress());
-        user.setPostalCode(userDto.getPostalCode());
-        user.setCity(userDto.getCity());
-        user.setStatus(userDto.getStatus());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setDateOfBirth(dto.getDateOfBirth());
+        user.setAddress(dto.getAddress());
+        user.setPostalCode(dto.getPostalCode());
+        user.setCity(dto.getCity());
+        user.setStatus(dto.getStatus());
         
-        User savedUser = userRepository.save(user);
-        return new UserDto(savedUser);
+        return new UserDto(userRepository.save(user));
     }
     
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + id);
+            throw new IllegalArgumentException("Utilisateur introuvable: " + id);
         }
         userRepository.deleteById(id);
     }
     
     public UserDto activateUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable: " + id));
         user.setStatus(User.UserStatus.ACTIVE);
-        User savedUser = userRepository.save(user);
-        return new UserDto(savedUser);
+        return new UserDto(userRepository.save(user));
     }
     
     public UserDto deactivateUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable: " + id));
         user.setStatus(User.UserStatus.INACTIVE);
-        User savedUser = userRepository.save(user);
-        return new UserDto(savedUser);
+        return new UserDto(userRepository.save(user));
     }
 }

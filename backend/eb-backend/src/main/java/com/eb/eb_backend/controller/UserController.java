@@ -19,10 +19,10 @@ public class UserController {
     private final UserService userService;
     
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserDto createUserDto) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserDto dto) {
         try {
-            UserDto userDto = userService.createUser(createUserDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(userDto);
+            UserDto user = userService.createUser(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -53,12 +53,12 @@ public class UserController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto dto) {
         try {
-            UserDto updatedUser = userService.updateUser(id, userDto);
-            return ResponseEntity.ok(updatedUser);
+            UserDto updated = userService.updateUser(id, dto);
+            return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
-            if (e.getMessage().contains("non trouvé")) {
+            if (e.getMessage().contains("introuvable")) {
                 return ResponseEntity.notFound().build();
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();

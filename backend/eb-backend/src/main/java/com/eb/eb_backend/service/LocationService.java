@@ -22,21 +22,19 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     
-    public LocationDto createLocation(Long ownerId, LocationDto locationDto) {
+    public LocationDto createLocation(Long ownerId, LocationDto dto) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
         
         Location location = new Location();
         location.setOwner(owner);
-        location.setLabel(locationDto.getLabel());
-        // L'adresse sera gérée via addressEntity si nécessaire
-        location.setLatitude(locationDto.getLatitude());
-        location.setLongitude(locationDto.getLongitude());
-        location.setDescription(locationDto.getDescription());
-        location.setIsActive(locationDto.getIsActive() != null ? locationDto.getIsActive() : true);
+        location.setLabel(dto.getLabel());
+        location.setLatitude(dto.getLatitude());
+        location.setLongitude(dto.getLongitude());
+        location.setDescription(dto.getDescription());
+        location.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
         
-        Location savedLocation = locationRepository.save(location);
-        return new LocationDto(savedLocation);
+        return new LocationDto(locationRepository.save(location));
     }
     
     @Transactional(readOnly = true)
@@ -48,17 +46,14 @@ public class LocationService {
     @Transactional(readOnly = true)
     public Page<LocationDto> getLocationsByOwner(Long ownerId, Pageable pageable) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
-        
-        return locationRepository.findByOwner(owner, pageable)
-                .map(LocationDto::new);
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
+        return locationRepository.findByOwner(owner, pageable).map(LocationDto::new);
     }
     
     @Transactional(readOnly = true)
     public List<LocationDto> getActiveLocationsByOwner(Long ownerId) {
         User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Propriétaire non trouvé avec l'ID: " + ownerId));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Propriétaire introuvable: " + ownerId));
         return locationRepository.findByOwnerAndIsActiveTrue(owner)
                 .stream()
                 .map(LocationDto::new)
@@ -71,43 +66,37 @@ public class LocationService {
                 .map(LocationDto::new);
     }
     
-    public LocationDto updateLocation(Long id, LocationDto locationDto) {
+    public LocationDto updateLocation(Long id, LocationDto dto) {
         Location location = locationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Lieu introuvable: " + id));
         
-        location.setLabel(locationDto.getLabel());
-        // L'adresse sera gérée via addressEntity si nécessaire
-        location.setLatitude(locationDto.getLatitude());
-        location.setLongitude(locationDto.getLongitude());
-        location.setDescription(locationDto.getDescription());
-        location.setIsActive(locationDto.getIsActive());
+        location.setLabel(dto.getLabel());
+        location.setLatitude(dto.getLatitude());
+        location.setLongitude(dto.getLongitude());
+        location.setDescription(dto.getDescription());
+        location.setIsActive(dto.getIsActive());
         
-        Location savedLocation = locationRepository.save(location);
-        return new LocationDto(savedLocation);
+        return new LocationDto(locationRepository.save(location));
     }
     
     public void deleteLocation(Long id) {
         if (!locationRepository.existsById(id)) {
-            throw new IllegalArgumentException("Lieu non trouvé avec l'ID: " + id);
+            throw new IllegalArgumentException("Lieu introuvable: " + id);
         }
         locationRepository.deleteById(id);
     }
     
     public LocationDto activateLocation(Long id) {
         Location location = locationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Lieu introuvable: " + id));
         location.setIsActive(true);
-        Location savedLocation = locationRepository.save(location);
-        return new LocationDto(savedLocation);
+        return new LocationDto(locationRepository.save(location));
     }
     
     public LocationDto deactivateLocation(Long id) {
         Location location = locationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Lieu non trouvé avec l'ID: " + id));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Lieu introuvable: " + id));
         location.setIsActive(false);
-        Location savedLocation = locationRepository.save(location);
-        return new LocationDto(savedLocation);
+        return new LocationDto(locationRepository.save(location));
     }
 }
