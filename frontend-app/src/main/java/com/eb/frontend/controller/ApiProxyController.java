@@ -34,8 +34,10 @@ public class ApiProxyController {
             HttpServletRequest request,
             @RequestBody(required = false) String body
     ) {
-        // Détecter si c'est une requête pour un fichier binaire (PDF, image, etc.)
+        // Extraire le chemin de la requête
         String path = request.getRequestURI().substring(request.getContextPath().length());
+        // Logger pour diagnostic
+        System.out.println("🔄 Proxy Frontend: " + request.getMethod() + " " + path + (request.getQueryString() != null ? "?" + request.getQueryString() : ""));
         boolean isBinaryRequest = path.endsWith(".pdf") || 
                                   path.contains("/medias/") ||
                                   request.getContentType() != null && request.getContentType().startsWith("multipart/");
@@ -84,21 +86,27 @@ public class ApiProxyController {
         
         // Gérer les requêtes JSON normales
         ResponseEntity<String> response;
-        if (method == HttpMethod.GET) {
-            response = backendProxyService.get(path, headers);
-        } else if (method == HttpMethod.POST) {
-            response = backendProxyService.post(path, body, headers);
-        } else if (method == HttpMethod.PUT) {
-            response = backendProxyService.put(path, body, headers);
-        } else if (method == HttpMethod.DELETE) {
-            response = backendProxyService.delete(path, headers);
-        } else if (method == HttpMethod.PATCH) {
-            response = backendProxyService.patch(path, body, headers);
-        } else {
-            return ResponseEntity.status(405).body("{\"error\":\"Method not allowed\"}");
+        try {
+            if (method == HttpMethod.GET) {
+                response = backendProxyService.get(path, headers);
+            } else if (method == HttpMethod.POST) {
+                response = backendProxyService.post(path, body, headers);
+            } else if (method == HttpMethod.PUT) {
+                response = backendProxyService.put(path, body, headers);
+            } else if (method == HttpMethod.DELETE) {
+                response = backendProxyService.delete(path, headers);
+            } else if (method == HttpMethod.PATCH) {
+                response = backendProxyService.patch(path, body, headers);
+            } else {
+                return ResponseEntity.status(405).body("{\"error\":\"Method not allowed\"}");
+            }
+            System.out.println("✅ Proxy Frontend: Réponse du backend - Status: " + response.getStatusCode());
+            return response;
+        } catch (Exception e) {
+            System.err.println("❌ Proxy Frontend: Erreur lors du proxy: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("{\"error\":\"Erreur interne du proxy: " + e.getMessage() + "\"}");
         }
-
-        return response;
     }
 
     /**

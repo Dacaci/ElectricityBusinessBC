@@ -27,40 +27,44 @@ public class BackendProxyService {
     @PostConstruct
     public void init() {
         log.info("🔧 BackendProxyService initialisé avec backend.url: {}", backendUrl);
+        // Logger le type de factory utilisée pour RestTemplate
+        if (restTemplate.getRequestFactory() instanceof org.springframework.http.client.HttpComponentsClientHttpRequestFactory) {
+            log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (HTTPS optimisé)");
+        } else {
+            log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 60s connect, 120s read)");
+        }
     }
 
     private final RestTemplate restTemplate;
     
     // Initialisation du RestTemplate avec une meilleure gestion HTTPS et timeouts pour Render
     {
-        restTemplate = new RestTemplate();
+        RestTemplate template = new RestTemplate();
         try {
             // Utiliser HttpComponentsClientHttpRequestFactory pour une meilleure gestion HTTPS
             org.apache.hc.client5.http.impl.classic.CloseableHttpClient httpClient = 
                 org.apache.hc.client5.http.impl.classic.HttpClients.custom()
-                    .setConnectionTimeToLive(120, java.util.concurrent.TimeUnit.SECONDS)
                     .evictExpiredConnections()
-                    .evictIdleConnections(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(120))
                     .build();
             
             org.springframework.http.client.HttpComponentsClientHttpRequestFactory factory = 
                 new org.springframework.http.client.HttpComponentsClientHttpRequestFactory(httpClient);
             factory.setConnectTimeout(java.time.Duration.ofSeconds(60));  // 60s pour connexion (Render sleep mode)
             factory.setConnectionRequestTimeout(java.time.Duration.ofSeconds(60));
-            factory.setResponseTimeout(java.time.Duration.ofSeconds(120)); // 120s pour réponse
+            // Note: setReadTimeout n'existe pas dans cette version, géré par le client HTTP directement
             
-            restTemplate.setRequestFactory(factory);
-            log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (HTTPS optimisé)");
+            template.setRequestFactory(factory);
+            // Log déplacé dans @PostConstruct pour éviter les problèmes d'initialisation
         } catch (NoClassDefFoundError | Exception e) {
             // Fallback vers SimpleClientHttpRequestFactory si HttpComponents n'est pas disponible
-            log.warn("⚠️ HttpComponents non disponible ({}), fallback vers SimpleClientHttpRequestFactory", e.getClass().getSimpleName());
             org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
                 new org.springframework.http.client.SimpleClientHttpRequestFactory();
             factory.setConnectTimeout(60000);   // 60 secondes pour connexion (augmenté pour Render)
             factory.setReadTimeout(120000);      // 120 secondes pour lecture
-            restTemplate.setRequestFactory(factory);
-            log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts augmentés)");
+            template.setRequestFactory(factory);
         }
+        this.restTemplate = template;
     }
 
     /**
