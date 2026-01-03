@@ -411,7 +411,23 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080/api';
+        // Configuration de l'URL de l'API
+        // Configuration de l'URL de base de l'API
+        // IMPORTANT: Toujours utiliser window.location.origin pour utiliser l'URL actuelle
+        // - Si servi par le backend directement: window.location.origin = backend (ex: localhost:8080)
+        // - Si servi par le frontend proxy: window.location.origin = frontend (ex: localhost:8081)
+        // Dans tous les cas, on ajoute '/api' pour pointer vers l'API
+        let API_BASE = window.location.origin + '/api';
+        
+        // Vérification de sécurité: ne jamais utiliser localhost:8080 en dur
+        // Si API_BASE contient 'localhost:8080' et qu'on est sur le frontend, corriger
+        if (API_BASE.includes('localhost:8080') && (window.location.port === '8081' || window.location.hostname.includes('frontend'))) {
+            console.warn('⚠️ Correction: API_BASE pointait vers backend direct, utilisation du proxy frontend');
+            API_BASE = window.location.origin + '/api';
+        }
+        
+        console.log('🔧 API Base configurée:', API_BASE);
+        console.log('📍 Hostname:', window.location.hostname, 'Port:', window.location.port, 'Origin:', window.location.origin);
         
         // Navigation
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -790,10 +806,14 @@
                 document.getElementById('db-status').innerHTML = 'Erreur de connexion';
             }
             
-            // Check MailHog
+            // Check MailHog (seulement en développement local)
             try {
-                const response = await fetch('http://localhost:8026/api/v1/messages');
-                document.getElementById('mailhog-status').innerHTML = 'Connecté';
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    const response = await fetch('http://localhost:8026/api/v1/messages');
+                    document.getElementById('mailhog-status').innerHTML = 'Connecté';
+                } else {
+                    document.getElementById('mailhog-status').innerHTML = 'Non disponible en production';
+                }
             } catch (error) {
                 document.getElementById('mailhog-status').innerHTML = 'Non accessible';
             }

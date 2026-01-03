@@ -26,7 +26,16 @@ public class BackendProxyService {
     
     @PostConstruct
     public void init() {
-        log.info("🔧 BackendProxyService initialisé avec backend.url: {}", backendUrl);
+        log.info("🔧 BackendProxyService initialisé");
+        log.info("   - Backend URL (Java): {}", backendUrl);
+        log.info("   - Variable d'environnement BACKEND_URL: {}", System.getenv("BACKEND_URL"));
+        // Vérifier que l'URL backend n'est pas la même que le frontend
+        String frontendUrl = System.getenv("RENDER_EXTERNAL_URL");
+        if (frontendUrl != null && backendUrl.equals(frontendUrl)) {
+            log.error("⚠️ ERREUR: Backend URL et Frontend URL sont identiques ! {}", backendUrl);
+        } else {
+            log.info("   - Frontend URL (Render): {}", frontendUrl != null ? frontendUrl : "Non défini");
+        }
         // Logger le type de factory utilisée pour RestTemplate
         if (restTemplate.getRequestFactory() instanceof org.springframework.http.client.HttpComponentsClientHttpRequestFactory) {
             log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (HTTPS optimisé)");
@@ -206,6 +215,12 @@ public class BackendProxyService {
         } catch (ResourceAccessException e) {
             String errorMsg = e.getMessage();
             String fullUrl = backendUrl + path;
+            String exceptionType = e.getClass().getSimpleName();
+            String exceptionCause = e.getCause() != null ? e.getCause().getClass().getSimpleName() + ": " + e.getCause().getMessage() : "null";
+            
+            log.error("❌ ResourceAccessException - Type: {}, Cause: {}, Message: {}, URL: {}", 
+                exceptionType, exceptionCause, errorMsg, fullUrl);
+            
             if (errorMsg != null && (errorMsg.contains("Read timed out") || errorMsg.contains("Connection timed out"))) {
                 log.warn("⏱️ Timeout lors de la connexion au backend: {} (le backend sur Render peut être en cours de démarrage)", fullUrl);
                 return ResponseEntity
@@ -217,7 +232,7 @@ public class BackendProxyService {
                     .status(HttpStatus.BAD_GATEWAY)
                     .body("{\"error\":\"Le backend ne répond pas. Sur Render (plan gratuit), le service peut être en veille. Le premier appel peut prendre 30-60s pour le réveiller.\"}");
             } else {
-                log.error("❌ Impossible de se connecter au backend {}: {}", fullUrl, errorMsg);
+                log.error("❌ Impossible de se connecter au backend {}: {} (Type: {}, Cause: {})", fullUrl, errorMsg, exceptionType, exceptionCause);
                 return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
                     .body("{\"error\":\"Backend non disponible: " + (errorMsg != null ? errorMsg : "Erreur de connexion") + "\"}");

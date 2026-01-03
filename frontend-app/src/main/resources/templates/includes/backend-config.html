@@ -1,10 +1,17 @@
 <!-- Fragment Thymeleaf pour la configuration du backend -->
 <!-- Le Frontend sert maintenant de proxy, donc API_BASE_URL pointe vers le Frontend lui-même -->
+<!-- Le backend réel est configuré via BACKEND_URL dans les variables d'environnement -->
 <script th:fragment="backend-config" th:inline="javascript">
     // Le Frontend sert de proxy vers l'API Backend
-    // Tous les appels API passent maintenant par le Frontend
+    // - API_BASE_URL (JavaScript) = Frontend URL (proxy)
+    // - BACKEND_URL (Java/Env) = Backend URL réel (https://electricity-business-backend-jvc9.onrender.com)
+    // Tous les appels API passent maintenant par le Frontend qui proxifie vers le Backend
     if (typeof window.API_BASE_URL === 'undefined') {
         window.API_BASE_URL = window.location.origin;
     }
-    console.log('API Base URL (Frontend proxy):', window.API_BASE_URL);
+    // Créer aussi une constante globale pour compatibilité
+    if (typeof API_BASE_URL === 'undefined') {
+        var API_BASE_URL = window.API_BASE_URL;
+    }
+    console.log('🔧 API Base URL (Frontend proxy):', window.API_BASE_URL);
 </script>
