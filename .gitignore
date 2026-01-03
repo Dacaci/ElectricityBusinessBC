@@ -42,6 +42,7 @@ node_modules/
 *.puml
 *.mmd
 *.xml
+!**/pom.xml
 *.drawio.xml
 
 # Scripts de conversion et utilitaires
