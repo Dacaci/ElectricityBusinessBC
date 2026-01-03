@@ -34,8 +34,8 @@ public class BackendProxyService {
     {
         this.restTemplate.setRequestFactory(
             new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
-                setConnectTimeout(30000);
-                setReadTimeout(60000);
+                setConnectTimeout(30000);  // 30 secondes pour établir la connexion
+                setReadTimeout(120000);    // 120 secondes pour lire la réponse (Render peut être lent)
             }}
         );
     }
@@ -177,10 +177,18 @@ public class BackendProxyService {
                 .headers(responseHeaders)
                 .body(e.getResponseBodyAsString());
         } catch (ResourceAccessException e) {
-            log.error("❌ Impossible de se connecter au backend à {}: {}", backendUrl, e.getMessage());
-            return ResponseEntity
-                .status(HttpStatus.BAD_GATEWAY)
-                .body("{\"error\":\"Backend non disponible: " + e.getMessage() + "\"}");
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("Read timed out")) {
+                log.warn("⏱️ Timeout lors de la connexion au backend (le backend est peut-être en cours de démarrage): {}", backendUrl);
+                return ResponseEntity
+                    .status(HttpStatus.GATEWAY_TIMEOUT)
+                    .body("{\"error\":\"Le backend met trop de temps à répondre. Veuillez réessayer dans quelques instants.\"}");
+            } else {
+                log.error("❌ Impossible de se connecter au backend à {}: {}", backendUrl, errorMsg);
+                return ResponseEntity
+                    .status(HttpStatus.BAD_GATEWAY)
+                    .body("{\"error\":\"Backend non disponible: " + errorMsg + "\"}");
+            }
         } catch (Exception e) {
             log.error("❌ Erreur lors de la communication avec le backend: {}", e.getMessage(), e);
             return ResponseEntity
