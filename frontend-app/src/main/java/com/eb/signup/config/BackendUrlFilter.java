@@ -16,7 +16,8 @@ public class BackendUrlFilter implements Filter {
         backendUrl = System.getenv("BACKEND_URL");
         if (backendUrl == null || backendUrl.isEmpty()) {
             // Fallback : utiliser localhost en développement
-            backendUrl = "http://localhost:8080";
+            // IMPORTANT: En production sur Render, BACKEND_URL doit être défini en HTTPS
+            backendUrl = "https://localhost:8080";
         }
         // S'assurer que l'URL ne se termine pas par /
         if (backendUrl.endsWith("/")) {

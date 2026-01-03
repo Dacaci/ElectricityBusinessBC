@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice
 public class GlobalModelAttributes {
 
-    @Value("${backend.url:http://localhost:8080}")
+    // IMPORTANT: En production sur Render, backend.url doit être en HTTPS via BACKEND_URL
+    @Value("${backend.url:https://localhost:8080}")
     private String backendUrl;
 
-    @Value("${inscription.url:http://localhost:8082}")
+    // IMPORTANT: En production sur Render, inscription.url doit être en HTTPS via INSCRIPTION_URL
+    @Value("${inscription.url:https://localhost:8082}")
     private String inscriptionUrl;
 
     /**

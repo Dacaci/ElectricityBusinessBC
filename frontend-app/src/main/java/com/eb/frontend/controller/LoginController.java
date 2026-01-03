@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LoginController {
 
-    @Value("${backend.url:http://localhost:8080}")
+    // IMPORTANT: En production sur Render, backend.url doit être en HTTPS via BACKEND_URL
+    @Value("${backend.url:https://localhost:8080}")
     private String backendUrl;
 
     @GetMapping("/login")

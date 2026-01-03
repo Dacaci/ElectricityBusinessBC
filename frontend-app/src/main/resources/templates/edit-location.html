@@ -7,7 +7,8 @@
     <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Modifier un Lieu - Electricity Business</title>
     <link rel="stylesheet" th:href="@{/css/common-styles.css?v=20251022v5}">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' http://localhost:8080 https://electricity-business-backend-jvc9.onrender.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;">
+    <!-- IMPORTANT: En production sur Render, utiliser uniquement HTTPS. https://localhost:8080 est pour le développement local uniquement -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src 'self' https://localhost:8080 https://electricity-business-backend-jvc9.onrender.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:;">
 </head>
 <body>
     <div th:replace="~{includes/navbar :: navbar}"></div>

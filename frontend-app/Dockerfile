@@ -26,4 +26,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
 
 # Run the Spring Boot application
 # Use PORT and BACKEND_URL environment variables from Render
-ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-http://localhost:8080} -jar app.war"]
+# IMPORTANT: BACKEND_URL doit être en HTTPS sur Render (défini dans render.yaml)
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-https://localhost:8080} -jar app.war"]

@@ -22,8 +22,29 @@ public class CorsFilter extends OncePerRequestFilter {
         if (origin != null) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         } else {
-            // Fallback pour les origines non spécifiées
-            response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+            // Fallback pour les origines non spécifiées (en production, devrait être géré par SimpleSecurityConfig)
+            // En développement local uniquement
+            String requestUrl = request.getRequestURL().toString();
+            if (requestUrl.contains("localhost") || requestUrl.contains("127.0.0.1")) {
+                response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+            } else {
+                // En production, utiliser l'origine de la requête si disponible
+                String referer = request.getHeader("Referer");
+                if (referer != null && !referer.isEmpty()) {
+                    try {
+                        java.net.URL url = new java.net.URL(referer);
+                        String protocol = url.getProtocol();
+                        String host = url.getHost();
+                        int port = url.getPort();
+                        String originFallback = port != -1 ? 
+                            protocol + "://" + host + ":" + port : 
+                            protocol + "://" + host;
+                        response.setHeader("Access-Control-Allow-Origin", originFallback);
+                    } catch (Exception e) {
+                        // Si on ne peut pas parser, ne pas définir d'origine (SimpleSecurityConfig gérera)
+                    }
+                }
+            }
         }
         
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD");
