@@ -67,6 +67,12 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     
+    <!-- Apache HttpClient pour une meilleure gestion HTTPS dans RestTemplate -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+    </dependency>
+    
     <!-- JSP Support (nécessaire pour les Servlets sans framework) -->
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>

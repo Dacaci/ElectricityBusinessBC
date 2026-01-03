@@ -29,15 +29,38 @@ public class BackendProxyService {
         log.info("🔧 BackendProxyService initialisé avec backend.url: {}", backendUrl);
     }
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
+    private final RestTemplate restTemplate;
+    
+    // Initialisation du RestTemplate avec une meilleure gestion HTTPS et timeouts pour Render
     {
-        this.restTemplate.setRequestFactory(
-            new org.springframework.http.client.SimpleClientHttpRequestFactory() {{
-                setConnectTimeout(30000);  // 30 secondes pour établir la connexion
-                setReadTimeout(120000);    // 120 secondes pour lire la réponse (Render peut être lent)
-            }}
-        );
+        restTemplate = new RestTemplate();
+        try {
+            // Utiliser HttpComponentsClientHttpRequestFactory pour une meilleure gestion HTTPS
+            org.apache.hc.client5.http.impl.classic.CloseableHttpClient httpClient = 
+                org.apache.hc.client5.http.impl.classic.HttpClients.custom()
+                    .setConnectionTimeToLive(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .evictExpiredConnections()
+                    .evictIdleConnections(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .build();
+            
+            org.springframework.http.client.HttpComponentsClientHttpRequestFactory factory = 
+                new org.springframework.http.client.HttpComponentsClientHttpRequestFactory(httpClient);
+            factory.setConnectTimeout(java.time.Duration.ofSeconds(60));  // 60s pour connexion (Render sleep mode)
+            factory.setConnectionRequestTimeout(java.time.Duration.ofSeconds(60));
+            factory.setResponseTimeout(java.time.Duration.ofSeconds(120)); // 120s pour réponse
+            
+            restTemplate.setRequestFactory(factory);
+            log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (HTTPS optimisé)");
+        } catch (NoClassDefFoundError | Exception e) {
+            // Fallback vers SimpleClientHttpRequestFactory si HttpComponents n'est pas disponible
+            log.warn("⚠️ HttpComponents non disponible ({}), fallback vers SimpleClientHttpRequestFactory", e.getClass().getSimpleName());
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(60000);   // 60 secondes pour connexion (augmenté pour Render)
+            factory.setReadTimeout(120000);      // 120 secondes pour lecture
+            restTemplate.setRequestFactory(factory);
+            log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts augmentés)");
+        }
     }
 
     /**
@@ -53,7 +76,7 @@ public class BackendProxyService {
     public ResponseEntity<byte[]> getBinary(String path, HttpHeaders requestHeaders) {
         try {
             String url = backendUrl + path;
-            log.debug("🔄 Proxy Binary: GET {}", url);
+            log.info("🔄 Proxy Binary: GET {} -> Backend URL: {}", path, url);
             
             HttpHeaders headers = new HttpHeaders();
             if (requestHeaders != null) {
@@ -129,7 +152,7 @@ public class BackendProxyService {
     private ResponseEntity<String> executeRequest(HttpMethod method, String path, String body, HttpHeaders requestHeaders) {
         try {
             String url = backendUrl + path;
-            log.debug("🔄 Proxy: {} {}", method, url);
+            log.info("🔄 Proxy: {} {} -> Backend URL: {}", method, path, url);
             
             // Copier les headers de la requête (sauf Host et Origin)
             HttpHeaders headers = new HttpHeaders();
@@ -178,16 +201,22 @@ public class BackendProxyService {
                 .body(e.getResponseBodyAsString());
         } catch (ResourceAccessException e) {
             String errorMsg = e.getMessage();
-            if (errorMsg != null && errorMsg.contains("Read timed out")) {
-                log.warn("⏱️ Timeout lors de la connexion au backend (le backend est peut-être en cours de démarrage): {}", backendUrl);
+            String fullUrl = backendUrl + path;
+            if (errorMsg != null && (errorMsg.contains("Read timed out") || errorMsg.contains("Connection timed out"))) {
+                log.warn("⏱️ Timeout lors de la connexion au backend: {} (le backend sur Render peut être en cours de démarrage)", fullUrl);
                 return ResponseEntity
                     .status(HttpStatus.GATEWAY_TIMEOUT)
-                    .body("{\"error\":\"Le backend met trop de temps à répondre. Veuillez réessayer dans quelques instants.\"}");
-            } else {
-                log.error("❌ Impossible de se connecter au backend à {}: {}", backendUrl, errorMsg);
+                    .body("{\"error\":\"Le backend met trop de temps à répondre. Sur Render (plan gratuit), le service peut mettre 30-60s à démarrer. Veuillez réessayer.\"}");
+            } else if (errorMsg != null && errorMsg.contains("Connect timed out")) {
+                log.warn("⏱️ Connexion timeout au backend: {} (le service Render est peut-être en sleep mode)", fullUrl);
                 return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
-                    .body("{\"error\":\"Backend non disponible: " + errorMsg + "\"}");
+                    .body("{\"error\":\"Le backend ne répond pas. Sur Render (plan gratuit), le service peut être en veille. Le premier appel peut prendre 30-60s pour le réveiller.\"}");
+            } else {
+                log.error("❌ Impossible de se connecter au backend {}: {}", fullUrl, errorMsg);
+                return ResponseEntity
+                    .status(HttpStatus.BAD_GATEWAY)
+                    .body("{\"error\":\"Backend non disponible: " + (errorMsg != null ? errorMsg : "Erreur de connexion") + "\"}");
             }
         } catch (Exception e) {
             log.error("❌ Erreur lors de la communication avec le backend: {}", e.getMessage(), e);
