@@ -76,7 +76,15 @@ public class ApiProxyController {
             ResponseEntity<byte[]> binaryResponse = backendProxyService.getBinary(path, headers);
             HttpHeaders responseHeaders = new HttpHeaders();
             binaryResponse.getHeaders().forEach((key, value) -> {
-                responseHeaders.addAll(key, value);
+                if ("Set-Cookie".equalsIgnoreCase(key)) {
+                    // Modifier les cookies pour qu'ils fonctionnent sur le domaine du frontend
+                    for (String cookieValue : value) {
+                        String modifiedCookie = modifyCookieForFrontendDomain(cookieValue);
+                        responseHeaders.add("Set-Cookie", modifiedCookie);
+                    }
+                } else {
+                    responseHeaders.addAll(key, value);
+                }
             });
             return ResponseEntity
                 .status(binaryResponse.getStatusCode())
@@ -101,7 +109,26 @@ public class ApiProxyController {
                 return ResponseEntity.status(405).body("{\"error\":\"Method not allowed\"}");
             }
             System.out.println("✅ Proxy Frontend: Réponse du backend - Status: " + response.getStatusCode());
-            return response;
+            
+            // Intercepter et modifier les cookies Set-Cookie de la réponse pour les adapter au domaine du frontend
+            HttpHeaders responseHeaders = new HttpHeaders();
+            response.getHeaders().forEach((key, value) -> {
+                if ("Set-Cookie".equalsIgnoreCase(key)) {
+                    // Modifier les cookies pour qu'ils fonctionnent sur le domaine du frontend
+                    for (String cookieValue : value) {
+                        // Extraire le nom et la valeur du cookie
+                        String modifiedCookie = modifyCookieForFrontendDomain(cookieValue);
+                        responseHeaders.add("Set-Cookie", modifiedCookie);
+                    }
+                } else {
+                    responseHeaders.addAll(key, value);
+                }
+            });
+            
+            return ResponseEntity
+                .status(response.getStatusCode())
+                .headers(responseHeaders)
+                .body(response.getBody());
         } catch (Exception e) {
             System.err.println("❌ Proxy Frontend: Erreur lors du proxy: " + e.getMessage());
             e.printStackTrace();
@@ -135,6 +162,38 @@ public class ApiProxyController {
         }
     }
 
+    /**
+     * Modifie le cookie Set-Cookie pour qu'il fonctionne sur le domaine du frontend
+     * Supprime le domaine du backend et ajuste les attributs SameSite et Secure si nécessaire
+     */
+    private String modifyCookieForFrontendDomain(String cookieValue) {
+        if (cookieValue == null || cookieValue.isEmpty()) {
+            return cookieValue;
+        }
+        
+        // Supprimer le domaine du backend (Domain=electricity-business-backend-jvc9.onrender.com)
+        // et s'assurer que SameSite=None et Secure=true sont présents pour cross-domain
+        String modified = cookieValue;
+        
+        // Supprimer le domaine spécifique du backend
+        modified = modified.replaceAll("(?i);\\s*Domain=[^;]+", "");
+        
+        // S'assurer que Secure est présent (obligatoire pour SameSite=None en HTTPS)
+        if (!modified.toLowerCase().contains("secure")) {
+            modified += "; Secure";
+        }
+        
+        // S'assurer que SameSite=None est présent pour cross-domain
+        if (!modified.toLowerCase().contains("samesite")) {
+            modified += "; SameSite=None";
+        } else {
+            // Remplacer SameSite=Lax ou SameSite=Strict par SameSite=None
+            modified = modified.replaceAll("(?i);\\s*SameSite=(Lax|Strict)", "; SameSite=None");
+        }
+        
+        return modified;
+    }
+    
     /**
      * Lit le body de la requête HTTP
      */
