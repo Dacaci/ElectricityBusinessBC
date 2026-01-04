@@ -89,9 +89,6 @@ services:
         value: onboarding@resend.dev
     autoDeploy: true
 
-databases:
-  - name: electricity-business-db
-    databaseName: electricity_business_avmm  # Nom réel de la base sur Render
-    user: eb_user
-    plan: basic  # Plan Basic pour éviter l'expiration
+# Database déjà existante sur Render - ne pas la déclarer ici pour éviter les conflits
+# Les services utilisent fromDatabase avec le nom: electricity-business-db
 
