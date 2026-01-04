@@ -28,4 +28,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
 # Use PORT and BACKEND_URL environment variables from Render
 # IMPORTANT: BACKEND_URL doit être en HTTPS sur Render (défini dans render.yaml)
 # Augmentation de la mémoire pour éviter les OutOfMemoryError
-ENTRYPOINT ["sh", "-c", "java -Xmx768m -Xms384m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-https://electricity-business-backend-jvc9.onrender.com} -jar app.war"]
+ENTRYPOINT ["sh", "-c", "java -Xmx400m -Xms200m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-https://electricity-business-backend-jvc9.onrender.com} -jar app.war"]
