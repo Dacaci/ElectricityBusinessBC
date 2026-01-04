@@ -732,83 +732,118 @@
             loadAllStations();
             setupSearchForm();
             
-            // Fonction pour charger les stations selon la zone visible
+            // OPTIMISATION: Debounce et file d'attente pour limiter les requêtes simultanées
+            let loadStationsTimeout = null;
+            let isLoadStationsPending = false;
+            let currentRequestAbortController = null;
+            
+            // Fonction pour charger les stations selon la zone visible (avec debounce et file d'attente)
             function loadStationsForCurrentView() {
-                if (!map || !map.getCenter) {
-                    setTimeout(loadStationsForCurrentView, 500);
-                    return;
+                // Annuler la requête précédente si elle est en cours
+                if (currentRequestAbortController) {
+                    currentRequestAbortController.abort();
                 }
                 
-                let lat = 48.8566;
-                let lng = 2.3522;
-                let zoom = 10;
+                // Annuler le timeout précédent
+                if (loadStationsTimeout) {
+                    clearTimeout(loadStationsTimeout);
+                }
                 
-                try {
-                    const center = map.getCenter();
-                    const newZoom = map.getZoom();
-                    
-                    if (center && typeof center.lat === 'number' && typeof center.lng === 'number') {
-                        lat = center.lat;
-                        lng = center.lng;
+                // Debounce: attendre 500ms avant de faire la requête
+                loadStationsTimeout = setTimeout(() => {
+                    if (isLoadStationsPending) {
+                        return; // Une requête est déjà en cours, ignorer
                     }
                     
-                    if (typeof newZoom === 'number' && !isNaN(newZoom)) {
-                        zoom = newZoom;
+                    if (!map || !map.getCenter) {
+                        setTimeout(loadStationsForCurrentView, 500);
+                        return;
                     }
-                } catch (e) {
-                    // Ignorer les erreurs
-                }
-                
-                let distance = 10;
-                let maxResults = 100;
-                
-                // Limiter les valeurs pour éviter les problèmes de mémoire côté serveur
-                if (zoom < 8) {
-                    distance = 50;
-                    maxResults = 200;
-                } else if (zoom < 10) {
-                    distance = 30;
-                    maxResults = 150;
-                } else if (zoom < 12) {
-                    distance = 20;
-                    maxResults = 100;
-                } else {
-                    distance = 10;
-                    maxResults = 50;
-                }
-                
-                const apiBase = window.API_BASE_URL || window.location.origin;
-                const url = apiBase + '/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
-                
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Erreur HTTP: ${response.status}`);
+                    
+                    isLoadStationsPending = true;
+                    currentRequestAbortController = new AbortController();
+                    
+                    let lat = 48.8566;
+                    let lng = 2.3522;
+                    let zoom = 10;
+                    
+                    try {
+                        const center = map.getCenter();
+                        const newZoom = map.getZoom();
+                        
+                        if (center && typeof center.lat === 'number' && typeof center.lng === 'number') {
+                            lat = center.lat;
+                            lng = center.lng;
                         }
-                        return response.json();
+                        
+                        if (typeof newZoom === 'number' && !isNaN(newZoom)) {
+                            zoom = newZoom;
+                        }
+                    } catch (e) {
+                        // Ignorer les erreurs
+                    }
+                    
+                    let distance = 10;
+                    let maxResults = 100;
+                    
+                    // Limiter les valeurs pour éviter les problèmes de mémoire côté serveur
+                    if (zoom < 8) {
+                        distance = 50;
+                        maxResults = 200;
+                    } else if (zoom < 10) {
+                        distance = 30;
+                        maxResults = 150;
+                    } else if (zoom < 12) {
+                        distance = 20;
+                        maxResults = 100;
+                    } else {
+                        distance = 10;
+                        maxResults = 50;
+                    }
+                    
+                    const apiBase = window.API_BASE_URL || window.location.origin;
+                    const url = apiBase + '/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
+                    
+                    fetch(url, { 
+                        signal: currentRequestAbortController.signal,
+                        credentials: 'include'
                     })
-                    .then(data => {
-                        const stations = Array.isArray(data) ? data : [];
-                        
-                        // Purger la couche OCM avant d'ajouter
-                        ocmClusterLayer.clearLayers();
-                        
-                        // Ajouter les stations OCM à la carte (cluster)
-                        stations.forEach(station => {
-                            const location = locations.find(l => l.id === station.locationId);
-                            const lat = location ? location.latitude : (station.AddressInfo && station.AddressInfo.Latitude);
-                            const lng = location ? location.longitude : (station.AddressInfo && station.AddressInfo.Longitude);
-                            
-                            if (lat && lng) {
-                                const marker = L.marker([lat, lng], { icon: ocmStationIcon })
-                                    .bindPopup(createOCMStationPopup(station));
-                                ocmClusterLayer.addLayer(marker);
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`Erreur HTTP: ${response.status}`);
                             }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const stations = Array.isArray(data) ? data : [];
+                            
+                            // Purger la couche OCM avant d'ajouter
+                            ocmClusterLayer.clearLayers();
+                            
+                            // Ajouter les stations OCM à la carte (cluster)
+                            stations.forEach(station => {
+                                const location = locations.find(l => l.id === station.locationId);
+                                const lat = location ? location.latitude : (station.AddressInfo && station.AddressInfo.Latitude);
+                                const lng = location ? location.longitude : (station.AddressInfo && station.AddressInfo.Longitude);
+                                
+                                if (lat && lng) {
+                                    const marker = L.marker([lat, lng], { icon: ocmStationIcon })
+                                        .bindPopup(createOCMStationPopup(station));
+                                    ocmClusterLayer.addLayer(marker);
+                                }
+                            });
+                            
+                            isLoadStationsPending = false;
+                            currentRequestAbortController = null;
+                        })
+                        .catch(error => {
+                            if (error.name !== 'AbortError') {
+                                // Erreur silencieuse (sauf si c'est une annulation)
+                            }
+                            isLoadStationsPending = false;
+                            currentRequestAbortController = null;
                         });
-                    })
-                    .catch(error => {
-                        // Erreur silencieuse
-                    });
+                }, 500); // Debounce de 500ms
             }
             
             setTimeout(() => {

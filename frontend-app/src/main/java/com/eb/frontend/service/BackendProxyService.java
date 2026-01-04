@@ -9,6 +9,9 @@ import org.springframework.web.client.ResourceAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.annotation.PostConstruct;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -22,6 +25,21 @@ public class BackendProxyService {
 
     // Lire directement depuis l'environnement - pas de @Value qui peut poser problème
     private String backendUrl;
+    
+    // Cache simple pour les requêtes GET fréquentes (30 secondes)
+    private static class CacheEntry {
+        final String response;
+        final long timestamp;
+        CacheEntry(String response) {
+            this.response = response;
+            this.timestamp = System.currentTimeMillis();
+        }
+        boolean isExpired(long ttlMs) {
+            return System.currentTimeMillis() - timestamp > ttlMs;
+        }
+    }
+    private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MS = 30000; // 30 secondes
 
     // Méthode publique pour obtenir l'URL du backend (pour diagnostic)
     public String getBackendUrl() {
@@ -134,6 +152,13 @@ public class BackendProxyService {
         
         // Test de connexion au backend au démarrage
         testBackendConnection();
+        
+        // Nettoyer le cache toutes les 60 secondes
+        java.util.concurrent.Executors.newSingleThreadScheduledExecutor()
+            .scheduleAtFixedRate(() -> {
+                cache.entrySet().removeIf(entry -> entry.getValue().isExpired(CACHE_TTL_MS));
+                log.debug("🧹 Cache nettoyé - {} entrées restantes", cache.size());
+            }, 60, 60, TimeUnit.SECONDS);
     }
     
     /**
@@ -165,9 +190,33 @@ public class BackendProxyService {
 
     /**
      * Fait un appel GET vers l'API Backend (retourne String pour JSON)
+     * Utilise un cache pour les requêtes fréquentes
      */
     public ResponseEntity<String> get(String path, HttpHeaders requestHeaders) {
-        return executeRequest(HttpMethod.GET, path, null, requestHeaders);
+        // Cache uniquement pour les endpoints de stations (les plus fréquents)
+        if (path != null && (path.startsWith("/api/stations/map") || path.startsWith("/api/stations/external"))) {
+            CacheEntry cached = cache.get(path);
+            if (cached != null && !cached.isExpired(CACHE_TTL_MS)) {
+                log.debug("✅ Cache hit pour: {}", path);
+                return ResponseEntity.ok()
+                    .header("X-Cache", "HIT")
+                    .body(cached.response);
+            }
+        }
+        
+        ResponseEntity<String> response = executeRequest(HttpMethod.GET, path, null, requestHeaders);
+        
+        // Mettre en cache si succès et endpoint cachable
+        if (response.getStatusCode().is2xxSuccessful() && path != null && 
+            (path.startsWith("/api/stations/map") || path.startsWith("/api/stations/external"))) {
+            String body = response.getBody();
+            if (body != null) {
+                cache.put(path, new CacheEntry(body));
+                log.debug("✅ Cache miss - mis en cache: {}", path);
+            }
+        }
+        
+        return response;
     }
 
     /**

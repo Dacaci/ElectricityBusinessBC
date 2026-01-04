@@ -1,20 +1,14 @@
 <!-- Fragment Thymeleaf pour la configuration du backend -->
-<!-- Le Frontend sert maintenant de proxy, donc API_BASE_URL pointe vers le Frontend lui-même -->
-<!-- Le backend réel est configuré via BACKEND_URL dans les variables d'environnement -->
+<!-- APPEL DIRECT AU BACKEND (sans proxy) -->
 <script th:fragment="backend-config" th:inline="javascript">
-    // Le Frontend sert de proxy vers l'API Backend
-    // - API_BASE_URL (JavaScript) = Frontend URL (proxy) - utilisé par le client JavaScript
-    // - BACKEND_URL (Java/Env) = Backend URL réel - utilisé par le proxy Java BackendProxyService
-    // Tous les appels API passent maintenant par le Frontend qui proxifie vers le Backend
-    if (typeof window.API_BASE_URL === 'undefined') {
-        window.API_BASE_URL = window.location.origin;
-    }
+    // Le navigateur appelle directement le backend (CORS activé)
+    // Plus de proxy Java - appel direct pour éviter les erreurs 502
+    window.API_BASE_URL = 'https://electricity-business-backend-jvc9.onrender.com';
+    
     // Créer aussi une constante globale pour compatibilité
     if (typeof API_BASE_URL === 'undefined') {
         var API_BASE_URL = window.API_BASE_URL;
     }
-    console.log('🔧 API Base URL (Frontend proxy):', window.API_BASE_URL);
-    // Note: backendUrl injecté par Thymeleaf est utilisé côté serveur uniquement, pas côté client
-    var BACKEND_URL_SERVER = /*[[${backendUrl}]]*/ 'https://electricity-business-backend-jvc9.onrender.com';
-    console.log('🔧 API Backend URL (serveur):', BACKEND_URL_SERVER);
+    console.log('🔧 API Base URL (APPEL DIRECT AU BACKEND):', window.API_BASE_URL);
+    console.log('ℹ️ Les requêtes API vont DIRECTEMENT au backend (CORS activé)');
 </script>
