@@ -7,7 +7,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.eb.frontend", "com.eb.signup"})
+@ComponentScan(basePackages = {"com.eb.frontend"})
 public class FrontendApplication extends SpringBootServletInitializer {
 
     @Override
