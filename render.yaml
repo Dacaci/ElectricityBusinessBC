@@ -55,6 +55,7 @@ services:
           envVarKey: RENDER_EXTERNAL_URL
       # DB variables supprimées - le frontend ne doit PAS accéder directement à la base
       # Tout passe par le backend API (architecture propre)
+    healthCheckPath: /actuator/health
     autoDeploy: true
 
   # Inscription Module Service
