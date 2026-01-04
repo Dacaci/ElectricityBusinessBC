@@ -14,19 +14,17 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class OpenChargeMapService {
     
     // RestTemplate avec timeout configuré pour éviter les 502 sur Render
     private final RestTemplate restTemplate;
     
-    {
+    public OpenChargeMapService() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);  // 10 secondes pour connexion
         factory.setReadTimeout(25000);     // 25 secondes pour lecture (Render timeout = 30s)
-        RestTemplate template = new RestTemplate(factory);
-        this.restTemplate = template;
+        this.restTemplate = new RestTemplate(factory);
         log.info("✅ OpenChargeMapService - RestTemplate configuré avec timeouts: 10s connect, 25s read");
     }
     
