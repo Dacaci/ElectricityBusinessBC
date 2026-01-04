@@ -24,11 +24,11 @@ async function logout() {
         localStorage.clear();
         sessionStorage.clear();
         
-        // Rediriger vers /login
-        window.location.replace('/login');
+        // Rediriger vers la carte des bornes après déconnexion
+        window.location.replace('/map');
     } catch (error) {
         console.error('Erreur lors de la déconnexion:', error);
-        window.location.replace('/login');
+        window.location.replace('/map');
     }
 }
 

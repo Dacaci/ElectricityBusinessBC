@@ -23,7 +23,7 @@ public class LogoutController {
         
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         
-        return "redirect:/login";
+        return "redirect:/map";
     }
 }
 
