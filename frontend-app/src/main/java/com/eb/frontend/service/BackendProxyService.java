@@ -102,7 +102,9 @@ public class BackendProxyService {
             }
         }
         
+        log.info("=".repeat(80));
         log.info("🔧 BackendProxyService initialisé avec URL finale: {}", backendUrl);
+        log.info("=".repeat(80));
         
         // Vérifier que l'URL backend n'est pas la même que le frontend
         String frontendUrl = System.getenv("RENDER_EXTERNAL_URL");

@@ -104,7 +104,8 @@ function isAuthenticated() {
         // Vérifier que l'utilisateur existe avec un ID valide
         // Le token est vérifié côté serveur via le cookie HttpOnly
         const isAuth = user !== null && user !== undefined && user.id !== null && user.id !== undefined;
-        console.log('🔍 isAuthenticated() - user:', user, 'isAuth:', isAuth);
+        console.log('🔍 isAuthenticated() - user:', user, 'user.id:', user ? user.id : 'null', 'isAuth:', isAuth);
+        console.log('🔍 localStorage.getItem(authUser):', localStorage.getItem('authUser'));
         return isAuth;
     } catch (error) {
         console.error('Erreur dans isAuthenticated():', error);
