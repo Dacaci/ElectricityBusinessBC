@@ -48,8 +48,15 @@ function getAuthToken() {
  * @returns {object|null} Les informations utilisateur ou null
  */
 function getAuthUser() {
-    const userStr = localStorage.getItem(window.JWT_USER_KEY);
-    return userStr ? JSON.parse(userStr) : null;
+    try {
+        const userStr = localStorage.getItem(window.JWT_USER_KEY);
+        if (userStr) {
+            return JSON.parse(userStr);
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des infos utilisateur:', error);
+    }
+    return null;
 }
 
 /**
@@ -92,10 +99,17 @@ async function forceLogout() {
  * @returns {boolean} true si les infos utilisateur existent, false sinon
  */
 function isAuthenticated() {
-    const user = getAuthUser();
-    // Vérifier que l'utilisateur existe avec un ID valide
-    // Le token est vérifié côté serveur via le cookie HttpOnly
-    return user !== null && user !== undefined && user.id !== null && user.id !== undefined;
+    try {
+        const user = getAuthUser();
+        // Vérifier que l'utilisateur existe avec un ID valide
+        // Le token est vérifié côté serveur via le cookie HttpOnly
+        const isAuth = user !== null && user !== undefined && user.id !== null && user.id !== undefined;
+        console.log('🔍 isAuthenticated() - user:', user, 'isAuth:', isAuth);
+        return isAuth;
+    } catch (error) {
+        console.error('Erreur dans isAuthenticated():', error);
+        return false;
+    }
 }
 
 /**
