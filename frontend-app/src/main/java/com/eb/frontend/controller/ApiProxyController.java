@@ -110,6 +110,32 @@ public class ApiProxyController {
     }
 
     /**
+     * Endpoint de diagnostic pour vérifier la configuration du backend
+     */
+    @GetMapping("/diagnostic/backend-config")
+    public ResponseEntity<String> getBackendConfig() {
+        try {
+            String backendUrl = backendProxyService.getBackendUrl();
+            String envBackendUrl = System.getenv("BACKEND_URL");
+            String sysBackendUrl = System.getProperty("backend.url");
+            String frontendUrl = System.getenv("RENDER_EXTERNAL_URL");
+            
+            String config = String.format(
+                "{\"backendUrl\":\"%s\",\"envBackendUrl\":\"%s\",\"sysBackendUrl\":\"%s\",\"frontendUrl\":\"%s\",\"isSame\":%s}",
+                backendUrl != null ? backendUrl : "null",
+                envBackendUrl != null ? envBackendUrl : "null",
+                sysBackendUrl != null ? sysBackendUrl : "null",
+                frontendUrl != null ? frontendUrl : "null",
+                frontendUrl != null && backendUrl != null && frontendUrl.equals(backendUrl)
+            );
+            
+            return ResponseEntity.ok(config);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("{\"error\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
+    /**
      * Lit le body de la requête HTTP
      */
     private String readRequestBody(HttpServletRequest request) {

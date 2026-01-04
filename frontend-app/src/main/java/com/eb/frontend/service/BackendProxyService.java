@@ -23,6 +23,11 @@ public class BackendProxyService {
     // Lire directement depuis l'environnement - pas de @Value qui peut poser problème
     private String backendUrl;
 
+    // Méthode publique pour obtenir l'URL du backend (pour diagnostic)
+    public String getBackendUrl() {
+        return backendUrl;
+    }
+
     private final RestTemplate restTemplate;
 
     @PostConstruct
@@ -30,6 +35,9 @@ public class BackendProxyService {
         // PRIORITÉ 1: Variable d'environnement BACKEND_URL (c'est comme ça que Render le passe)
         String envBackendUrl = System.getenv("BACKEND_URL");
         log.info("🔍 BackendProxyService - BACKEND_URL (env): {}", envBackendUrl != null ? envBackendUrl : "NON DÉFINI");
+        
+        // URL backend par défaut sur Render (à utiliser si BACKEND_URL n'est pas défini)
+        String defaultBackendUrl = "https://electricity-business-backend-jvc9.onrender.com";
         
         if (envBackendUrl != null && !envBackendUrl.isEmpty() && !envBackendUrl.equals("null")) {
             this.backendUrl = envBackendUrl.trim();
@@ -63,31 +71,32 @@ public class BackendProxyService {
                                 this.backendUrl = renderBackendUrl.trim();
                                 log.info("✅ BackendProxyService - URL depuis BACKEND_URL (fallback): {}", backendUrl);
                             } else {
-                                this.backendUrl = "https://localhost:8080";
-                                log.warn("⚠️ BackendProxyService - Fallback vers https://localhost:8080 (dev uniquement)");
+                                // En production Render, utiliser l'URL backend par défaut
+                                this.backendUrl = defaultBackendUrl;
+                                log.warn("⚠️ BackendProxyService - Fallback vers URL backend Render par défaut: {}", backendUrl);
                             }
                         }
                         is.close();
                     } else {
-                        // En production, ne pas utiliser localhost
+                        // En production Render, utiliser l'URL backend par défaut
                         String renderBackendUrl = System.getenv("BACKEND_URL");
                         if (renderBackendUrl != null && !renderBackendUrl.isEmpty()) {
                             this.backendUrl = renderBackendUrl.trim();
                             log.info("✅ BackendProxyService - URL depuis BACKEND_URL (fallback): {}", backendUrl);
                         } else {
-                            this.backendUrl = "https://localhost:8080";
-                            log.warn("⚠️ BackendProxyService - Fallback vers https://localhost:8080 (dev uniquement, pas de application.properties)");
+                            this.backendUrl = defaultBackendUrl;
+                            log.warn("⚠️ BackendProxyService - Fallback vers URL backend Render par défaut: {}", backendUrl);
                         }
                     }
                 } catch (Exception e) {
-                    // En production, ne pas utiliser localhost
+                    // En production Render, utiliser l'URL backend par défaut
                     String renderBackendUrl = System.getenv("BACKEND_URL");
                     if (renderBackendUrl != null && !renderBackendUrl.isEmpty()) {
                         this.backendUrl = renderBackendUrl.trim();
                         log.info("✅ BackendProxyService - URL depuis BACKEND_URL (fallback après erreur): {}", backendUrl);
                     } else {
-                        this.backendUrl = "https://localhost:8080";
-                        log.warn("⚠️ BackendProxyService - Fallback vers https://localhost:8080 (dev uniquement, erreur lecture config): {}", e.getMessage());
+                        this.backendUrl = defaultBackendUrl;
+                        log.warn("⚠️ BackendProxyService - Fallback vers URL backend Render par défaut: {} (erreur: {})", backendUrl, e.getMessage());
                     }
                 }
             }
