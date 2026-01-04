@@ -15,6 +15,6 @@
     }
     console.log('🔧 API Base URL (Frontend proxy):', window.API_BASE_URL);
     // Note: backendUrl injecté par Thymeleaf est utilisé côté serveur uniquement, pas côté client
-    /*[[${backendUrl}]]*/ var BACKEND_URL_SERVER = /*[[${backendUrl}]]*/ 'https://electricity-business-backend-jvc9.onrender.com';
+    var BACKEND_URL_SERVER = /*[[${backendUrl}]]*/ 'https://electricity-business-backend-jvc9.onrender.com';
     console.log('🔧 API Backend URL (serveur):', BACKEND_URL_SERVER);
 </script>
