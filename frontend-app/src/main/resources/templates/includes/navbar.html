@@ -61,6 +61,11 @@
                 if (logoutItem) {
                     logoutItem.style.display = 'flex';
                     logoutItem.style.setProperty('display', 'flex', 'important');
+                    logoutItem.classList.remove('d-none');
+                    logoutItem.classList.add('d-flex');
+                    // Forcer la visibilité avec plusieurs méthodes
+                    logoutItem.removeAttribute('hidden');
+                    logoutItem.setAttribute('aria-hidden', 'false');
                 }
                 if (loginItem) {
                     loginItem.style.display = 'none';
@@ -152,6 +157,18 @@
         
         // Exposer la fonction globalement pour qu'elle puisse être appelée depuis d'autres scripts
         window.updateNavbarAuth = updateNavbarAuth;
+        
+        // Appeler updateNavbarAuth après chaque chargement de page
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(updateNavbarAuth, 500);
+            });
+        } else {
+            setTimeout(updateNavbarAuth, 500);
+        }
+        
+        // Réexécuter après un court délai pour s'assurer que tout est chargé
+        setTimeout(updateNavbarAuth, 1000);
         
         // Marquer le lien actif selon l'URL courante
         document.addEventListener('DOMContentLoaded', function() {
@@ -333,6 +350,12 @@
             }
             
             /* S'assurer que le bouton de déconnexion est toujours visible */
+            .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto #logoutItem {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
             .navbar.navbar-dark.bg-primary .navbar-nav.ms-auto .btn-outline-light {
                 border-color: rgba(255, 255, 255, 0.5) !important;
                 color: #ffffff !important;
