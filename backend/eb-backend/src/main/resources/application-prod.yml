@@ -30,4 +30,6 @@ server:
 logging:
   level:
     root: INFO
-    com.eb: INFO
+    com.eb: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
