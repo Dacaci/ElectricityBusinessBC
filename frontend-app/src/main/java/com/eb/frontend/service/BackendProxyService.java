@@ -155,9 +155,9 @@ public class BackendProxyService {
         RestTemplate template = new RestTemplate();
         try {
             // Utiliser HttpComponentsClientHttpRequestFactory pour une meilleure gestion HTTPS
-            // Configuration des timeouts pour Render (plan gratuit = sleep mode)
-            org.apache.hc.core5.util.Timeout connectTimeout = org.apache.hc.core5.util.Timeout.ofSeconds(90);  // 90s pour connexion
-            org.apache.hc.core5.util.Timeout responseTimeout = org.apache.hc.core5.util.Timeout.ofSeconds(180); // 180s pour réponse
+            // Configuration des timeouts pour Render (timeout max = 30 secondes)
+            org.apache.hc.core5.util.Timeout connectTimeout = org.apache.hc.core5.util.Timeout.ofSeconds(25);  // 25s pour connexion
+            org.apache.hc.core5.util.Timeout responseTimeout = org.apache.hc.core5.util.Timeout.ofSeconds(25); // 25s pour réponse
             
             org.apache.hc.client5.http.config.RequestConfig requestConfig = org.apache.hc.client5.http.config.RequestConfig.custom()
                 .setConnectTimeout(connectTimeout)
@@ -169,23 +169,23 @@ public class BackendProxyService {
                 org.apache.hc.client5.http.impl.classic.HttpClients.custom()
                     .setDefaultRequestConfig(requestConfig)
                     .evictExpiredConnections()
-                    .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(180))
+                    .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
                     .build();
             
             org.springframework.http.client.HttpComponentsClientHttpRequestFactory factory = 
                 new org.springframework.http.client.HttpComponentsClientHttpRequestFactory(httpClient);
             
             template.setRequestFactory(factory);
-            log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (timeouts: 90s connect, 180s response)");
+            log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (timeouts: 25s connect, 25s response)");
         } catch (NoClassDefFoundError | Exception e) {
             log.warn("⚠️ HttpComponents non disponible ({}), fallback vers SimpleClientHttpRequestFactory", e.getClass().getSimpleName());
             // Fallback vers SimpleClientHttpRequestFactory si HttpComponents n'est pas disponible
             org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
                 new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(90000);   // 90 secondes pour connexion (augmenté pour Render sleep mode)
-            factory.setReadTimeout(180000);      // 180 secondes pour lecture (augmenté pour Render)
+            factory.setConnectTimeout(25000);   // 25 secondes pour connexion (compatible Render timeout = 30s)
+            factory.setReadTimeout(25000);      // 25 secondes pour lecture (compatible Render timeout = 30s)
             template.setRequestFactory(factory);
-            log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 90s connect, 180s read)");
+            log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 25s connect, 25s read)");
         }
         this.restTemplate = template;
     }
@@ -290,8 +290,8 @@ public class BackendProxyService {
             try {
                 if (attempt > 0) {
                     log.info("🔄 Retry {} pour {} {}", attempt, method, path);
-                    // Attendre avant de réessayer (2 secondes par tentative)
-                    Thread.sleep(2000 * attempt);
+                    // Attendre avant de réessayer (1 seconde par tentative pour rester sous le timeout Render)
+                    Thread.sleep(1000 * attempt);
                 } else {
                     log.info("🔄 Proxy: {} {} -> Backend URL: {}", method, path, url);
                 }
