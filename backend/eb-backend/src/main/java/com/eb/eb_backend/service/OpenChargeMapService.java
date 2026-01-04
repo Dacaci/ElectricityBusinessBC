@@ -3,6 +3,7 @@ package com.eb.eb_backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,7 +18,17 @@ import java.util.Map;
 @Slf4j
 public class OpenChargeMapService {
     
-    private final RestTemplate restTemplate = new RestTemplate();
+    // RestTemplate avec timeout configuré pour éviter les 502 sur Render
+    private final RestTemplate restTemplate;
+    
+    {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);  // 10 secondes pour connexion
+        factory.setReadTimeout(25000);     // 25 secondes pour lecture (Render timeout = 30s)
+        RestTemplate template = new RestTemplate(factory);
+        this.restTemplate = template;
+        log.info("✅ OpenChargeMapService - RestTemplate configuré avec timeouts: 10s connect, 25s read");
+    }
     
     @Value("${openchargemap.api.url:https://api.openchargemap.io/v3/poi}")
     private String apiUrl;
