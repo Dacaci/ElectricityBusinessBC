@@ -22,6 +22,9 @@ spring:
     # Cela permet de démarrer l'app même si la base n'est pas accessible
 
 server:
+  # IMPORTANT: S'assurer que l'application écoute sur toutes les interfaces (0.0.0.0) et pas seulement localhost
+  # Cela permet à Render de router le trafic vers l'application
+  address: 0.0.0.0
   port: ${PORT:8080}
 
 logging:

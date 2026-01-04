@@ -23,12 +23,14 @@ COPY --from=build /app/target/eb-backend-*.jar app.jar
 EXPOSE 8080
 
 # Health check - increased start period for database connection
+# IMPORTANT: Utiliser ${PORT:-8080} pour que Render puisse injecter le port
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8080}/actuator/health || exit 1
 
 # Run the application with increased memory
 # -Xmx512m: Maximum heap size of 512MB
 # -Xms256m: Initial heap size of 256MB
+# IMPORTANT: Render injecte la variable PORT, Spring Boot la lit automatiquement depuis application-prod.yml
 # Force prod profile (Render sets SPRING_PROFILES_ACTIVE=prod via env vars, but we keep this as fallback)
-ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dspring.profiles.active=prod -Dserver.port=${PORT:-8080} -jar app.jar"]
 
