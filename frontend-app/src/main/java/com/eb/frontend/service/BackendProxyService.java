@@ -150,44 +150,17 @@ public class BackendProxyService {
         }
     }
     
-    // Initialisation du RestTemplate avec une meilleure gestion HTTPS et timeouts pour Render
+    // Initialisation du RestTemplate SIMPLIFIÉ pour Render free tier (sans pool de connexions)
     {
         RestTemplate template = new RestTemplate();
-        try {
-            // Utiliser HttpComponentsClientHttpRequestFactory pour une meilleure gestion HTTPS
-            // Configuration des timeouts pour Render (timeout max = 30 secondes)
-            org.apache.hc.core5.util.Timeout connectTimeout = org.apache.hc.core5.util.Timeout.ofSeconds(25);  // 25s pour connexion
-            org.apache.hc.core5.util.Timeout responseTimeout = org.apache.hc.core5.util.Timeout.ofSeconds(25); // 25s pour réponse
-            
-            org.apache.hc.client5.http.config.RequestConfig requestConfig = org.apache.hc.client5.http.config.RequestConfig.custom()
-                .setConnectTimeout(connectTimeout)
-                .setConnectionRequestTimeout(connectTimeout)
-                .setResponseTimeout(responseTimeout)
-                .build();
-            
-            org.apache.hc.client5.http.impl.classic.CloseableHttpClient httpClient = 
-                org.apache.hc.client5.http.impl.classic.HttpClients.custom()
-                    .setDefaultRequestConfig(requestConfig)
-                    .evictExpiredConnections()
-                    .evictIdleConnections(org.apache.hc.core5.util.TimeValue.ofSeconds(30))
-                    .build();
-            
-            org.springframework.http.client.HttpComponentsClientHttpRequestFactory factory = 
-                new org.springframework.http.client.HttpComponentsClientHttpRequestFactory(httpClient);
-            
-            template.setRequestFactory(factory);
-            log.info("✅ RestTemplate configuré avec HttpComponentsClientHttpRequestFactory (timeouts: 25s connect, 25s response)");
-        } catch (NoClassDefFoundError | Exception e) {
-            log.warn("⚠️ HttpComponents non disponible ({}), fallback vers SimpleClientHttpRequestFactory", e.getClass().getSimpleName());
-            // Fallback vers SimpleClientHttpRequestFactory si HttpComponents n'est pas disponible
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
-                new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(25000);   // 25 secondes pour connexion (compatible Render timeout = 30s)
-            factory.setReadTimeout(25000);      // 25 secondes pour lecture (compatible Render timeout = 30s)
-            template.setRequestFactory(factory);
-            log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 25s connect, 25s read)");
-        }
+        // Utiliser SimpleClientHttpRequestFactory (plus simple, pas de pool de connexions)
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
+            new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(20000);   // 20 secondes pour connexion
+        factory.setReadTimeout(20000);      // 20 secondes pour lecture
+        template.setRequestFactory(factory);
         this.restTemplate = template;
+        log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 20s, pas de pool de connexions)");
     }
 
     /**
@@ -274,10 +247,10 @@ public class BackendProxyService {
     }
 
     /**
-     * Exécute une requête HTTP vers l'API Backend avec retry automatique
+     * Exécute une requête HTTP vers l'API Backend SANS retry (pour éviter blocage threads Render)
      */
     private ResponseEntity<String> executeRequest(HttpMethod method, String path, String body, HttpHeaders requestHeaders) {
-        return executeRequestWithRetry(method, path, body, requestHeaders, 2); // 2 retries max
+        return executeRequestWithRetry(method, path, body, requestHeaders, 0); // 0 retries pour éviter Thread.sleep qui bloque
     }
     
     /**
