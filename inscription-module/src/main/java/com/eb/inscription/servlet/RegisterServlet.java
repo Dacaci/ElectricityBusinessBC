@@ -2,7 +2,7 @@ package com.eb.inscription.servlet;
 
 import com.eb.inscription.dao.EmailVerificationCodeDAO;
 import com.eb.inscription.dao.UserDAO;
-import com.eb.inscription.mail.ResendMailer;
+import com.eb.inscription.mail.Mailer;
 import com.eb.inscription.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -27,7 +27,7 @@ public class RegisterServlet extends HttpServlet {
     
     private UserDAO userDAO;
     private EmailVerificationCodeDAO codeDAO;
-    private ResendMailer resendMailer;
+    private Mailer mailer;
     
     @Override
     public void init() throws ServletException {
@@ -40,13 +40,33 @@ public class RegisterServlet extends HttpServlet {
         this.userDAO = new UserDAO(dbUrl, dbUser, dbPassword);
         this.codeDAO = new EmailVerificationCodeDAO(dbUrl, dbUser, dbPassword);
         
-        String resendApiKey = System.getenv("RESEND_API_KEY");
-        String resendFromEmail = System.getenv("RESEND_FROM_EMAIL");
-        if (resendFromEmail == null || resendFromEmail.isEmpty()) {
-            resendFromEmail = "onboarding@resend.dev";
+        // Configuration SMTP (Brevo ou autre service)
+        String smtpHost = System.getenv("MAIL_SMTP_HOST");
+        String smtpPortStr = System.getenv("MAIL_SMTP_PORT");
+        String smtpUser = System.getenv("MAIL_SMTP_USER");
+        String smtpPassword = System.getenv("MAIL_SMTP_PASSWORD");
+        String mailFrom = System.getenv("MAIL_FROM");
+        
+        int smtpPort = 587; // Port par défaut
+        if (smtpPortStr != null && !smtpPortStr.isEmpty()) {
+            try {
+                smtpPort = Integer.parseInt(smtpPortStr);
+            } catch (NumberFormatException e) {
+                smtpPort = 587;
+            }
         }
         
-        this.resendMailer = new ResendMailer(resendApiKey, resendFromEmail);
+        if (mailFrom == null || mailFrom.isEmpty()) {
+            mailFrom = "noreply@localhost";
+        }
+        
+        // Créer le Mailer SMTP
+        if (smtpHost != null && !smtpHost.isEmpty()) {
+            this.mailer = new Mailer(smtpHost, smtpPort, mailFrom, smtpUser, smtpPassword);
+        } else {
+            // Fallback : Mailer sans authentification (pour développement local)
+            this.mailer = new Mailer("localhost", 1025, mailFrom);
+        }
     }
     
     @Override
@@ -111,7 +131,7 @@ public class RegisterServlet extends HttpServlet {
             System.out.println("=== CODE DE VÉRIFICATION POUR " + email + " : " + code + " ===");
             
             try {
-                resendMailer.sendCode(email, code);
+                mailer.sendCode(email, code);
             } catch (Exception e) {
                 System.err.println("Erreur lors de l'envoi de l'email : " + e.getMessage());
             }
