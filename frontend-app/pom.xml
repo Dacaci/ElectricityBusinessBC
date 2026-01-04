@@ -73,6 +73,12 @@
       <artifactId>httpclient5</artifactId>
     </dependency>
     
+    <!-- Spring Boot Actuator pour health checks (OBLIGATOIRE pour Render) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    
     <!-- JSP Support (nécessaire pour les Servlets sans framework) -->
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
