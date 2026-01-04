@@ -785,22 +785,22 @@
                         // Ignorer les erreurs
                     }
                     
-                    let distance = 10;
-                    let maxResults = 100;
+                    let distance = 5;
+                    let maxResults = 20;
                     
-                    // Limiter les valeurs pour éviter les problèmes de mémoire côté serveur
+                    // Paramètres RÉDUITS pour éviter surcharge Render (OpenChargeMap + plan free)
                     if (zoom < 8) {
-                        distance = 50;
-                        maxResults = 200;
+                        distance = 20;      // Réduit de 50 à 20
+                        maxResults = 50;     // Réduit de 200 à 50
                     } else if (zoom < 10) {
-                        distance = 30;
-                        maxResults = 150;
+                        distance = 15;       // Réduit de 30 à 15
+                        maxResults = 30;    // Réduit de 150 à 30
                     } else if (zoom < 12) {
-                        distance = 20;
-                        maxResults = 100;
+                        distance = 10;       // Réduit de 20 à 10
+                        maxResults = 20;    // Réduit de 100 à 20
                     } else {
-                        distance = 10;
-                        maxResults = 50;
+                        distance = 5;        // Réduit de 10 à 5
+                        maxResults = 10;     // Réduit de 50 à 10
                     }
                     
                     const apiBase = window.API_BASE_URL || window.location.origin;
@@ -848,18 +848,31 @@
                 }, 1000); // Debounce de 1000ms (augmenté pour réduire charge serveur)
             }
             
+            // Debounce externe pour empêcher les appels multiples en rafale
+            let externalDebounceTimeout = null;
+            function loadStationsDebounced() {
+                if (externalDebounceTimeout) {
+                    clearTimeout(externalDebounceTimeout);
+                }
+                externalDebounceTimeout = setTimeout(() => {
+                    loadStationsForCurrentView();
+                }, 500); // Debounce externe de 500ms
+            }
+            
             setTimeout(() => {
                 loadStationsForCurrentView();
             }, 3000);
             
-            map.on('moveend', loadStationsForCurrentView);
+            // Utiliser la version debounced pour tous les événements
+            map.on('moveend', loadStationsDebounced);
+            map.on('resize', loadStationsDebounced);
             
             let lastZoom = map.getZoom() || 10;
             map.on('zoomend', function() {
                 const currentZoom = map.getZoom() || 10;
                 if (Math.abs(currentZoom - lastZoom) >= 2) {
                     lastZoom = currentZoom;
-                    loadStationsForCurrentView();
+                    loadStationsDebounced(); // Debounced aussi
                 }
             });
         });
