@@ -5,9 +5,7 @@ services:
     runtime: docker
     dockerfilePath: ./backend/eb-backend/Dockerfile
     dockerContext: ./backend/eb-backend
-    # Plan gratuit : le service s'endort après 15 min d'inactivité
-    # Pour un service toujours actif, upgrade vers un plan payant
-    plan: free  # ou "starter" pour éviter le sommeil
+    # Plan non spécifié - conserve le plan actuel du service existant
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
