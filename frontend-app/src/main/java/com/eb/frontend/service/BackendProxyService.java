@@ -39,7 +39,7 @@ public class BackendProxyService {
         }
     }
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
-    private static final long CACHE_TTL_MS = 30000; // 30 secondes
+    private static final long CACHE_TTL_MS = 60000; // 60 secondes (augmenté pour réduire charge)
 
     // Méthode publique pour obtenir l'URL du backend (pour diagnostic)
     public String getBackendUrl() {
@@ -175,17 +175,17 @@ public class BackendProxyService {
         }
     }
     
-    // Initialisation du RestTemplate SIMPLIFIÉ pour Render free tier (sans pool de connexions)
+    // Initialisation du RestTemplate OPTIMISÉ pour Render Starter (timeouts réduits)
     {
         RestTemplate template = new RestTemplate();
-        // Utiliser SimpleClientHttpRequestFactory (plus simple, pas de pool de connexions)
+        // Utiliser SimpleClientHttpRequestFactory (simple, pas de pool de connexions)
         org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
             new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(20000);   // 20 secondes pour connexion
-        factory.setReadTimeout(20000);      // 20 secondes pour lecture
+        factory.setConnectTimeout(15000);   // 15 secondes pour connexion (réduit)
+        factory.setReadTimeout(15000);      // 15 secondes pour lecture (réduit)
         template.setRequestFactory(factory);
         this.restTemplate = template;
-        log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 20s, pas de pool de connexions)");
+        log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 15s optimisés)");
     }
 
     /**

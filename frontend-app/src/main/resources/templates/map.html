@@ -749,10 +749,12 @@
                     clearTimeout(loadStationsTimeout);
                 }
                 
-                // Debounce: attendre 500ms avant de faire la requête
+                // Debounce: attendre 1000ms avant de faire la requête (augmenté pour réduire charge)
                 loadStationsTimeout = setTimeout(() => {
                     if (isLoadStationsPending) {
-                        return; // Une requête est déjà en cours, ignorer
+                        // Une requête est déjà en cours, reprogrammer pour plus tard
+                        loadStationsTimeout = setTimeout(loadStationsForCurrentView, 1000);
+                        return;
                     }
                     
                     if (!map || !map.getCenter) {
@@ -843,7 +845,7 @@
                             isLoadStationsPending = false;
                             currentRequestAbortController = null;
                         });
-                }, 500); // Debounce de 500ms
+                }, 1000); // Debounce de 1000ms (augmenté pour réduire charge serveur)
             }
             
             setTimeout(() => {
