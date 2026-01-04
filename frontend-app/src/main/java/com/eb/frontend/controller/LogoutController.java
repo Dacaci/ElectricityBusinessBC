@@ -17,6 +17,8 @@ public class LogoutController {
     public String logout(HttpServletResponse response) throws IOException {
         ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", "")
             .httpOnly(true)
+            .secure(true)  // Nécessaire pour SameSite=None en HTTPS
+            .sameSite("None")  // Permet l'envoi cross-origin (frontend/backend sur domaines différents)
             .path("/")
             .maxAge(0)
             .build();
