@@ -20,11 +20,12 @@ COPY --from=build /app/target/frontend-app.war app.war
 # Expose port (Render injecte la variable PORT)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=90s --retries=3 \
+# Health check - timeouts plus permissifs pour éviter les faux positifs
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-8080}/actuator/health || exit 1
 
 # Run the Spring Boot application
 # Use PORT and BACKEND_URL environment variables from Render
 # IMPORTANT: BACKEND_URL doit être en HTTPS sur Render (défini dans render.yaml)
-ENTRYPOINT ["sh", "-c", "java -Xmx512m -Xms256m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-https://localhost:8080} -jar app.war"]
+# Augmentation de la mémoire pour éviter les OutOfMemoryError
+ENTRYPOINT ["sh", "-c", "java -Xmx768m -Xms384m -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Dbackend.url=${BACKEND_URL:-https://electricity-business-backend-jvc9.onrender.com} -jar app.war"]

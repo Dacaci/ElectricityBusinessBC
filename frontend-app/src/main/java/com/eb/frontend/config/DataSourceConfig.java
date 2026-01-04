@@ -10,34 +10,13 @@ import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
+// DataSource désactivée - Le frontend ne doit PAS accéder directement à la base de données
+// Tout passe par le backend API (architecture propre)
+// Cette classe est gardée pour compatibilité mais le Bean n'est plus créé
 @Configuration
 public class DataSourceConfig {
-
-    @Value("${spring.datasource.url:jdbc:postgresql://localhost:5432/eb}")
-    private String jdbcUrl;
-
-    @Value("${spring.datasource.username:eb}")
-    private String username;
-
-    @Value("${spring.datasource.password:eb}")
-    private String password;
-
-    @Value("${spring.datasource.hikari.maximum-pool-size:5}")
-    private int maxPoolSize;
-
-    @Bean
-    @Primary
-    @ConditionalOnProperty(name = "spring.datasource.enabled", havingValue = "true", matchIfMissing = true)
-    public DataSource dataSource() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(jdbcUrl);
-        config.setUsername(username);
-        config.setPassword(password);
-        config.setMaximumPoolSize(maxPoolSize);
-        config.setDriverClassName("org.postgresql.Driver");
-        config.setConnectionTimeout(30000);
-        config.setInitializationFailTimeout(-1);
-        return new HikariDataSource(config);
-    }
+    // DataSource Bean supprimé - architecture proxy pure
+    // Le frontend sert uniquement de proxy vers le backend
+    // Si vous avez besoin d'accéder aux données, passez par l'API backend
 }
 

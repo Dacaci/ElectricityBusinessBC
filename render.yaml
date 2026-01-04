@@ -53,31 +53,8 @@ services:
           type: web
           name: electricity-business-backend
           envVarKey: RENDER_EXTERNAL_URL
-      - key: DB_HOST
-        fromDatabase:
-          name: electricity-business-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: electricity-business-db
-          property: port
-      - key: DB_NAME
-        fromDatabase:
-          name: electricity-business-db
-          property: database
-      - key: DB_USER
-        fromDatabase:
-          name: electricity-business-db
-          property: user
-      - key: DB_PASS
-        fromDatabase:
-          name: electricity-business-db
-          property: password
-      - key: INSCRIPTION_URL
-        fromService:
-          type: web
-          name: electricity-business-inscription
-          property: host
+      # DB variables supprimées - le frontend ne doit PAS accéder directement à la base
+      # Tout passe par le backend API (architecture propre)
     autoDeploy: true
 
   # Inscription Module Service
