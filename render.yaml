@@ -49,10 +49,7 @@ services:
     dockerContext: ./frontend-app
     envVars:
       - key: BACKEND_URL
-        fromService:
-          type: web
-          name: electricity-business-backend
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://electricity-business-backend-jvc9.onrender.com
       # DB variables supprimées - le frontend ne doit PAS accéder directement à la base
       # Tout passe par le backend API (architecture propre)
     healthCheckPath: /actuator/health
