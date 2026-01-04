@@ -32,7 +32,7 @@ public class Mailer {
         this.from = from;
 
         if (requiresAuth) {
-            configureAuth(props, host, port, username, password);
+            this.session = configureAuth(props, host, port, username, password);
         } else {
             props.put("mail.smtp.auth", "false");
             this.session = Session.getInstance(props);
@@ -43,7 +43,7 @@ public class Mailer {
         this(host, port, from, null, null);
     }
 
-    private void configureAuth(Properties props, String host, int port, String username, String password) {
+    private Session configureAuth(Properties props, String host, int port, String username, String password) {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
@@ -60,7 +60,7 @@ public class Mailer {
             props.put("mail.smtp.ssl.enable", "true");
         }
 
-        this.session = Session.getInstance(props, new Authenticator() {
+        return Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
