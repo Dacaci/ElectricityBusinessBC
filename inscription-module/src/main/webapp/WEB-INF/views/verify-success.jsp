@@ -72,18 +72,26 @@
         <h2>Compte vérifié avec succès !</h2>
         <p>Votre compte a été activé. Vous pouvez maintenant vous connecter à votre espace personnel.</p>
         
-        <a href="<%= request.getContextPath() %>/login" class="btn">Se connecter maintenant</a>
+        <%
+            // URL du frontend (configurable via variable d'environnement)
+            String frontendUrl = System.getenv("FRONTEND_URL");
+            if (frontendUrl == null || frontendUrl.isEmpty()) {
+                frontendUrl = "https://electricity-business-frontend.onrender.com";
+            }
+            String loginUrl = frontendUrl + "/login";
+        %>
+        <a href="<%= loginUrl %>" class="btn">Se connecter maintenant</a>
         
         <div class="redirect-info">
             <p>Vous serez redirigé automatiquement dans quelques secondes...</p>
-            <a href="<%= request.getContextPath() %>/login">Cliquez ici si la redirection ne fonctionne pas</a>
+            <a href="<%= loginUrl %>">Cliquez ici si la redirection ne fonctionne pas</a>
         </div>
     </div>
     
     <script>
         // Redirection automatique après 5 secondes
         setTimeout(function() {
-            window.location.href = '<%= request.getContextPath() %>/login';
+            window.location.href = '<%= loginUrl %>';
         }, 5000);
     </script>
 </body>
