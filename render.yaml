@@ -5,6 +5,9 @@ services:
     runtime: docker
     dockerfilePath: ./backend/eb-backend/Dockerfile
     dockerContext: ./backend/eb-backend
+    # Plan gratuit : le service s'endort après 15 min d'inactivité
+    # Pour un service toujours actif, upgrade vers un plan payant
+    plan: free  # ou "starter" pour éviter le sommeil
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
@@ -46,7 +49,10 @@ services:
     dockerContext: ./frontend-app
     envVars:
       - key: BACKEND_URL
-        value: https://electricity-business-backend-jvc9.onrender.com
+        fromService:
+          type: web
+          name: electricity-business-backend
+          envVarKey: RENDER_EXTERNAL_URL
       - key: DB_HOST
         fromDatabase:
           name: electricity-business-db
