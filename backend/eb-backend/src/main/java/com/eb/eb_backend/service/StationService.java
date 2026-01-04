@@ -6,6 +6,7 @@ import com.eb.eb_backend.entity.Location;
 import com.eb.eb_backend.entity.Station;
 import com.eb.eb_backend.entity.User;
 import com.eb.eb_backend.repository.LocationRepository;
+import com.eb.eb_backend.repository.ReservationRepository;
 import com.eb.eb_backend.repository.StationRepository;
 import com.eb.eb_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class StationService {
     private final StationRepository stationRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final ReservationRepository reservationRepository;
     
     public StationDto createStation(Long ownerId, StationDto dto) {
         User owner = userRepository.findById(ownerId)
@@ -116,9 +118,21 @@ public class StationService {
     }
     
     public void deleteStation(Long id) {
-        if (!stationRepository.existsById(id)) {
-            throw new IllegalArgumentException("Borne introuvable: " + id);
+        Station station = stationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Borne introuvable: " + id));
+        
+        // Vérifier s'il existe des réservations actives (PENDING ou CONFIRMED) pour cette borne
+        // Même si une réservation est annulée, on garde l'historique donc on vérifie aussi
+        long activeReservationsCount = reservationRepository.findByStation(station, Pageable.unpaged())
+                .stream()
+                .filter(r -> r.getStatus() == com.eb.eb_backend.entity.Reservation.ReservationStatus.PENDING ||
+                            r.getStatus() == com.eb.eb_backend.entity.Reservation.ReservationStatus.CONFIRMED)
+                .count();
+        
+        if (activeReservationsCount > 0) {
+            throw new IllegalStateException("Impossible de supprimer une borne qui a des réservations actives (PENDING ou CONFIRMED)");
         }
+        
         stationRepository.deleteById(id);
     }
     

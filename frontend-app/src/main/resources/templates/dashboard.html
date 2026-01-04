@@ -453,6 +453,11 @@
                 const location = allLocations.find(l => l.id === station?.locationId);
                 const city = location?.city || 'N/A';
                 
+                // Bouton PDF uniquement pour les réservations acceptées (CONFIRMED) ou terminées (COMPLETED)
+                const pdfButton = (reservation.status === 'CONFIRMED' || reservation.status === 'COMPLETED')
+                    ? '<button class="btn btn-info btn-sm" onclick="downloadReceipt(' + reservation.id + ')"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</button>'
+                    : '<span class="text-muted">-</span>';
+                
                 return '<tr>' +
                     '<td>' + formatDateTime(reservation.startTime) + '</td>' +
                     '<td>' + formatDateTime(reservation.endTime) + '</td>' +
@@ -460,7 +465,7 @@
                     '<td>' + (reservation.stationName || 'N/A') + '<br>' + (reservation.locationLabel || 'N/A') + '<br>' + city + '</td>' +
                     '<td>' + (reservation.totalAmount ? reservation.totalAmount.toFixed(2) : '0.00') + ' €</td>' +
                     '<td>' + getStatusBadge(reservation.status) + '</td>' +
-                    '<td><button class="btn btn-info btn-sm" onclick="downloadReceipt(' + reservation.id + ')">Télécharger</button></td>' +
+                    '<td>' + pdfButton + '</td>' +
                 '</tr>';
             }).join('');
             
@@ -493,8 +498,17 @@
                     '<h4>' + (location.label || location.name || 'Lieu') + '</h4>' +
                     '<p class="text-muted small mb-2">' + (location.address || '') + (location.city ? ', ' + location.city : '') + '</p>' +
                     '<div>' +
-                        locationStations.map(station => 
-                            '<div class="station">' +
+                        locationStations.map(station => {
+                            // Vérifier si la station a des réservations (même passées)
+                            const hasReservations = allReservations.some(r => r.stationId === station.id);
+                            const isActive = station.status === 'ACTIVE';
+                            
+                            // Si la station a des réservations, on ne peut que désactiver, pas supprimer
+                            const deleteButton = hasReservations 
+                                ? '<button class="btn btn-warning btn-sm" onclick="toggleStationStatus(' + station.id + ', ' + isActive + ')" title="Cette borne a des réservations, elle ne peut pas être supprimée"><i class="bi bi-toggle-off me-1"></i>Désactiver</button>'
+                                : '<button class="btn btn-danger btn-sm" onclick="deleteStation(' + station.id + ')"><i class="bi bi-trash me-1"></i>Supprimer</button>';
+                            
+                            return '<div class="station">' +
                                 '<div class="station-name">' + station.name + '</div>' +
                                 '<div class="station-rate">' + (station.hourlyRate ? station.hourlyRate.toFixed(2) : '0.00') + ' €/h</div>' +
                                 '<div class="mt-2 d-flex gap-1 flex-wrap">' +
@@ -502,10 +516,10 @@
                                     '<button class="btn btn-warning btn-sm" onclick="setStationRate(' + station.id + ')">Tarif</button>' +
                                     '<button class="btn btn-secondary btn-sm" onclick="uploadStationPhoto(' + station.id + ')"><i class="bi bi-image me-1"></i>Photo</button>' +
                                     '<button class="btn btn-secondary btn-sm" onclick="uploadStationVideo(' + station.id + ')"><i class="bi bi-camera-video me-1"></i>Vidéo</button>' +
-                                    '<button class="btn btn-danger btn-sm" onclick="deleteStation(' + station.id + ')"><i class="bi bi-trash me-1"></i>Supprimer</button>' +
+                                    deleteButton +
                                 '</div>' +
-                            '</div>'
-                        ).join('') +
+                            '</div>';
+                        }).join('') +
                     '</div>' +
                     '<div class="location-actions">' +
                         '<button class="btn btn-primary btn-sm" onclick="window.location.href=\'/edit-location?id=' + location.id + '\'">Modifier lieu</button>' +
@@ -795,12 +809,61 @@
             }
         }
         
-        function setStationRate(stationId) {
-            const newRate = prompt('Entrez le nouveau tarif horaire (€/h) :');
-            if (newRate && !isNaN(newRate)) {
-                // TODO: Appel API pour mettre à jour le tarif
-                showSuccess('Tarif mis à jour');
+        async function setStationRate(stationId) {
+            const station = allStations.find(s => s.id === stationId);
+            const currentRate = station ? (station.hourlyRate || 0) : 0;
+            const newRate = prompt('Entrez le nouveau tarif horaire (€/h) :', currentRate.toFixed(2));
+            
+            if (newRate && !isNaN(newRate) && parseFloat(newRate) >= 0) {
+                try {
+                    const response = await authenticatedFetch(getApiBaseUrl() + '/api/stations/' + stationId, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            hourlyRate: parseFloat(newRate)
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Erreur lors de la modification du tarif');
+                    }
+                    
+                    showSuccess('Tarif mis à jour avec succès');
+                    loadAllData();
+                } catch (error) {
+                    console.error('Erreur lors de la modification du tarif:', error);
+                    showError('Erreur lors de la modification du tarif: ' + error.message);
+                }
+            } else if (newRate !== null) {
+                showError('Veuillez entrer un tarif valide (nombre positif)');
+            }
+        }
+        
+        async function toggleStationStatus(stationId, currentStatus) {
+            try {
+                const response = await authenticatedFetch(getApiBaseUrl() + '/api/stations/' + stationId, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        isActive: !currentStatus
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la modification');
+                }
+                
+                const newStatus = !currentStatus ? 'activée' : 'désactivée';
+                showSuccess('Borne ' + newStatus + ' avec succès');
                 loadAllData();
+            } catch (error) {
+                console.error('Erreur lors de la modification du statut:', error);
+                showError('Erreur lors de la modification: ' + error.message);
             }
         }
         

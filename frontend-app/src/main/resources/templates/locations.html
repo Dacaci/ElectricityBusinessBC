@@ -51,6 +51,7 @@
         let locations = [];
         let stations = [];
         let medias = [];
+        let allReservations = [];
         let mediasByStation = {}; // Pour grouper les médias par borne
         let stationsByLocation = {}; // Pour grouper les stations par lieu
         let isDeletingStation = false; // Protection contre les double-clics
@@ -73,11 +74,12 @@
             try {
                 showLoading(true);
                 
-                // Charger les lieux, stations et médias en parallèle
-                const [locationsResponse, stationsResponse, mediasResponse] = await Promise.all([
+                // Charger les lieux, stations, médias et réservations en parallèle
+                const [locationsResponse, stationsResponse, mediasResponse, reservationsResponse] = await Promise.all([
                     fetch(API_BASE_URL + '/api/locations', { credentials: 'include' }),
                     fetch(API_BASE_URL + '/api/stations/owner/' + CURRENT_USER_ID, { credentials: 'include' }), // Mes propres bornes
-                    fetch(API_BASE_URL + '/api/medias', { credentials: 'include' })
+                    fetch(API_BASE_URL + '/api/medias', { credentials: 'include' }),
+                    fetch(API_BASE_URL + '/api/reservations?size=1000', { credentials: 'include' }) // Charger toutes les réservations
                 ]);
                 
                 if (!locationsResponse.ok || !stationsResponse.ok) {
@@ -92,6 +94,14 @@
                     medias = await mediasResponse.json();
                 } else {
                     medias = [];
+                }
+                
+                // Charger les réservations (peut échouer sans bloquer)
+                if (reservationsResponse.ok) {
+                    const reservationsData = await reservationsResponse.json();
+                    allReservations = reservationsData.content || reservationsData || [];
+                } else {
+                    allReservations = [];
                 }
                 
                 // L'API retourne une structure paginée {content: [...], ...}
@@ -188,7 +198,9 @@
                                 '<a href="/station-rates?id=' + station.id + '" class="btn">Tarifs</a>' +
                                 '<button onclick="uploadPhoto(' + station.id + ')" class="btn">Photo</button>' +
                                 '<button onclick="uploadVideo(' + station.id + ')" class="btn">Vidéo</button>' +
-                                '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>' +
+                                (allReservations.some(r => r.stationId === station.id) 
+                                    ? '<button onclick="toggleStationStatusInLocations(' + station.id + ', ' + station.isActive + ')" class="btn btn-warning" title="Cette borne a des réservations, elle ne peut pas être supprimée">Désactiver</button>'
+                                    : '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>') +
                             '</div>' +
                         '</div>';
                     }).join('');
@@ -232,6 +244,32 @@
         
         function uploadVideo(stationId) {
             showMediaModal(stationId, 'VIDEO');
+        }
+        
+        async function toggleStationStatusInLocations(stationId, currentStatus) {
+            try {
+                const response = await fetch(API_BASE_URL + '/api/stations/' + stationId, {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        isActive: !currentStatus
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la modification');
+                }
+                
+                const newStatus = !currentStatus ? 'activée' : 'désactivée';
+                showSuccess('Borne ' + newStatus + ' avec succès');
+                loadLocationsAndStations();
+            } catch (error) {
+                console.error('Erreur lors de la modification du statut:', error);
+                showError('Erreur lors de la modification: ' + error.message);
+            }
         }
         
         async function deleteStation(stationId) {

@@ -18,14 +18,33 @@ public class SecurityUtil {
     
     /**
      * Extrait l'ID de l'utilisateur depuis le token JWT de la requête
+     * Cherche d'abord dans le cookie JWT_TOKEN, puis dans le header Authorization
      * @param request La requête HTTP
      * @return L'ID de l'utilisateur ou null si non trouvé
      */
     public Long getCurrentUserId(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
+        String token = null;
         
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+        // 1. Essayer de récupérer le token depuis le cookie HTTPOnly (priorité)
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("JWT_TOKEN".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        
+        // 2. Si pas de cookie, essayer le header Authorization (pour compatibilité)
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+        
+        // 3. Extraire l'userId depuis le token
+        if (token != null) {
             try {
                 return jwtUtil.extractUserId(token);
             } catch (Exception e) {

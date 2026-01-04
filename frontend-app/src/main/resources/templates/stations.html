@@ -49,6 +49,7 @@
     <script>
         let stations = [];
         let locations = [];
+        let allReservations = [];
         let isDeleting = false; // Protection contre les double-clics
         
         // Charger les données au chargement de la page
@@ -76,10 +77,11 @@
                 showLoading(true);
                 
                 const stationsUrl = API_BASE_URL + '/api/stations/owner/' + CURRENT_USER_ID + '?t=' + Date.now();
-                                                // Charger les bornes et les lieux en parallèle
-                const [stationsResponse, locationsResponse] = await Promise.all([
+                                                // Charger les bornes, les lieux et les réservations en parallèle
+                const [stationsResponse, locationsResponse, reservationsResponse] = await Promise.all([
                     fetch(stationsUrl, { credentials: 'include' }), // Mes propres bornes
-                    fetch(API_BASE_URL + '/api/locations', { credentials: 'include' })
+                    fetch(API_BASE_URL + '/api/locations', { credentials: 'include' }),
+                    fetch(API_BASE_URL + '/api/reservations?size=1000', { credentials: 'include' }) // Charger toutes les réservations
                 ]);
                 
                 if (!stationsResponse.ok) {
@@ -92,10 +94,12 @@
                 
                 const stationsData = await stationsResponse.json();
                 const locationsData = await locationsResponse.json();
+                const reservationsData = reservationsResponse.ok ? await reservationsResponse.json() : { content: [] };
                 
                                                 // L'API retourne une structure paginée {content: [...], ...}
                 stations = stationsData.content || stationsData;
                 locations = locationsData.content || locationsData;
+                allReservations = reservationsData.content || reservationsData || [];
                 
                                                 displayStations(stations);
                 showLoading(false);
@@ -125,6 +129,14 @@
                 const toggleBtnClass = station.isActive ? 'btn-secondary' : 'btn-success';
                 const toggleBtnText = station.isActive ? 'Désactiver' : 'Activer';
                 
+                // Vérifier si la station a des réservations (même passées)
+                const hasReservations = allReservations.some(r => r.stationId === station.id);
+                
+                // Si la station a des réservations, on ne peut que désactiver, pas supprimer
+                const deleteButton = hasReservations 
+                    ? '<button onclick="toggleStationStatus(' + station.id + ', ' + station.isActive + ')" class="btn btn-warning" title="Cette borne a des réservations, elle ne peut pas être supprimée">Désactiver</button>'
+                    : '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>';
+                
                 return '<div class="station-card">' +
                     '<div class="station-header">' +
                         '<div>' +
@@ -147,7 +159,7 @@
                     '<div class="station-actions">' +
                         '<a href="/edit-station?id=' + station.id + '" class="btn btn-warning">Modifier</a>' +
                         '<button onclick="toggleStationStatus(' + station.id + ', ' + station.isActive + ')" class="btn ' + toggleBtnClass + '">' + toggleBtnText + '</button>' +
-                        '<button onclick="deleteStation(' + station.id + ')" class="btn btn-danger">Supprimer</button>' +
+                        deleteButton +
                     '</div>' +
                 '</div>';
             }).join('');

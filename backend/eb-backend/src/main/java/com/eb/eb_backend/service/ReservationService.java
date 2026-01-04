@@ -218,12 +218,18 @@ public class ReservationService {
             throw new IllegalArgumentException("Action non autorisée");
         }
         
+        // Ne peut annuler que les réservations PENDING ou déjà CANCELLED
         if (res.getStatus() != Reservation.ReservationStatus.PENDING && 
             res.getStatus() != Reservation.ReservationStatus.CANCELLED) {
-            throw new IllegalStateException("Impossible de supprimer cette réservation");
+            throw new IllegalStateException("Impossible d'annuler cette réservation (statut: " + res.getStatus() + ")");
         }
         
-        reservationRepository.delete(res);
+        // Mettre le statut à CANCELLED au lieu de supprimer pour garder l'historique
+        // Cela empêche aussi le contournement de la règle de suppression de borne
+        if (res.getStatus() != Reservation.ReservationStatus.CANCELLED) {
+            res.setStatus(Reservation.ReservationStatus.CANCELLED);
+            reservationRepository.save(res);
+        }
     }
     
     @Transactional(readOnly = true)

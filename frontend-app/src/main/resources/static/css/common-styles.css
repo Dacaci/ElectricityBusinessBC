@@ -90,15 +90,137 @@ h1, h2, h3, h4, h5, h6 {
 /* Note: Container, Cards, Forms, Buttons sont maintenant gérés par Bootstrap */
 /* Utilisez les classes Bootstrap : .container, .card, .form-control, .btn, etc. */
 
-/* Limiter la largeur des champs de formulaire */
-.form-control,
-.form-select {
-    max-width: 300px;
+/* Centrer et limiter la largeur des formulaires */
+.container-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-/* Limiter la largeur des boutons dans les formulaires */
+.form-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Centrer et limiter la largeur des champs de formulaire */
+.form-control,
+.form-select {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Pour les champs dans les colonnes Bootstrap, respecter la largeur de la colonne */
+[class*="col-"] .form-control,
+[class*="col-"] .form-select {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Textarea peut être un peu plus large mais pas trop */
+textarea.form-control {
+    max-width: 100%;
+    width: 100%;
+    min-height: 100px;
+}
+
+/* Alignement des labels et champs dans les formulaires */
+.form-container .mb-3,
+.form-container .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-container .form-label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-container .form-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Centrer les boutons de formulaire */
+.form-container .btn,
 form .btn {
-    max-width: 300px;
+    min-width: 120px;
+}
+
+.form-container .d-flex.gap-2 {
+    justify-content: center;
+    margin-top: 25px;
+}
+
+/* Centrer les formulaires dans les pages sans .form-container */
+.container .content {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.container .content form {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+}
+
+/* Centrer automatiquement les formulaires dans .container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.container > form,
+.container form {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+}
+
+.container > h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Centrer les tableaux et listes */
+.container .table-responsive,
+.container .card {
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+/* Alignement cohérent pour les pages de liste */
+.container .actions {
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Centrer les messages */
+#messageContainer,
+#msg,
+.message {
+    max-width: 700px;
+    margin: 0 auto 20px auto;
 }
 
 /* Exception pour les boutons dans les tableaux et actions */
@@ -107,17 +229,7 @@ form .btn {
 .location-actions .btn,
 .station-actions .btn {
     max-width: none;
-}
-
-/* Pour les champs dans les colonnes Bootstrap, respecter la largeur de la colonne */
-[class*="col-"] .form-control,
-[class*="col-"] .form-select {
-    max-width: 100%;
-}
-
-/* Textarea peut être un peu plus large mais pas trop */
-textarea.form-control {
-    max-width: 450px;
+    min-width: auto;
 }
 
 /* Actions */
