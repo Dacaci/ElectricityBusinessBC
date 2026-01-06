@@ -22,8 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,11 +106,17 @@ class StationServiceTest {
 
     @Test
     void testDeleteStationWithReservations() {
-        when(stationRepository.existsById(1L)).thenReturn(true);
-        doThrow(new RuntimeException("Cannot delete station with existing reservations"))
-                .when(stationRepository).deleteById(1L);
+        Station station = new Station();
+        station.setId(1L);
+        when(stationRepository.findById(1L)).thenReturn(Optional.of(station));
+        
+        Reservation reservation = new Reservation();
+        reservation.setStatus(com.eb.eb_backend.entity.Reservation.ReservationStatus.CONFIRMED);
+        Page<Reservation> reservationsPage = new PageImpl<>(List.of(reservation));
+        when(reservationRepository.findByStation(eq(station), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(reservationsPage);
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(IllegalStateException.class, () -> {
             stationService.deleteStation(1L);
         });
     }

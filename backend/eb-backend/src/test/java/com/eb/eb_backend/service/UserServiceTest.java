@@ -87,7 +87,7 @@ class UserServiceTest {
     void testCreateUser_EmailAlreadyExists() {
         when(userRepository.existsByEmail(createUserDto.getEmail())).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(com.eb.eb_backend.exception.ConflictException.class, () -> {
             userService.createUser(createUserDto);
         });
     }
@@ -177,7 +177,7 @@ class UserServiceTest {
         UserDto updateDto = new UserDto();
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(com.eb.eb_backend.exception.NotFoundException.class, () -> {
             userService.updateUser(999L, updateDto);
         });
     }
@@ -191,7 +191,7 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(savedUser));
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(com.eb.eb_backend.exception.ConflictException.class, () -> {
             userService.updateUser(1L, updateDto);
         });
     }
@@ -226,7 +226,7 @@ class UserServiceTest {
     void testDeleteUser_NotFound() {
         when(userRepository.existsById(999L)).thenReturn(false);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(com.eb.eb_backend.exception.NotFoundException.class, () -> {
             userService.deleteUser(999L);
         });
     }

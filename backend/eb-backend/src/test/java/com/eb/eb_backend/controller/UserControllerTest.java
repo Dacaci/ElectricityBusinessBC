@@ -74,7 +74,7 @@ class UserControllerTest {
         createUserDto.setPassword("password123");
 
         when(userService.createUser(any(CreateUserDto.class)))
-                .thenThrow(new IllegalArgumentException("Un utilisateur avec cet email existe déjà"));
+                .thenThrow(new com.eb.eb_backend.exception.ConflictException("Un utilisateur avec cet email existe déjà"));
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +115,7 @@ class UserControllerTest {
 
         Page<UserDto> page = new PageImpl<>(List.of(user1), PageRequest.of(0, 10), 1);
 
-        when(userService.searchUsers(eq("john"), any())).thenReturn(page);
+        when(userService.getAllUsersOrSearch(eq("john"), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/users")
                 .param("q", "john")
@@ -135,7 +135,7 @@ class UserControllerTest {
 
         Page<UserDto> page = new PageImpl<>(List.of(user1), PageRequest.of(0, 10), 1);
 
-        when(userService.getAllUsers(any())).thenReturn(page);
+        when(userService.getAllUsersOrSearch(eq(null), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/users")
                 .param("page", "0")
