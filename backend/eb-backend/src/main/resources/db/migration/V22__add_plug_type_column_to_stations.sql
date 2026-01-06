@@ -28,3 +28,4 @@ COMMENT ON COLUMN stations.plug_type IS 'Type de prise de la borne (ex: TYPE_2S)
 
 
 
+

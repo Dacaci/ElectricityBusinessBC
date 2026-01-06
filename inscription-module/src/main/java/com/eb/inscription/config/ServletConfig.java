@@ -23,13 +23,6 @@ public class ServletConfig {
 
     @Value("${spring.datasource.password:eb}")
     private String dbPassword;
-
-    // Variables Resend (depuis variables d'environnement Render)
-    @Value("${RESEND_API_KEY:}")
-    private String resendApiKey;
-
-    @Value("${RESEND_FROM_EMAIL:onboarding@resend.dev}")
-    private String resendFromEmail;
     
     // Variables d'environnement Render pour la base de données
     @Value("${DB_URL:}")
@@ -77,20 +70,6 @@ public class ServletConfig {
         registration.addInitParameter("db.url", finalDbUrl);
         registration.addInitParameter("db.username", finalDbUser);
         registration.addInitParameter("db.password", finalDbPass);
-        
-        // Configuration Resend (priorité aux variables d'environnement système)
-        String finalResendApiKey = System.getenv("RESEND_API_KEY");
-        if (finalResendApiKey == null || finalResendApiKey.isEmpty()) {
-            finalResendApiKey = (resendApiKey != null && !resendApiKey.isEmpty()) ? resendApiKey : "";
-        }
-        
-        String finalResendFromEmail = System.getenv("RESEND_FROM_EMAIL");
-        if (finalResendFromEmail == null || finalResendFromEmail.isEmpty()) {
-            finalResendFromEmail = (resendFromEmail != null && !resendFromEmail.isEmpty()) ? resendFromEmail : "onboarding@resend.dev";
-        }
-        
-        registration.addInitParameter("resend.api.key", finalResendApiKey);
-        registration.addInitParameter("resend.from.email", finalResendFromEmail);
         
         return registration;
     }

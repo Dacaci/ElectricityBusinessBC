@@ -3,6 +3,8 @@ package com.eb.eb_backend.service;
 import com.eb.eb_backend.dto.CreateUserDto;
 import com.eb.eb_backend.dto.UserDto;
 import com.eb.eb_backend.entity.User;
+import com.eb.eb_backend.exception.ConflictException;
+import com.eb.eb_backend.exception.NotFoundException;
 import com.eb.eb_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,7 +25,7 @@ public class UserService {
     
     public UserDto createUser(CreateUserDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email déjà utilisé");
+            throw new ConflictException("Email déjà utilisé");
         }
         
         User user = new User();
@@ -65,13 +67,21 @@ public class UserService {
                 .map(UserDto::new);
     }
     
+    @Transactional(readOnly = true)
+    public Page<UserDto> getAllUsersOrSearch(String query, Pageable pageable) {
+        if (query != null && !query.trim().isEmpty()) {
+            return searchUsers(query.trim(), pageable);
+        }
+        return getAllUsers(pageable);
+    }
+    
     public UserDto updateUser(Long id, UserDto dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable: " + id));
+                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + id));
         
         if (!user.getEmail().equals(dto.getEmail()) && 
             userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email déjà utilisé");
+            throw new ConflictException("Email déjà utilisé");
         }
         
         user.setFirstName(dto.getFirstName());
@@ -89,21 +99,21 @@ public class UserService {
     
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("Utilisateur introuvable: " + id);
+            throw new NotFoundException("Utilisateur introuvable: " + id);
         }
         userRepository.deleteById(id);
     }
     
     public UserDto activateUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable: " + id));
+                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + id));
         user.setStatus(User.UserStatus.ACTIVE);
         return new UserDto(userRepository.save(user));
     }
     
     public UserDto deactivateUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable: " + id));
+                .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + id));
         user.setStatus(User.UserStatus.INACTIVE);
         return new UserDto(userRepository.save(user));
     }

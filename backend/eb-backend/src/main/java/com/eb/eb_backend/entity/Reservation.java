@@ -102,6 +102,38 @@ public class Reservation {
         return java.time.Duration.between(startTime, endTime).toHours();
     }
     
+    // Méthodes métier pour les changements de statut
+    public void confirm() {
+        if (status != ReservationStatus.PENDING) {
+            throw new IllegalStateException("Seule une réservation en attente peut être confirmée");
+        }
+        this.status = ReservationStatus.CONFIRMED;
+    }
+    
+    public void refuse() {
+        if (status != ReservationStatus.PENDING) {
+            throw new IllegalStateException("Seule une réservation en attente peut être refusée");
+        }
+        this.status = ReservationStatus.REFUSED;
+    }
+    
+    public void complete() {
+        if (status != ReservationStatus.CONFIRMED) {
+            throw new IllegalStateException("Seule une réservation confirmée peut être terminée");
+        }
+        if (endTime != null && endTime.isAfter(java.time.LocalDateTime.now())) {
+            throw new IllegalStateException("La date de fin n'est pas encore atteinte");
+        }
+        this.status = ReservationStatus.COMPLETED;
+    }
+    
+    public void cancel() {
+        if (status == ReservationStatus.COMPLETED) {
+            throw new IllegalStateException("Impossible d'annuler une réservation terminée");
+        }
+        this.status = ReservationStatus.CANCELLED;
+    }
+    
     // Enum pour le statut des réservations
     public enum ReservationStatus {
         PENDING,    // En attente de confirmation du propriétaire

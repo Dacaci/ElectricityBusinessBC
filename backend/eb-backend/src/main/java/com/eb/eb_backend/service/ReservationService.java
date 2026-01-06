@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,66 +35,77 @@ public class ReservationService {
     private final UserRepository userRepository;
     
     public ReservationDto createReservation(Long userId, CreateReservationDto dto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Utilisateur non trouvé: " + userId));
+        // Utiliser getReferenceById pour éviter une requête SQL inutile (on a juste besoin de la référence)
+        User user = userRepository.getReferenceById(userId);
         
+        // Récupérer la station (besoin de vérifier le statut, donc findById nécessaire)
         Station station = stationRepository.findById(dto.getStationId())
                 .orElseThrow(() -> new NotFoundException("Station non trouvée: " + dto.getStationId()));
         
+        // Vérifications métier
         if (station.getStatus() != StationStatus.ACTIVE) {
             throw new IllegalArgumentException("Station inactive");
         }
         
-        if (station.getOwner().getId().equals(userId)) {
+        Long stationOwnerId = station.getOwner().getId();
+        if (stationOwnerId.equals(userId)) {
             throw new IllegalArgumentException("Impossible de réserver sa propre borne");
         }
         
+        // Vérifier les conflits de réservation
         List<Reservation> conflicts = reservationRepository.findConflictingReservations(
                 station, dto.getStartTime(), dto.getEndTime());
-        
         if (!conflicts.isEmpty()) {
             throw new ConflictException("Créneau déjà réservé");
         }
         
-        LocalDateTime start = dto.getStartTime();
-        LocalDateTime end = dto.getEndTime();
-        long hours = Duration.between(start, end).toHours();
-        BigDecimal amount = station.getHourlyRate().multiply(BigDecimal.valueOf(hours));
+        // Calculer le montant au prorata (utiliser les minutes pour une précision financière)
+        long nbMinutes = Duration.between(dto.getStartTime(), dto.getEndTime()).toMinutes();
+        BigDecimal nbHeuresDecimal = BigDecimal.valueOf(nbMinutes)
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+        BigDecimal prixTotal = station.getHourlyRate().multiply(nbHeuresDecimal)
+                .setScale(2, RoundingMode.HALF_UP);
         
-        Reservation res = new Reservation();
-        res.setUser(user);
-        res.setStation(station);
-        res.setStartTime(start);
-        res.setEndTime(end);
-        res.setTotalAmount(amount);
-        res.setStatus(Reservation.ReservationStatus.PENDING);
-        res.setNotes(dto.getNotes());
+        // Créer la réservation
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setStation(station);
+        reservation.setStartTime(dto.getStartTime());
+        reservation.setEndTime(dto.getEndTime());
+        reservation.setTotalAmount(prixTotal);
+        reservation.setStatus(Reservation.ReservationStatus.PENDING);
+        reservation.setNotes(dto.getNotes());
         
-        return new ReservationDto(reservationRepository.save(res));
+        Reservation saved = reservationRepository.save(reservation);
+        return toDto(saved);
+    }
+    
+    private ReservationDto toDto(Reservation reservation) {
+        return new ReservationDto(reservation);
     }
     
     @Transactional(readOnly = true)
     public Optional<ReservationDto> getReservationById(Long id) {
-        return reservationRepository.findById(id).map(ReservationDto::new);
+        return reservationRepository.findById(id).map(this::toDto);
     }
     
     @Transactional(readOnly = true)
     public Page<ReservationDto> getAllReservations(Pageable pageable) {
-        return reservationRepository.findAll(pageable).map(ReservationDto::new);
+        return reservationRepository.findAll(pageable).map(this::toDto);
     }
     
     @Transactional(readOnly = true)
     public Page<ReservationDto> getReservationsByUser(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + userId));
-        return reservationRepository.findByUser(user, pageable).map(ReservationDto::new);
+        return reservationRepository.findByUser(user, pageable).map(this::toDto);
     }
     
     @Transactional(readOnly = true)
     public Page<ReservationDto> getReservationsByStation(Long stationId, Pageable pageable) {
         Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new NotFoundException("Station introuvable: " + stationId));
-        return reservationRepository.findByStation(station, pageable).map(ReservationDto::new);
+        return reservationRepository.findByStation(station, pageable).map(this::toDto);
     }
     
     @Transactional(readOnly = true)
@@ -101,7 +113,7 @@ public class ReservationService {
             Reservation.ReservationStatus status, 
             Pageable pageable) {
         return reservationRepository.findByStatus(status, pageable)
-                .map(ReservationDto::new);
+                .map(this::toDto);
     }
     
     @Transactional(readOnly = true)
@@ -112,10 +124,10 @@ public class ReservationService {
             String search,
             Pageable pageable) {
         return reservationRepository.searchReservations(userId, stationId, status, search, pageable)
-                .map(ReservationDto::new);
+                .map(this::toDto);
     }
     
-    public ReservationDto confirmReservation(Long reservationId, Long ownerId) {
+    private Reservation getReservationAndCheckOwnership(Long reservationId, Long ownerId) {
         Reservation res = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("Réservation introuvable: " + reservationId));
         
@@ -123,29 +135,20 @@ public class ReservationService {
             throw new IllegalArgumentException("Action non autorisée");
         }
         
-        if (res.getStatus() != Reservation.ReservationStatus.PENDING) {
-            throw new IllegalStateException("Seule une réservation en attente peut être confirmée");
-        }
-        
-        res.setStatus(Reservation.ReservationStatus.CONFIRMED);
-        return new ReservationDto(reservationRepository.save(res));
+        return res;
+    }
+    
+    public ReservationDto confirmReservation(Long reservationId, Long ownerId) {
+        Reservation res = getReservationAndCheckOwnership(reservationId, ownerId);
+        res.confirm();
+        return toDto(reservationRepository.save(res));
     }
     
     @Transactional
     public ReservationDto refuseReservation(Long reservationId, Long ownerId) {
-        Reservation res = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("Réservation introuvable: " + reservationId));
-        
-        if (!res.getStation().getOwner().getId().equals(ownerId)) {
-            throw new IllegalArgumentException("Action non autorisée");
-        }
-        
-        if (res.getStatus() != Reservation.ReservationStatus.PENDING) {
-            throw new IllegalStateException("Seule une réservation en attente peut être refusée");
-        }
-        
-        res.setStatus(Reservation.ReservationStatus.REFUSED);
-        return new ReservationDto(reservationRepository.save(res));
+        Reservation res = getReservationAndCheckOwnership(reservationId, ownerId);
+        res.refuse();
+        return toDto(reservationRepository.save(res));
     }
     
     @Transactional
@@ -160,35 +163,14 @@ public class ReservationService {
             throw new IllegalArgumentException("Action non autorisée");
         }
         
-        if (res.getStatus() == Reservation.ReservationStatus.COMPLETED) {
-            throw new IllegalStateException("Impossible d'annuler une réservation terminée");
-        }
-        
-        reservationRepository.updateReservationStatus(reservationId, Reservation.ReservationStatus.CANCELLED);
-        Reservation updated = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("Erreur lors de la mise à jour"));
-        
-        return new ReservationDto(updated);
+        res.cancel();
+        return toDto(reservationRepository.save(res));
     }
     
     public ReservationDto completeReservation(Long reservationId, Long ownerId) {
-        Reservation res = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("Réservation introuvable: " + reservationId));
-        
-        if (!res.getStation().getOwner().getId().equals(ownerId)) {
-            throw new IllegalArgumentException("Action non autorisée");
-        }
-        
-        if (res.getStatus() != Reservation.ReservationStatus.CONFIRMED) {
-            throw new IllegalStateException("Seule une réservation confirmée peut être terminée");
-        }
-        
-        if (res.getEndTime().isAfter(LocalDateTime.now())) {
-            throw new IllegalStateException("La date de fin n'est pas encore atteinte");
-        }
-        
-        res.setStatus(Reservation.ReservationStatus.COMPLETED);
-        return new ReservationDto(reservationRepository.save(res));
+        Reservation res = getReservationAndCheckOwnership(reservationId, ownerId);
+        res.complete();
+        return toDto(reservationRepository.save(res));
     }
     
     @Transactional(readOnly = true)
@@ -197,7 +179,7 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + userId));
         LocalDateTime now = LocalDateTime.now();
         return reservationRepository.findUpcomingUserReservations(user, now).stream()
-                .map(ReservationDto::new)
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
     
@@ -206,7 +188,7 @@ public class ReservationService {
         Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new NotFoundException("Station introuvable: " + stationId));
         return reservationRepository.findUpcomingStationReservations(station, LocalDateTime.now()).stream()
-                .map(ReservationDto::new)
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
     
@@ -218,16 +200,10 @@ public class ReservationService {
             throw new IllegalArgumentException("Action non autorisée");
         }
         
-        // Ne peut annuler que les réservations PENDING ou déjà CANCELLED
-        if (res.getStatus() != Reservation.ReservationStatus.PENDING && 
-            res.getStatus() != Reservation.ReservationStatus.CANCELLED) {
-            throw new IllegalStateException("Impossible d'annuler cette réservation (statut: " + res.getStatus() + ")");
-        }
-        
         // Mettre le statut à CANCELLED au lieu de supprimer pour garder l'historique
         // Cela empêche aussi le contournement de la règle de suppression de borne
         if (res.getStatus() != Reservation.ReservationStatus.CANCELLED) {
-            res.setStatus(Reservation.ReservationStatus.CANCELLED);
+            res.cancel();
             reservationRepository.save(res);
         }
     }
@@ -237,9 +213,8 @@ public class ReservationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + userId));
         LocalDateTime now = LocalDateTime.now();
-        return reservationRepository.findByUser(user, Pageable.unpaged()).stream()
-                .filter(r -> r.getEndTime().isBefore(now))
-                .map(ReservationDto::new)
+        return reservationRepository.findPastUserReservations(user, now).stream()
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
     
@@ -248,9 +223,8 @@ public class ReservationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Utilisateur introuvable: " + userId));
         LocalDateTime now = LocalDateTime.now();
-        return reservationRepository.findByUser(user, Pageable.unpaged()).stream()
-                .filter(r -> !r.getStartTime().isAfter(now) && !r.getEndTime().isBefore(now))
-                .map(ReservationDto::new)
+        return reservationRepository.findCurrentUserReservations(user, now).stream()
+                .map(this::toDto)
                 .collect(Collectors.toList());
     }
 }

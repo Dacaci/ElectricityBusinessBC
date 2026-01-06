@@ -37,3 +37,4 @@ COMMENT ON COLUMN medias.type IS 'Type de média : IMAGE ou VIDEO';
 
 
 
+

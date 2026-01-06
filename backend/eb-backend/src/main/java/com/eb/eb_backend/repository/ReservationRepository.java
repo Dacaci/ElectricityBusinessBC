@@ -59,6 +59,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
            "ORDER BY r.startTime ASC")
     List<Reservation> findUpcomingStationReservations(@Param("station") Station station, @Param("now") LocalDateTime now);
     
+    @Query("SELECT r FROM Reservation r WHERE r.user = :user " +
+           "AND r.endTime < :now " +
+           "ORDER BY r.endTime DESC")
+    List<Reservation> findPastUserReservations(@Param("user") User user, @Param("now") LocalDateTime now);
+    
+    @Query("SELECT r FROM Reservation r WHERE r.user = :user " +
+           "AND r.startTime <= :now " +
+           "AND r.endTime >= :now " +
+           "ORDER BY r.startTime ASC")
+    List<Reservation> findCurrentUserReservations(@Param("user") User user, @Param("now") LocalDateTime now);
+    
     @Modifying
     @Query("UPDATE Reservation r SET r.status = :status WHERE r.id = :id")
     void updateReservationStatus(@Param("id") Long id, @Param("status") Reservation.ReservationStatus status);

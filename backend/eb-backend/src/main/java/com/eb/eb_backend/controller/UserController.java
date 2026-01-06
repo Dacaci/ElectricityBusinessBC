@@ -20,79 +20,46 @@ public class UserController {
     
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserDto dto) {
-        try {
-            UserDto user = userService.createUser(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        UserDto user = userService.createUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(user))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @GetMapping
     public ResponseEntity<Page<UserDto>> getAllUsers(
             @RequestParam(required = false) String q,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
             Pageable pageable) {
-        
-        Page<UserDto> users;
-        if (q != null && !q.trim().isEmpty()) {
-            users = userService.searchUsers(q.trim(), pageable);
-        } else {
-            users = userService.getAllUsers(pageable);
-        }
-        
+        Page<UserDto> users = userService.getAllUsersOrSearch(q, pageable);
         return ResponseEntity.ok(users);
     }
     
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto dto) {
-        try {
-            UserDto updated = userService.updateUser(id, dto);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            if (e.getMessage().contains("introuvable")) {
-                return ResponseEntity.notFound().build();
-            } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            }
-        }
+        UserDto updated = userService.updateUser(id, dto);
+        return ResponseEntity.ok(updated);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        try {
-            userService.deleteUser(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
     
     @PostMapping("/{id}/activate")
     public ResponseEntity<UserDto> activateUser(@PathVariable Long id) {
-        try {
-            UserDto userDto = userService.activateUser(id);
-            return ResponseEntity.ok(userDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        UserDto userDto = userService.activateUser(id);
+        return ResponseEntity.ok(userDto);
     }
     
     @PostMapping("/{id}/deactivate")
     public ResponseEntity<UserDto> deactivateUser(@PathVariable Long id) {
-        try {
-            UserDto userDto = userService.deactivateUser(id);
-            return ResponseEntity.ok(userDto);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        UserDto userDto = userService.deactivateUser(id);
+        return ResponseEntity.ok(userDto);
     }
 }
