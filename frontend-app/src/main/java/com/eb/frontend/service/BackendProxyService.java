@@ -309,7 +309,10 @@ public class BackendProxyService {
      * Exécute une requête HTTP vers l'API Backend avec retry automatique
      */
     private ResponseEntity<String> executeRequestWithRetry(HttpMethod method, String path, String body, HttpHeaders requestHeaders, int maxRetries) {
+            // PROBLÈME IDENTIFIÉ : Le path doit commencer par /api
+            // Le proxy reçoit /api/stations/map mais doit envoyer au backend avec le même path
             String url = backendUrl + path;
+            log.info("🔍 Proxy Debug - Path reçu: {}, URL complète: {}", path, url);
         
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
@@ -335,21 +338,46 @@ public class BackendProxyService {
                 });
             }
             
+            // PROBLÈME IDENTIFIÉ : RestTemplate ne définit pas Origin par défaut
+            // Le backend a besoin d'un header Origin pour valider CORS
+            // On définit Origin comme étant l'URL du frontend (l'origine réelle du client)
+            String frontendOrigin = System.getenv("RENDER_EXTERNAL_URL");
+            if (frontendOrigin == null || frontendOrigin.isEmpty()) {
+                frontendOrigin = "https://electricity-business-frontend.onrender.com";
+            }
+            // S'assurer que Origin est présent pour CORS
+            if (!headers.containsKey("Origin")) {
+                headers.set("Origin", frontendOrigin);
+            }
+            
             // S'assurer que Content-Type est présent pour les requêtes avec body
             if (body != null && !headers.containsKey("Content-Type")) {
                 headers.set("Content-Type", "application/json;charset=UTF-8");
+            }
+            
+            // S'assurer que User-Agent est présent (pour éviter que le backend bloque les requêtes serveur-à-serveur)
+            if (!headers.containsKey("User-Agent")) {
+                headers.set("User-Agent", "ElectricityBusiness-Frontend-Proxy/1.0");
             }
 
             // Créer l'entité de la requête
             HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
             // Faire la requête
+            log.info("🔍 Exécution requête: {} {} avec headers: Origin={}, User-Agent={}, Content-Type={}", 
+                method, url,
+                headers.get("Origin"),
+                headers.get("User-Agent"),
+                headers.get("Content-Type"));
             ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 method,
                 entity,
                 String.class
             );
+            log.info("✅ Réponse reçue: Status={}, Content-Type={}", 
+                response.getStatusCode(),
+                response.getHeaders().get("Content-Type"));
 
             // Copier les headers de la réponse (y compris Set-Cookie pour les JWT)
             // Exclure Content-Encoding car RestTemplate décompresse automatiquement

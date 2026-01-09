@@ -57,6 +57,21 @@ public class ApiProxyController {
             }
         }
         
+        // PROBLÈME IDENTIFIÉ : RestTemplate ne définit pas Origin par défaut
+        // Le backend a besoin d'un header Origin pour valider CORS
+        // On définit Origin comme étant l'URL du frontend (l'origine réelle du client)
+        String frontendOrigin = System.getenv("RENDER_EXTERNAL_URL");
+        if (frontendOrigin == null || frontendOrigin.isEmpty()) {
+            frontendOrigin = "https://electricity-business-frontend.onrender.com";
+        }
+        // S'assurer que Origin est présent pour CORS (utiliser l'origine du navigateur si disponible, sinon le frontend)
+        String browserOrigin = request.getHeader("Origin");
+        if (browserOrigin != null && !browserOrigin.isEmpty()) {
+            headers.set("Origin", browserOrigin); // Utiliser l'origine du navigateur (meilleur pour CORS)
+        } else {
+            headers.set("Origin", frontendOrigin); // Fallback sur l'origine du frontend
+        }
+        
         // S'assurer que le header Cookie est forwardé (pour les JWT HttpOnly)
         String cookieHeader = request.getHeader("Cookie");
         if (cookieHeader != null && !cookieHeader.isEmpty()) {
