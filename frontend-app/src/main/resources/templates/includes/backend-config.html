@@ -1,15 +1,15 @@
 <!-- Fragment Thymeleaf pour la configuration du backend -->
-<!-- PROXY FRONTEND : Les requêtes passent par le proxy frontend pour gérer les cookies JWT -->
+<!-- APPEL DIRECT AU BACKEND : Les requêtes vont directement au backend avec CORS activé -->
 <script th:fragment="backend-config" th:inline="javascript">
-    // Utiliser le proxy frontend (même domaine = cookies HTTPOnly fonctionnent sans CORS)
-    // Le proxy frontend redirige automatiquement vers le backend
-    window.API_BASE_URL = window.location.origin;
+    // APPEL DIRECT AU BACKEND (sans proxy) - Le backend a CORS activé pour autoriser toutes les origines
+    // CORS est configuré dans SimpleSecurityConfig.java avec setAllowedOriginPatterns("*")
+    window.API_BASE_URL = 'https://electricity-business-backend-jvc9.onrender.com';
     
     // Créer aussi une constante globale pour compatibilité
     if (typeof API_BASE_URL === 'undefined') {
         var API_BASE_URL = window.API_BASE_URL;
     }
-    console.log('🔧 API Base URL (PROXY FRONTEND):', window.API_BASE_URL);
-    console.log('ℹ️ Les requêtes API passent par le proxy frontend qui redirige vers le backend');
-    console.log('ℹ️ Les cookies JWT sont forwardés automatiquement par le proxy (même domaine)');
+    console.log('🔧 API Base URL (APPEL DIRECT AU BACKEND):', window.API_BASE_URL);
+    console.log('ℹ️ Les requêtes API vont DIRECTEMENT au backend (CORS activé)');
+    console.log('ℹ️ CORS est configuré dans SimpleSecurityConfig.java pour autoriser toutes les origines');
 </script>
