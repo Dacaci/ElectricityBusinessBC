@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -80,6 +83,33 @@ public class MediaController {
             return ResponseEntity.ok(mediaService.updateMedia(id, mediaDto));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+    
+    /**
+     * Servir un fichier média uploadé par son nom de fichier
+     * Endpoint pour servir les fichiers depuis /uploads/medias/
+     */
+    @GetMapping("/file/{filename:.+}")
+    public ResponseEntity<?> getMediaFile(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get("uploads/medias", filename);
+            if (!Files.exists(filePath) || !Files.isRegularFile(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            byte[] fileContent = Files.readAllBytes(filePath);
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            
+            return ResponseEntity.ok()
+                    .header("Content-Type", contentType)
+                    .header("Content-Disposition", "inline; filename=\"" + filename + "\"")
+                    .body(fileContent);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     

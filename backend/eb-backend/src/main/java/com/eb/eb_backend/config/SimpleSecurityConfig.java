@@ -41,6 +41,8 @@ public class SimpleSecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll()
                 // Autoriser la consultation publique des stations (pour la carte) - GET uniquement
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/stations/**").permitAll()
+                // Autoriser l'accès aux fichiers médias uploadés (pour afficher les images)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/medias/file/**").permitAll()
                 // Les autres endpoints nécessitent l'authentification (gérés par @PreAuthorize)
                 .anyRequest().authenticated()
             )

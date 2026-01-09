@@ -1,12 +1,9 @@
-
-
-<div th:replace="~{includes/backend-config :: backend-config}"></div>
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
     <title>Carte des Stations - Electricity Business</title>
+    <!-- Configuration backend (inclus une seule fois) -->
     <div th:replace="~{includes/backend-config :: backend-config}"></div>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />

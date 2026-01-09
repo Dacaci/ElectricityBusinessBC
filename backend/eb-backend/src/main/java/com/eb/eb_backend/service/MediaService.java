@@ -112,7 +112,8 @@ public class MediaService {
         // 7. Créer l'entité Media
         Media media = new Media();
         media.setName(originalFilename);
-        media.setUrl("/uploads/medias/" + uniqueFilename); // URL relative
+        // URL via l'API pour servir le fichier (au lieu d'une URL relative directe)
+        media.setUrl("/api/medias/file/" + uniqueFilename);
         media.setType(type);
         media.setMimeType(contentType);
         media.setFileSize(file.getSize());
