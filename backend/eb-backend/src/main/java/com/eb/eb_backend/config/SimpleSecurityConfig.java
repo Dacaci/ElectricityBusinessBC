@@ -3,6 +3,7 @@ package com.eb.eb_backend.config;
 import com.eb.eb_backend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true) // Active @PreAuthorize
 public class SimpleSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -35,8 +37,10 @@ public class SimpleSecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 // Autoriser les endpoints d'authentification
                 .requestMatchers("/api/auth/**").permitAll()
-                // Pour les tests, on permet tout
-                .anyRequest().permitAll()
+                // Autoriser la création de compte
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll()
+                // Les autres endpoints nécessitent l'authentification (gérés par @PreAuthorize)
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

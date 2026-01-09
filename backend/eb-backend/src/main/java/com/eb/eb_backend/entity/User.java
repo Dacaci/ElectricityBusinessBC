@@ -67,6 +67,10 @@ public class User {
     @Column(name = "status", nullable = false)
     private UserStatus status = UserStatus.PENDING;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 50)
+    private UserRole role = UserRole.USER;
+    
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -91,8 +95,17 @@ public class User {
         return status == UserStatus.ACTIVE;
     }
     
+    public boolean isAdmin() {
+        return role == UserRole.ADMIN;
+    }
+    
     // Enum pour le statut
     public enum UserStatus {
         PENDING, ACTIVE, INACTIVE, SUSPENDED
+    }
+    
+    // Enum pour le rôle
+    public enum UserRole {
+        USER, ADMIN
     }
 }

@@ -44,6 +44,8 @@ public class UserDto {
     
     private User.UserStatus status;
     
+    private User.UserRole role;
+    
     // Constructeur pour conversion depuis l'entité
     public UserDto(User user) {
         this.id = user.getId();
@@ -56,5 +58,6 @@ public class UserDto {
         this.postalCode = user.getPostalCode();
         this.city = user.getCity();
         this.status = user.getStatus();
+        this.role = user.getRole();
     }
 }

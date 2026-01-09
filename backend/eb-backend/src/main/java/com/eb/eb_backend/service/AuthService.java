@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Slf4j
 @Service
@@ -37,6 +38,13 @@ public class AuthService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable: " + email));
         
+        // Créer les autorités (rôles) pour Spring Security
+        java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new ArrayList<>();
+        if (user.getRole() == User.UserRole.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),
@@ -44,7 +52,7 @@ public class AuthService implements UserDetailsService {
                 true,
                 true,
                 user.isActive(),
-                new ArrayList<>()
+                authorities
         );
     }
     
@@ -56,7 +64,11 @@ public class AuthService implements UserDetailsService {
             throw new BadCredentialsException("Identifiants incorrects");
         }
         
-        String token = jwtUtil.generateToken(user.getEmail(), java.util.Map.of("uid", user.getId()));
+        // Inclure le rôle dans le JWT
+        String token = jwtUtil.generateToken(user.getEmail(), java.util.Map.of(
+                "uid", user.getId(),
+                "role", user.getRole().name()
+        ));
         return new LoginResponse(token, new UserDto(user));
     }
     
