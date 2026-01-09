@@ -399,56 +399,109 @@
             const modalTitle = document.getElementById('mediaModalTitle');
             modalTitle.textContent = mediaType === 'IMAGE' ? 'Ajouter une Photo' : 'Ajouter une Vidéo';
             
+            // Réinitialiser le formulaire
+            document.getElementById('mediaFile').value = '';
             document.getElementById('mediaUrl').value = '';
             document.getElementById('mediaName').value = '';
             document.getElementById('mediaDescription').value = '';
+            
+            // Configurer l'accept selon le type
+            const fileInput = document.getElementById('mediaFile');
+            if (mediaType === 'IMAGE') {
+                fileInput.accept = 'image/*';
+            } else {
+                fileInput.accept = 'video/*';
+            }
             
             modal.style.display = 'block';
         }
         
         function closeMediaModal() {
             document.getElementById('mediaModal').style.display = 'none';
+            // Réinitialiser le formulaire
+            document.getElementById('mediaFile').value = '';
+            document.getElementById('mediaUrl').value = '';
+            document.getElementById('mediaName').value = '';
+            document.getElementById('mediaDescription').value = '';
             currentMediaStation = null;
             currentMediaType = null;
         }
         
         async function submitMedia() {
-            const url = document.getElementById('mediaUrl').value.trim();
             const name = document.getElementById('mediaName').value.trim();
             const description = document.getElementById('mediaDescription').value.trim();
+            const fileInput = document.getElementById('mediaFile');
+            const file = fileInput.files[0];
             
-            if (!url || !name) {
-                showError('Veuillez remplir les champs obligatoires');
+            if (!name) {
+                showError('Le nom est obligatoire');
                 return;
             }
             
-            const mediaData = {
-                name: name,
-                url: url,
-                type: currentMediaType,
-                description: description || null,
-                stationId: currentMediaStation
-            };
-            
-            try {
-                const response = await fetch(API_BASE_URL + '/api/medias', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(mediaData)
-                });
+            // Si un fichier est sélectionné, utiliser l'upload de fichier
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('stationId', currentMediaStation);
+                formData.append('type', currentMediaType);
                 
-                if (!response.ok) {
-                    throw new Error('Erreur lors de l\'ajout du média');
+                try {
+                    const response = await fetch(API_BASE_URL + '/api/medias/upload', {
+                        method: 'POST',
+                        credentials: 'include', // IMPORTANT: pour envoyer le cookie HttpOnly
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        showSuccess('Média uploadé avec succès !');
+                        closeMediaModal();
+                        loadLocationsAndStations();
+                    } else {
+                        const error = await response.text();
+                        showError('Erreur : ' + error);
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showError('Erreur lors de l\'upload du média');
+                }
+            } else {
+                // Fallback : si pas de fichier, demander une URL (pour compatibilité)
+                const url = document.getElementById('mediaUrl').value.trim();
+                if (!url) {
+                    showError('Veuillez sélectionner un fichier ou entrer une URL');
+                    return;
                 }
                 
-                showSuccess('Média ajouté avec succès !');
-                closeMediaModal();
-                loadLocationsAndStations();
-            } catch (error) {
-                                showError('Erreur lors de l\'ajout du média');
+                const mediaData = {
+                    name: name,
+                    url: url,
+                    type: currentMediaType,
+                    description: description || null,
+                    stationId: currentMediaStation
+                };
+                
+                try {
+                    const response = await fetch(API_BASE_URL + '/api/medias', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(mediaData)
+                    });
+                    
+                    if (response.ok) {
+                        showSuccess('Média ajouté avec succès !');
+                        closeMediaModal();
+                        loadLocationsAndStations();
+                    } else {
+                        const error = await response.text();
+                        showError('Erreur : ' + error);
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showError('Erreur lors de l\'ajout du média');
+                }
             }
         }
         
@@ -494,9 +547,19 @@
                     <input type="text" id="mediaName" class="form-control" required placeholder="Ex: Photo de la borne">
                 </div>
                 <div class="form-group">
-                    <label for="mediaUrl">URL *</label>
-                    <input type="url" id="mediaUrl" class="form-control" required placeholder="https://exemple.com/image.jpg">
-                    <small style="color: #64748b;">Entrez l'URL de l'image ou vidéo hébergée en ligne</small>
+                    <label for="mediaFile">Fichier *</label>
+                    <input type="file" id="mediaFile" class="form-control" accept="image/*,video/*" required>
+                    <small style="color: #64748b;">Sélectionnez une photo ou une vidéo depuis votre ordinateur</small>
+                </div>
+                <div class="form-group">
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('urlFallbackGroup').style.display = 'block'; document.getElementById('mediaFile').required = false; return false;" style="font-size: 12px; color: #64748b;">
+                        Ou utiliser une URL à la place
+                    </a>
+                </div>
+                <div class="form-group" id="urlFallbackGroup" style="display: none;">
+                    <label for="mediaUrl">URL (si pas de fichier)</label>
+                    <input type="url" id="mediaUrl" class="form-control" placeholder="https://exemple.com/image.jpg">
+                    <small style="color: #64748b;">Entrez l'URL d'une image/vidéo hébergée en ligne</small>
                 </div>
                 <div class="form-group">
                     <label for="mediaDescription">Description</label>

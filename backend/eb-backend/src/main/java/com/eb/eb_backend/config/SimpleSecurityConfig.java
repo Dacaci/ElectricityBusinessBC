@@ -43,6 +43,8 @@ public class SimpleSecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/stations/**").permitAll()
                 // Autoriser l'accès aux fichiers médias uploadés (pour afficher les images)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/medias/file/**").permitAll()
+                // Autoriser l'upload de médias (nécessite authentification mais géré par @PreAuthorize)
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/medias/upload").authenticated()
                 // Les autres endpoints nécessitent l'authentification (gérés par @PreAuthorize)
                 .anyRequest().authenticated()
             )
