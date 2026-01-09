@@ -39,6 +39,8 @@ public class SimpleSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // Autoriser la création de compte
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll()
+                // Autoriser la consultation publique des stations (pour la carte) - GET uniquement
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/stations/**").permitAll()
                 // Les autres endpoints nécessitent l'authentification (gérés par @PreAuthorize)
                 .anyRequest().authenticated()
             )
