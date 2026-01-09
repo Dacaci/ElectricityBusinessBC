@@ -34,6 +34,15 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private com.eb.eb_backend.repository.LocationRepository locationRepository;
+
+    @Mock
+    private com.eb.eb_backend.repository.StationRepository stationRepository;
+
+    @Mock
+    private com.eb.eb_backend.repository.ReservationRepository reservationRepository;
+
     @InjectMocks
     private UserService userService;
 
@@ -198,7 +207,17 @@ class UserServiceTest {
 
     @Test
     void testDeleteUser_Success() {
-        when(userRepository.existsById(1L)).thenReturn(true);
+        savedUser.setStatus(User.UserStatus.ACTIVE);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(savedUser));
+        
+        // Mock pour checkUserDeletionImpact : aucun lieu, station ou réservation active
+        when(locationRepository.findByOwner(any(User.class), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
+        when(stationRepository.findByOwner(any(User.class), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
+        when(reservationRepository.findByUser(any(User.class), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
+        
         doNothing().when(userRepository).deleteById(1L);
 
         userService.deleteUser(1L);
@@ -224,7 +243,7 @@ class UserServiceTest {
 
     @Test
     void testDeleteUser_NotFound() {
-        when(userRepository.existsById(999L)).thenReturn(false);
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(com.eb.eb_backend.exception.NotFoundException.class, () -> {
             userService.deleteUser(999L);

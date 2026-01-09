@@ -31,7 +31,7 @@ public interface StationRepository extends JpaRepository<Station, Long> {
     @Query("SELECT s FROM Station s WHERE s.status = com.eb.eb_backend.entity.StationStatus.ACTIVE")
     Page<Station> findBySearchQuery(@Param("q") String query, Pageable pageable);
     
-    @Query("SELECT s FROM Station s WHERE " +
+    @Query("SELECT s FROM Station s JOIN FETCH s.location WHERE " +
            "s.status = com.eb.eb_backend.entity.StationStatus.ACTIVE AND " +
            "s.location.latitude BETWEEN :minLat AND :maxLat AND " +
            "s.location.longitude BETWEEN :minLng AND :maxLng")

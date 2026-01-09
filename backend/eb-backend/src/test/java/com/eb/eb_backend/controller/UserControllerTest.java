@@ -35,6 +35,12 @@ class UserControllerTest {
     private UserService userService;
 
     @MockBean
+    private com.eb.eb_backend.service.UserDataExportService userDataExportService;
+
+    @MockBean
+    private com.eb.eb_backend.util.SecurityUtil securityUtil;
+
+    @MockBean
     private com.eb.eb_backend.security.JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired

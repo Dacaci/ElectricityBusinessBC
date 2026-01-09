@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@org.junit.jupiter.api.Disabled("Nécessite Docker pour Testcontainers")
 class ReservationRepositoryIntegrationTest {
 
     @Container

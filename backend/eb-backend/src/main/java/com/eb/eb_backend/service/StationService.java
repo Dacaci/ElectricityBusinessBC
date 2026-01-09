@@ -175,24 +175,28 @@ public class StationService {
         BigDecimal minLon = longitude.subtract(BigDecimal.valueOf(lonDelta));
         BigDecimal maxLon = longitude.add(BigDecimal.valueOf(lonDelta));
         
-        List<Station> stations = stationRepository.findByStatus(com.eb.eb_backend.entity.StationStatus.ACTIVE);
+        // Utiliser la requête avec JOIN sur les coordonnées pour charger Location
+        List<Station> stations = stationRepository.findByCoordinatesRange(minLat, maxLat, minLon, maxLon);
         
         return stations.stream()
                 .filter(station -> {
+                    // Vérifier que la location est chargée et a des coordonnées
+                    if (station.getLocation() == null || 
+                        station.getLocation().getLatitude() == null || 
+                        station.getLocation().getLongitude() == null) {
+                        return false;
+                    }
+                    
                     BigDecimal stationLat = station.getLocation().getLatitude();
                     BigDecimal stationLon = station.getLocation().getLongitude();
                     
-                    if (stationLat.compareTo(minLat) >= 0 && stationLat.compareTo(maxLat) <= 0 &&
-                        stationLon.compareTo(minLon) >= 0 && stationLon.compareTo(maxLon) <= 0) {
-                        
-                        double distance = calculateHaversineDistance(
-                            latitude.doubleValue(), longitude.doubleValue(),
-                            stationLat.doubleValue(), stationLon.doubleValue()
-                        );
-                        
-                        return distance <= radiusKm;
-                    }
-                    return false;
+                    // Calculer la distance réelle avec Haversine
+                    double distance = calculateHaversineDistance(
+                        latitude.doubleValue(), longitude.doubleValue(),
+                        stationLat.doubleValue(), stationLon.doubleValue()
+                    );
+                    
+                    return distance <= radiusKm;
                 })
                 .map(StationLocationDto::new)
                 .collect(Collectors.toList());
