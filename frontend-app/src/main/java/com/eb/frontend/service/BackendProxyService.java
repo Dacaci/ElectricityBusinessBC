@@ -175,17 +175,19 @@ public class BackendProxyService {
         }
     }
     
-    // Initialisation du RestTemplate OPTIMISÉ pour Render Starter (timeouts réduits)
+    // Initialisation du RestTemplate OPTIMISÉ pour Render (plan gratuit avec sleep mode)
     {
         RestTemplate template = new RestTemplate();
         // Utiliser SimpleClientHttpRequestFactory (simple, pas de pool de connexions)
         org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
             new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(15000);   // 15 secondes pour connexion (réduit)
-        factory.setReadTimeout(15000);      // 15 secondes pour lecture (réduit)
+        // Timeouts augmentés pour gérer le "cold start" sur Render (plan gratuit)
+        // Le backend peut prendre 30-90 secondes à démarrer après sleep mode
+        factory.setConnectTimeout(90000);   // 90 secondes pour connexion (cold start Render)
+        factory.setReadTimeout(90000);      // 90 secondes pour lecture (cold start Render)
         template.setRequestFactory(factory);
         this.restTemplate = template;
-        log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 15s optimisés)");
+        log.info("✅ RestTemplate configuré avec SimpleClientHttpRequestFactory (timeouts: 90s pour cold start Render)");
     }
 
     /**
@@ -296,10 +298,11 @@ public class BackendProxyService {
     }
 
     /**
-     * Exécute une requête HTTP vers l'API Backend SANS retry (pour éviter blocage threads Render)
+     * Exécute une requête HTTP vers l'API Backend avec retry automatique pour gérer le cold start Render
      */
     private ResponseEntity<String> executeRequest(HttpMethod method, String path, String body, HttpHeaders requestHeaders) {
-        return executeRequestWithRetry(method, path, body, requestHeaders, 0); // 0 retries pour éviter Thread.sleep qui bloque
+        // 1 retry pour gérer le cold start Render (le premier appel peut échouer si le backend est en sleep mode)
+        return executeRequestWithRetry(method, path, body, requestHeaders, 1);
     }
     
     /**
@@ -311,9 +314,9 @@ public class BackendProxyService {
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
                 if (attempt > 0) {
-                    log.info("🔄 Retry {} pour {} {}", attempt, method, path);
-                    // Attendre avant de réessayer (1 seconde par tentative pour rester sous le timeout Render)
-                    Thread.sleep(1000 * attempt);
+                    log.info("🔄 Retry {} pour {} {} (cold start Render)", attempt, method, path);
+                    // Attendre 5 secondes avant de réessayer (donner le temps au backend de démarrer)
+                    Thread.sleep(5000);
                 } else {
                     log.info("🔄 Proxy: {} {} -> Backend URL: {}", method, path, url);
                 }
@@ -384,22 +387,24 @@ public class BackendProxyService {
         } catch (HttpClientErrorException | HttpServerErrorException e) {
                 log.warn("⚠️ Erreur HTTP du backend: {} {} - URL: {}", e.getStatusCode(), e.getMessage(), url);
             
-            // Gestion spéciale pour les erreurs 502 (Bad Gateway) - backend non accessible
+            // Gestion spéciale pour les erreurs 502 (Bad Gateway) - backend non accessible ou en cold start
             if (e.getStatusCode().value() == 502) {
-                log.error("❌ Erreur 502 Bad Gateway - Le backend n'est pas accessible à l'URL: {}", url);
-                log.error("   Vérifiez que le backend est démarré sur Render et n'est pas en sleep mode");
-                log.error("   Sur Render (plan gratuit), le premier appel peut prendre 30-90 secondes pour réveiller le service");
+                log.warn("⚠️ Erreur 502 Bad Gateway - Backend peut être en cold start (Render sleep mode): {}", url);
                 
-                // Retry si on a encore des tentatives
+                // Retry si on a encore des tentatives (cold start Render peut prendre 30-90 secondes)
                 if (attempt < maxRetries) {
-                    log.info("🔄 Retry pour erreur 502...");
+                    log.info("🔄 Retry pour erreur 502 (cold start Render)...");
                     continue;
                 }
+                
+                log.error("❌ Erreur 502 Bad Gateway après {} tentative(s) - Le backend n'est pas accessible", maxRetries + 1);
+                log.error("   Sur Render (plan gratuit), le service peut être en sleep mode et prendre 30-90 secondes pour démarrer");
+                log.error("   L'utilisateur peut réessayer dans quelques secondes - le backend devrait être réveillé");
                 
                 return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
                     .header("Content-Type", "application/json;charset=UTF-8")
-                    .body("{\"error\":\"Le backend n'est pas accessible (502 Bad Gateway). Sur Render (plan gratuit), le service peut être en veille. Le premier appel peut prendre jusqu'à 90 secondes pour le réveiller. Veuillez réessayer dans quelques instants.\",\"backendUrl\":\"" + url + "\"}");
+                    .body("{\"error\":\"Le backend est en cours de démarrage (cold start Render). Veuillez réessayer dans 10-20 secondes. Sur Render (plan gratuit), le premier appel peut prendre jusqu'à 90 secondes pour réveiller le service.\",\"backendUrl\":\"" + url + "\",\"retryAfter\":20}");
             }
             
             // Récupérer le body de l'erreur
@@ -438,32 +443,35 @@ public class BackendProxyService {
                 String exceptionType = e.getClass().getSimpleName();
                 String exceptionCause = e.getCause() != null ? e.getCause().getClass().getSimpleName() + ": " + e.getCause().getMessage() : "null";
                 
-                // Si on a encore des tentatives, réessayer
+                // Si on a encore des tentatives, réessayer (cold start Render)
                 if (attempt < maxRetries) {
-                    log.warn("⚠️ Tentative {} échouée: {} (Type: {}, Cause: {}) - Retry...", 
+                    log.warn("⚠️ Tentative {} échouée (cold start Render?): {} (Type: {}, Cause: {}) - Retry dans 5s...", 
                         attempt + 1, errorMsg, exceptionType, exceptionCause);
                     continue; // Réessayer
                 }
                 
-                // Plus de tentatives, retourner l'erreur
+                // Plus de tentatives, retourner l'erreur avec message explicite pour cold start Render
                 log.error("❌ ResourceAccessException après {} tentative(s) - Type: {}, Cause: {}, Message: {}, URL: {}", 
                     maxRetries + 1, exceptionType, exceptionCause, errorMsg, fullUrl);
                 
                 if (errorMsg != null && (errorMsg.contains("Read timed out") || errorMsg.contains("Connection timed out") || errorMsg.contains("timeout"))) {
-                    log.warn("⏱️ Timeout lors de la connexion au backend: {} (le backend sur Render peut être en cours de démarrage ou en sleep mode)", fullUrl);
+                    log.warn("⏱️ Timeout lors de la connexion au backend (cold start Render): {}", fullUrl);
                     return ResponseEntity
                         .status(HttpStatus.GATEWAY_TIMEOUT)
-                        .body("{\"error\":\"Le backend met trop de temps à répondre. Sur Render (plan gratuit), le service peut être en veille et prendre jusqu'à 90s pour démarrer. Veuillez réessayer dans quelques secondes.\"}");
+                        .header("Content-Type", "application/json;charset=UTF-8")
+                        .body("{\"error\":\"Le backend est en cours de démarrage (cold start Render). Veuillez réessayer dans 10-20 secondes. Sur Render (plan gratuit), le service peut être en sleep mode et prendre jusqu'à 90 secondes pour démarrer.\",\"retryAfter\":20}");
                 } else if (errorMsg != null && errorMsg.contains("Connect timed out")) {
-                    log.warn("⏱️ Connexion timeout au backend: {} (le service Render est peut-être en sleep mode)", fullUrl);
+                    log.warn("⏱️ Connexion timeout au backend (cold start Render): {}", fullUrl);
                     return ResponseEntity
                         .status(HttpStatus.BAD_GATEWAY)
-                        .body("{\"error\":\"Le backend ne répond pas. Sur Render (plan gratuit), le service peut être en veille. Le premier appel peut prendre jusqu'à 90s pour le réveiller.\"}");
+                        .header("Content-Type", "application/json;charset=UTF-8")
+                        .body("{\"error\":\"Le backend est en cours de démarrage (cold start Render). Le service peut être en sleep mode sur Render (plan gratuit). Veuillez réessayer dans 10-20 secondes - le premier appel peut prendre jusqu'à 90 secondes pour réveiller le service.\",\"retryAfter\":20}");
                 } else {
                     log.error("❌ Impossible de se connecter au backend {}: {} (Type: {}, Cause: {})", fullUrl, errorMsg, exceptionType, exceptionCause);
                     return ResponseEntity
                         .status(HttpStatus.BAD_GATEWAY)
-                        .body("{\"error\":\"Backend non disponible: " + (errorMsg != null ? errorMsg : "Erreur de connexion") + "\"}");
+                        .header("Content-Type", "application/json;charset=UTF-8")
+                        .body("{\"error\":\"Backend non disponible (cold start Render?). Veuillez réessayer dans quelques secondes. Sur Render (plan gratuit), le service peut être en sleep mode.\",\"retryAfter\":20}");
                 }
         } catch (Exception e) {
                 // Si on a encore des tentatives, réessayer
