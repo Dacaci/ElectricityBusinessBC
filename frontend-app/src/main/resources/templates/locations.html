@@ -428,15 +428,11 @@
         }
         
         async function submitMedia() {
-            const name = document.getElementById('mediaName').value.trim();
+            const nameInput = document.getElementById('mediaName');
+            const name = nameInput ? nameInput.value.trim() : '';
             const description = document.getElementById('mediaDescription').value.trim();
             const fileInput = document.getElementById('mediaFile');
             const file = fileInput.files[0];
-            
-            if (!name) {
-                showError('Le nom est obligatoire');
-                return;
-            }
             
             // Si un fichier est sélectionné, utiliser l'upload de fichier
             if (file) {
@@ -444,6 +440,16 @@
                 formData.append('file', file);
                 formData.append('stationId', currentMediaStation);
                 formData.append('type', currentMediaType);
+                
+                // Ajouter le nom personnalisé si fourni, sinon le backend utilisera le nom du fichier
+                if (name) {
+                    formData.append('name', name);
+                }
+                
+                // Ajouter la description si fournie
+                if (description) {
+                    formData.append('description', description);
+                }
                 
                 try {
                     const response = await fetch(API_BASE_URL + '/api/medias/upload', {
@@ -543,13 +549,14 @@
             <h2 id="mediaModalTitle">Ajouter un Média</h2>
             <form onsubmit="event.preventDefault(); submitMedia();">
                 <div class="form-group">
-                    <label for="mediaName">Nom *</label>
-                    <input type="text" id="mediaName" class="form-control" required placeholder="Ex: Photo de la borne">
-                </div>
-                <div class="form-group">
                     <label for="mediaFile">Fichier *</label>
                     <input type="file" id="mediaFile" class="form-control" accept="image/*,video/*" required>
                     <small style="color: #64748b;">Sélectionnez une photo ou une vidéo depuis votre ordinateur</small>
+                </div>
+                <div class="form-group">
+                    <label for="mediaName">Nom (optionnel)</label>
+                    <input type="text" id="mediaName" class="form-control" placeholder="Le nom du fichier sera utilisé par défaut">
+                    <small style="color: #64748b;">Laissez vide pour utiliser le nom du fichier</small>
                 </div>
                 <div class="form-group">
                     <a href="#" onclick="event.preventDefault(); document.getElementById('urlFallbackGroup').style.display = 'block'; document.getElementById('mediaFile').required = false; return false;" style="font-size: 12px; color: #64748b;">

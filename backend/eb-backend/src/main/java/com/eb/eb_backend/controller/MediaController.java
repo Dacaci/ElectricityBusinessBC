@@ -44,9 +44,11 @@ public class MediaController {
     public ResponseEntity<?> uploadMedia(
             @RequestParam("stationId") Long stationId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("type") MediaType type) {
+            @RequestParam("type") MediaType type,
+            @RequestParam(value = "name", required = false) String customName,
+            @RequestParam(value = "description", required = false) String description) {
         try {
-            MediaDto created = mediaService.uploadMedia(stationId, file, type);
+            MediaDto created = mediaService.uploadMedia(stationId, file, type, customName, description);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

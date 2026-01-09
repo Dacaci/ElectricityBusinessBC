@@ -66,9 +66,11 @@ public class MediaService {
     
     /**
      * Upload d'un fichier média (photo ou vidéo) pour une station
+     * @param customName Nom personnalisé (optionnel, utilise le nom du fichier par défaut)
+     * @param description Description (optionnel)
      */
     @Transactional
-    public MediaDto uploadMedia(Long stationId, MultipartFile file, MediaType type) throws IOException {
+    public MediaDto uploadMedia(Long stationId, MultipartFile file, MediaType type, String customName, String description) throws IOException {
         // 1. Valider la station
         Station station = stationRepository.findById(stationId)
             .orElseThrow(() -> new IllegalArgumentException("Station non trouvée: " + stationId));
@@ -111,13 +113,18 @@ public class MediaService {
         
         // 7. Créer l'entité Media
         Media media = new Media();
-        media.setName(originalFilename);
+        // Utiliser le nom personnalisé si fourni, sinon le nom du fichier original
+        media.setName(customName != null && !customName.trim().isEmpty() ? customName.trim() : originalFilename);
         // URL via l'API pour servir le fichier (au lieu d'une URL relative directe)
         media.setUrl("/api/medias/file/" + uniqueFilename);
         media.setType(type);
         media.setMimeType(contentType);
         media.setFileSize(file.getSize());
         media.setStation(station);
+        // Description optionnelle
+        if (description != null && !description.trim().isEmpty()) {
+            media.setDescription(description.trim());
+        }
         
         // 8. Sauvegarder en base
         Media savedMedia = mediaRepository.save(media);
