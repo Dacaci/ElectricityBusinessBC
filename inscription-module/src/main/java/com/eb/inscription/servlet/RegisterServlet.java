@@ -93,6 +93,13 @@ public class RegisterServlet extends HttpServlet {
             city = request.getParameter("cityOther");
         }
         
+        // Vérifier le consentement RGPD
+        String rgpdConsent = request.getParameter("rgpdConsent");
+        if (rgpdConsent == null || !"on".equals(rgpdConsent)) {
+            forwardWithError(request, response, "Vous devez accepter la politique de confidentialité pour vous inscrire");
+            return;
+        }
+        
         String validationError = validateForm(email, password, confirmPassword, firstName, lastName, 
                                               phone, dateOfBirthStr, address, postalCode, city);
         if (validationError != null) {

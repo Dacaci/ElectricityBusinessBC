@@ -247,6 +247,19 @@
                 </div>
             </div>
             
+            <%-- Consentement RGPD --%>
+            <div class="form-group full-width" style="margin-top: 20px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <input type="checkbox" id="rgpdConsent" name="rgpdConsent" required 
+                           style="width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; cursor: pointer;">
+                    <label for="rgpdConsent" style="text-align: left; min-width: auto; flex: 1; font-size: 14px; line-height: 1.5; cursor: pointer;">
+                        J'accepte la <a href="<%= System.getenv("FRONTEND_URL") != null ? System.getenv("FRONTEND_URL") : "https://electricity-business-frontend.onrender.com" %>/privacy-policy" target="_blank" style="color: #1E40AF; text-decoration: underline;">politique de confidentialité</a> 
+                        et consens au traitement de mes données personnelles conformément au RGPD. 
+                        <span class="required">*</span>
+                    </label>
+                </div>
+            </div>
+            
             <button type="submit">S'inscrire</button>
         </form>
         

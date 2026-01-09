@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{includes/navbar :: head-bootstrap}"></th:block>
+    <title>Politique de confidentialité - Electricity Business</title>
+    <link rel="stylesheet" th:href="@{/css/common-styles.css}">
+</head>
+<body>
+    <div th:replace="~{includes/navbar :: navbar}"></div>
+    
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h1 class="mb-4">Politique de confidentialité</h1>
+                <p class="text-muted">Dernière mise à jour : 20 novembre 2025</p>
+                
+                <section class="mb-5">
+                    <h2>1. Collecte des données personnelles</h2>
+                    <p>Dans le cadre de l'utilisation de la plateforme Electricity Business, nous collectons les données personnelles suivantes :</p>
+                    <ul>
+                        <li><strong>Données d'identification :</strong> Nom, prénom, email, date de naissance</li>
+                        <li><strong>Données de contact :</strong> Téléphone, adresse postale, code postal, ville</li>
+                        <li><strong>Données de connexion :</strong> Mot de passe haché (BCrypt), codes de vérification OTP</li>
+                        <li><strong>Données de géolocalisation :</strong> Coordonnées GPS des lieux de recharge (latitude, longitude)</li>
+                        <li><strong>Données de transaction :</strong> Historique des réservations (dates, montants, statuts)</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>2. Finalités du traitement</h2>
+                    <p>Vos données personnelles sont traitées pour les finalités suivantes :</p>
+                    <ul>
+                        <li><strong>Gestion de compte :</strong> Création, authentification et administration de votre compte utilisateur</li>
+                        <li><strong>Vérification email :</strong> Envoi de codes OTP pour valider votre adresse email</li>
+                        <li><strong>Gestion des réservations :</strong> Création, suivi et facturation des réservations de bornes de recharge</li>
+                        <li><strong>Géolocalisation :</strong> Affichage des bornes de recharge sur la carte interactive</li>
+                        <li><strong>Génération de documents :</strong> Création de reçus PDF et exports Excel pour vos réservations</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>3. Base légale du traitement</h2>
+                    <p>Le traitement de vos données personnelles repose sur :</p>
+                    <ul>
+                        <li><strong>Exécution du contrat :</strong> Les données nécessaires à la fourniture du service (email, mot de passe, coordonnées)</li>
+                        <li><strong>Obligation légale :</strong> Conservation des données de réservation pendant 3 ans (obligation comptable)</li>
+                        <li><strong>Intérêt légitime :</strong> Sécurisation de la plateforme (codes OTP avec expiration)</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>4. Durée de conservation</h2>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Type de données</th>
+                                <th>Durée de conservation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Données de compte (nom, email, etc.)</td>
+                                <td>Durée de vie du compte utilisateur</td>
+                            </tr>
+                            <tr>
+                                <td>Codes OTP de vérification</td>
+                                <td>15 minutes (suppression automatique après expiration ou utilisation)</td>
+                            </tr>
+                            <tr>
+                                <td>Réservations</td>
+                                <td>3 ans après la date de la réservation (obligation légale comptable)</td>
+                            </tr>
+                            <tr>
+                                <td>Coordonnées GPS des lieux</td>
+                                <td>Durée de publication de la borne sur la plateforme</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>5. Vos droits RGPD</h2>
+                    <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez des droits suivants :</p>
+                    <ul>
+                        <li><strong>Droit d'accès :</strong> Vous pouvez consulter vos données personnelles via votre tableau de bord</li>
+                        <li><strong>Droit de rectification :</strong> Vous pouvez modifier vos données dans les paramètres de votre compte</li>
+                        <li><strong>Droit à l'effacement :</strong> Vous pouvez demander la suppression de votre compte via l'interface utilisateur</li>
+                        <li><strong>Droit à la portabilité :</strong> Vous pouvez exporter vos données au format Excel ou JSON (endpoint <code>/api/users/{id}/export</code>)</li>
+                        <li><strong>Droit d'opposition :</strong> Vous pouvez désactiver votre compte sans suppression définitive</li>
+                        <li><strong>Droit de limitation :</strong> Vous pouvez demander la limitation du traitement de vos données</li>
+                    </ul>
+                    <p class="mt-3">Pour exercer ces droits, contactez-nous à : <a href="mailto:dpo@electricity-business.fr">dpo@electricity-business.fr</a></p>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>6. Sécurité des données</h2>
+                    <p>Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données :</p>
+                    <ul>
+                        <li><strong>Chiffrement :</strong> Mots de passe hashés avec BCrypt (salt unique automatique)</li>
+                        <li><strong>Authentification :</strong> Tokens JWT stockés dans des cookies HTTPOnly (protection contre XSS)</li>
+                        <li><strong>Validation :</strong> Validation des entrées utilisateur côté serveur (protection contre injection SQL)</li>
+                        <li><strong>HTTPS :</strong> Communications chiffrées en production via certificats SSL</li>
+                        <li><strong>Contrôle d'accès :</strong> Chaque utilisateur ne peut accéder qu'à ses propres données</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>7. Sous-traitants</h2>
+                    <p>Dans le cadre de l'exploitation de la plateforme, nous faisons appel aux sous-traitants suivants :</p>
+                    <ul>
+                        <li><strong>Brevo (ex-Sendinblue) :</strong> Service SMTP pour l'envoi d'emails de vérification (pays : France, conformité RGPD)</li>
+                        <li><strong>Render :</strong> Hébergement cloud de l'application et base de données PostgreSQL (pays : États-Unis, garanties contractuelles RGPD)</li>
+                        <li><strong>OpenStreetMap :</strong> Service de cartographie pour l'affichage des bornes (pas de transmission de données personnelles)</li>
+                        <li><strong>OpenChargeMap :</strong> API publique de référencement des bornes publiques (pas de transmission de données personnelles)</li>
+                    </ul>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>8. Transferts internationaux</h2>
+                    <p>Certains de nos sous-traitants sont situés en dehors de l'Union Européenne (notamment Render aux États-Unis). 
+                    Nous nous assurons que des garanties appropriées sont en place conformément au RGPD, notamment via des clauses contractuelles types 
+                    approuvées par la Commission Européenne.</p>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>9. Cookies</h2>
+                    <p>Nous utilisons un seul type de cookie :</p>
+                    <ul>
+                        <li><strong>Cookie JWT_TOKEN :</strong> Cookie HTTPOnly et Secure stockant votre token d'authentification (durée : 24 heures). 
+                        Ce cookie est nécessaire au fonctionnement de la plateforme et ne peut pas être désactivé.</li>
+                    </ul>
+                    <p>Nous n'utilisons pas de cookies de suivi publicitaire ni de cookies tiers.</p>
+                </section>
+                
+                <section class="mb-5">
+                    <h2>10. Contact</h2>
+                    <p>Pour toute question relative à la protection de vos données personnelles, vous pouvez nous contacter :</p>
+                    <ul>
+                        <li><strong>Email DPO :</strong> <a href="mailto:dpo@electricity-business.fr">dpo@electricity-business.fr</a></li>
+                        <li><strong>Responsable du traitement :</strong> Electricity Business</li>
+                    </ul>
+                    <p>Vous avez également le droit d'introduire une réclamation auprès de la CNIL (Commission Nationale de l'Informatique et des Libertés) 
+                    si vous estimez que le traitement de vos données personnelles constitue une violation du RGPD.</p>
+                </section>
+                
+                <div class="mt-4">
+                    <a th:href="@{/}" class="btn btn-primary">Retour à l'accueil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block th:replace="~{includes/navbar :: scripts-bootstrap}"></th:block>
+</body>
+</html>
+

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Fragment: Footer avec liens légaux -->
+    <footer th:fragment="footer" class="bg-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted">&copy; 2025 Electricity Business. Tous droits réservés.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a th:href="@{/privacy-policy}" class="text-decoration-none text-muted me-3">Politique de confidentialité</a>
+                    <span class="text-muted">|</span>
+                    <span class="text-muted ms-3">Contact DPO: <a href="mailto:dpo@electricity-business.fr" class="text-decoration-none">dpo@electricity-business.fr</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
