@@ -47,7 +47,17 @@ public interface EmailVerificationCodeRepository extends JpaRepository<EmailVeri
     @Modifying
     @Query("UPDATE EmailVerificationCode c SET c.usedAt = :usedAt WHERE c.id = :id")
     void markAsUsed(@Param("id") Long id, @Param("usedAt") Instant usedAt);
+    
+    /**
+     * Supprime les codes OTP expirés (nettoyage RGPD automatique)
+     */
+    @Modifying
+    @Query("DELETE FROM EmailVerificationCode c WHERE c.expiresAt < :now")
+    long deleteByExpiresAtBefore(@Param("now") Instant now);
 }
+
+
+
 
 
 
