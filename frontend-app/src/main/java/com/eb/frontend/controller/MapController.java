@@ -17,5 +17,10 @@ public class MapController {
         model.addAttribute("backendUrl", backendUrl);
         return "map";
     }
+    
+    @GetMapping("/privacy-policy")
+    public String privacyPolicy() {
+        return "privacy-policy";
+    }
 }
 

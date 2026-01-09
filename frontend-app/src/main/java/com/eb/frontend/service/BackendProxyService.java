@@ -318,15 +318,23 @@ public class BackendProxyService {
                     log.info("🔄 Proxy: {} {} -> Backend URL: {}", method, path, url);
                 }
             
-            // Copier les headers de la requête (sauf Host et Origin)
+            // Copier les headers de la requête (sauf Host, Origin, et Content-Encoding compressé)
             HttpHeaders headers = new HttpHeaders();
             if (requestHeaders != null) {
                 requestHeaders.forEach((key, value) -> {
                     if (!key.equalsIgnoreCase("Host") && !key.equalsIgnoreCase("Origin")) {
-                        // Copier le header Cookie pour forwarder les JWT HttpOnly
-                        headers.addAll(key, value);
+                        // Ne pas forwarder Accept-Encoding: gzip car RestTemplate le gère automatiquement
+                        // et cela peut causer des problèmes de décompression
+                        if (!key.equalsIgnoreCase("Accept-Encoding")) {
+                            headers.addAll(key, value);
+                        }
                     }
                 });
+            }
+            
+            // S'assurer que Content-Type est présent pour les requêtes avec body
+            if (body != null && !headers.containsKey("Content-Type")) {
+                headers.set("Content-Type", "application/json;charset=UTF-8");
             }
 
             // Créer l'entité de la requête
@@ -341,10 +349,28 @@ public class BackendProxyService {
             );
 
             // Copier les headers de la réponse (y compris Set-Cookie pour les JWT)
+            // Exclure Content-Encoding car RestTemplate décompresse automatiquement
             HttpHeaders responseHeaders = new HttpHeaders();
             response.getHeaders().forEach((key, value) -> {
-                responseHeaders.addAll(key, value);
+                if (!"Content-Encoding".equalsIgnoreCase(key)) {
+                    // S'assurer que Content-Type est correct pour les réponses JSON
+                    if ("Content-Type".equalsIgnoreCase(key)) {
+                        String contentType = value != null && !value.isEmpty() ? value.get(0) : null;
+                        if (contentType == null || !contentType.contains("application/json")) {
+                            responseHeaders.set("Content-Type", "application/json;charset=UTF-8");
+                        } else {
+                            responseHeaders.addAll(key, value);
+                        }
+                    } else {
+                        responseHeaders.addAll(key, value);
+                    }
+                }
             });
+            
+            // S'assurer que Content-Type est toujours présent
+            if (!responseHeaders.containsKey("Content-Type")) {
+                responseHeaders.set("Content-Type", "application/json;charset=UTF-8");
+            }
 
                 if (attempt > 0) {
                     log.info("✅ Requête réussie après {} tentative(s)", attempt + 1);
@@ -372,19 +398,40 @@ public class BackendProxyService {
                 
                 return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
+                    .header("Content-Type", "application/json;charset=UTF-8")
                     .body("{\"error\":\"Le backend n'est pas accessible (502 Bad Gateway). Sur Render (plan gratuit), le service peut être en veille. Le premier appel peut prendre jusqu'à 90 secondes pour le réveiller. Veuillez réessayer dans quelques instants.\",\"backendUrl\":\"" + url + "\"}");
             }
             
+            // Récupérer le body de l'erreur
+            String errorBody = e.getResponseBodyAsString();
+            
+            // Si le body est null, vide, ou ne semble pas être du JSON valide, créer un message d'erreur JSON
+            if (errorBody == null || errorBody.trim().isEmpty() || 
+                (!errorBody.trim().startsWith("{") && !errorBody.trim().startsWith("["))) {
+                log.warn("⚠️ Body d'erreur non-JSON ou vide, création d'un message d'erreur JSON standard");
+                String reasonPhrase = e.getStatusCode() instanceof org.springframework.http.HttpStatus ? 
+                    ((org.springframework.http.HttpStatus) e.getStatusCode()).getReasonPhrase() : 
+                    "Erreur HTTP";
+                errorBody = String.format("{\"error\":\"%s\",\"status\":%d,\"message\":\"%s\"}", 
+                    reasonPhrase, 
+                    e.getStatusCode().value(),
+                    e.getMessage() != null ? e.getMessage().replace("\"", "\\\"").replace("\n", "\\n") : "Erreur inconnue");
+            }
+            
             HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("Content-Type", "application/json;charset=UTF-8");
             if (e.getResponseHeaders() != null) {
                 e.getResponseHeaders().forEach((key, value) -> {
-                    responseHeaders.addAll(key, value);
+                    // Ne pas copier Content-Encoding ou Content-Type (on le force à application/json)
+                    if (!"Content-Encoding".equalsIgnoreCase(key) && !"Content-Type".equalsIgnoreCase(key)) {
+                        responseHeaders.addAll(key, value);
+                    }
                 });
             }
             return ResponseEntity
                 .status(e.getStatusCode())
                 .headers(responseHeaders)
-                .body(e.getResponseBodyAsString());
+                .body(errorBody);
             } catch (ResourceAccessException e) {
                 String errorMsg = e.getMessage();
                 String fullUrl = backendUrl + path;

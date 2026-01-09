@@ -120,10 +120,28 @@ public class ApiProxyController {
                         String modifiedCookie = modifyCookieForFrontendDomain(cookieValue);
                         responseHeaders.add("Set-Cookie", modifiedCookie);
                     }
-                } else {
-                    responseHeaders.addAll(key, value);
+                } else if (!"Content-Encoding".equalsIgnoreCase(key)) {
+                    // Ne pas forwarder Content-Encoding car RestTemplate décompresse automatiquement
+                    // S'assurer que Content-Type est toujours présent pour les réponses JSON
+                    if ("Content-Type".equalsIgnoreCase(key)) {
+                        // Vérifier que le Content-Type est valide
+                        String contentType = value != null && !value.isEmpty() ? value.get(0) : null;
+                        if (contentType == null || !contentType.contains("application/json")) {
+                            // Forcer application/json si absent ou incorrect
+                            responseHeaders.set("Content-Type", "application/json;charset=UTF-8");
+                        } else {
+                            responseHeaders.addAll(key, value);
+                        }
+                    } else {
+                        responseHeaders.addAll(key, value);
+                    }
                 }
             });
+            
+            // S'assurer que Content-Type est toujours présent pour les réponses JSON
+            if (!responseHeaders.containsKey("Content-Type")) {
+                responseHeaders.set("Content-Type", "application/json;charset=UTF-8");
+            }
             
             return ResponseEntity
                 .status(response.getStatusCode())
