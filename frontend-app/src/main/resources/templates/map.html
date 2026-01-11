@@ -343,19 +343,15 @@
     <!-- jwt-utils.js est déjà chargé dans navbar.html, pas besoin de le recharger -->
     <script th:src="@{/js/auth.js}"></script>
     <script>
-        // Variables globales
         let map;
         let stationsLayer;
         let ocmClusterLayer;
         let userLocation = null;
         let nearbyMode = false;
         
-        // Fonction pour créer une icône avec prix (ronde)
         function createPriceIcon(price) {
-            // Formater le prix pour qu'il tienne dans un cercle
             let priceText = 'N/A';
             if (price) {
-                // Si le prix a des décimales, afficher 1 décimale, sinon juste le nombre
                 const formattedPrice = parseFloat(price).toFixed(1);
                 priceText = formattedPrice.endsWith('.0') 
                     ? Math.round(price).toString() + '€' 
@@ -370,7 +366,6 @@
             });
         }
         
-        // Icône pour les stations OpenChargeMap (verte)
         const ocmStationIcon = L.divIcon({
             className: 'ocm-station-marker',
             html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
@@ -378,7 +373,6 @@
             iconAnchor: [10, 10]
         });
         
-        // Charger toutes les stations
         async function loadAllStations(keepMapPosition = false) {
             showLoading(true);
             stationsLayer.clearLayers();
@@ -397,7 +391,6 @@
                 const stations = Array.isArray(data) ? data : (data.content || []);
                 
                 if (stations.length === 0) {
-                    console.log('Aucune station disponible');
                     showLoading(false);
                     return;
                 }
@@ -412,18 +405,13 @@
                     }
                 });
                 
-                // Ajuster la vue pour montrer toutes les stations
                 if (stationsLayer.getLayers().length > 0) {
                     const group = new L.featureGroup(stationsLayer.getLayers());
-                    // Ajuster la vue pour voir toutes les stations (sauf si on garde la position)
                     if (!keepMapPosition) {
                         map.fitBounds(group.getBounds().pad(0.1));
                     } else if (currentCenter && currentZoom) {
-                        // Restaurer la position précédente
                         map.setView(currentCenter, currentZoom);
                     }
-                } else {
-                    console.warn('Aucune station avec coordonnées GPS valides');
                 }
                 
                 showLoading(false);
@@ -433,7 +421,6 @@
             }
         }
         
-        // Obtenir la position de l'utilisateur
         function getUserLocation() {
             if (navigator.geolocation) {
                 showLoading(true);
@@ -489,13 +476,10 @@
                     }
                 );
             } else {
-                console.warn('Géolocalisation non supportée');
             }
         }
         
-        // Charger les stations à proximité
         async function loadNearbyStations(lat, lng, radius = 10, keepMapPosition = false) {
-            // Vérifier que les coordonnées sont valides
             if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
                 loadAllStations(keepMapPosition);
                 return;
@@ -585,34 +569,13 @@
             }
         }
         
-        // Réserver une station - Vérifier l'authentification d'abord
         function reserveStation(stationId) {
-            // La carte est accessible sans connexion, mais la réservation nécessite une connexion
-            // Vérifier si l'utilisateur est connecté de manière stricte
-            let isUserAuthenticated = false;
-            
-            // Utiliser isAuthenticated() qui est la fonction la plus fiable
-            if (typeof isAuthenticated === 'function') {
-                isUserAuthenticated = isAuthenticated();
-            } else {
-                // Fallback : vérification manuelle stricte
-                if (typeof getAuthUser === 'function') {
-                    const user = getAuthUser();
-                    // Vérifier que l'utilisateur existe et a un ID valide (nombre)
-                    if (user && user.id && typeof user.id === 'number') {
-                        isUserAuthenticated = true;
-                    }
-                }
-            }
-            
-            if (!isUserAuthenticated) {
-                // Rediriger vers login avec le paramètre de retour
+            if (!isAuthenticated || !isAuthenticated()) {
                 const returnUrl = encodeURIComponent('/add-reservation?stationId=' + stationId);
                 window.location.href = '/login?returnUrl=' + returnUrl;
                 return;
             }
             
-            // Si authentifié, rediriger vers la page de réservation
             window.location.href = '/add-reservation?stationId=' + stationId;
         }
         
@@ -621,7 +584,6 @@
             document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
         
-        // Variable pour gérer l'affichage des bornes publiques
         let showPublicStations = false;
         
         async function loadOCMBoundingBox() {
@@ -643,7 +605,7 @@
                     }
                 }
             } catch (e) {
-                console.warn('Erreur lors de la récupération des bounds:', e);
+                // Ignorer les erreurs de bounds
             }
             
             // Appel direct à l'API OpenChargeMap (bornes publiques françaises)
@@ -676,7 +638,6 @@
                     });
                 }
                 
-                console.log(`${stations.length} bornes publiques chargées`);
                 showLoading(false);
             } catch (error) {
                 console.error('Erreur chargement OpenChargeMap:', error);
@@ -684,7 +645,6 @@
             }
         }
         
-        // Fonction pour toggle l'affichage des bornes publiques
         function togglePublicStations() {
             showPublicStations = !showPublicStations;
             const btn = document.getElementById('togglePublicBtn');
@@ -695,10 +655,7 @@
             loadOCMBoundingBox();
         }
         
-        // Charger les stations au démarrage
         document.addEventListener('DOMContentLoaded', function() {
-            // Afficher le nom de l'utilisateur (si connecté)
-            // La carte est accessible même sans connexion
             if (typeof getAuthUser === 'function') {
                 const user = getAuthUser();
                 if (user && user.firstName && user.lastName) {
@@ -709,16 +666,13 @@
                 }
             }
             
-            // Initialiser la carte Leaflet
-            map = L.map('map').setView([48.8566, 2.3522], 10); // Paris par défaut
+            map = L.map('map').setView([48.8566, 2.3522], 10);
             
-            // Ajouter les tuiles OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
             
-            // Groupe de marqueurs
-            stationsLayer = L.layerGroup().addTo(map); // bornes internes
+            stationsLayer = L.layerGroup().addTo(map);
             ocmClusterLayer = L.markerClusterGroup({
                 maxClusterRadius: 60,
                 disableClusteringAtZoom: 16,
@@ -729,97 +683,38 @@
             loadAllStations();
             setupSearchForm();
             
-            // OPTIMISATION: Debounce et file d'attente pour limiter les requêtes simultanées
-            let loadStationsTimeout = null;
-            let isLoadStationsPending = false;
-            let currentRequestAbortController = null;
+            let loadTimeout = null;
+            let loading = false;
+            let abortController = null;
             
-            // Fonction pour charger les stations selon la zone visible (avec debounce et file d'attente)
-            function loadStationsForCurrentView() {
-                // Annuler la requête précédente si elle est en cours
-                if (currentRequestAbortController) {
-                    currentRequestAbortController.abort();
-                }
+            function loadStations() {
+                if (abortController) abortController.abort();
+                if (loadTimeout) clearTimeout(loadTimeout);
                 
-                // Annuler le timeout précédent
-                if (loadStationsTimeout) {
-                    clearTimeout(loadStationsTimeout);
-                }
-                
-                // Debounce: attendre 1000ms avant de faire la requête (augmenté pour réduire charge)
-                loadStationsTimeout = setTimeout(() => {
-                    if (isLoadStationsPending) {
-                        // Une requête est déjà en cours, reprogrammer pour plus tard
-                        loadStationsTimeout = setTimeout(loadStationsForCurrentView, 1000);
-                        return;
-                    }
+                loadTimeout = setTimeout(() => {
+                    if (loading || !map) return;
                     
-                    if (!map || !map.getCenter) {
-                        setTimeout(loadStationsForCurrentView, 500);
-                        return;
-                    }
+                    loading = true;
+                    abortController = new AbortController();
                     
-                    isLoadStationsPending = true;
-                    currentRequestAbortController = new AbortController();
+                    const center = map.getCenter();
+                    const zoom = map.getZoom();
                     
-                    let lat = 48.8566;
-                    let lng = 2.3522;
-                    let zoom = 10;
+                    const lat = center ? center.lat : 48.8566;
+                    const lng = center ? center.lng : 2.3522;
                     
-                    try {
-                        const center = map.getCenter();
-                        const newZoom = map.getZoom();
-                        
-                        if (center && typeof center.lat === 'number' && typeof center.lng === 'number') {
-                            lat = center.lat;
-                            lng = center.lng;
-                        }
-                        
-                        if (typeof newZoom === 'number' && !isNaN(newZoom)) {
-                            zoom = newZoom;
-                        }
-                    } catch (e) {
-                        // Ignorer les erreurs
-                    }
-                    
-                    let distance = 5;
-                    let maxResults = 20;
-                    
-                    // Paramètres RÉDUITS pour éviter surcharge Render (OpenChargeMap + plan free)
-                    if (zoom < 8) {
-                        distance = 20;      // Réduit de 50 à 20
-                        maxResults = 50;     // Réduit de 200 à 50
-                    } else if (zoom < 10) {
-                        distance = 15;       // Réduit de 30 à 15
-                        maxResults = 30;    // Réduit de 150 à 30
-                    } else if (zoom < 12) {
-                        distance = 10;       // Réduit de 20 à 10
-                        maxResults = 20;    // Réduit de 100 à 20
-                    } else {
-                        distance = 5;        // Réduit de 10 à 5
-                        maxResults = 10;     // Réduit de 50 à 10
-                    }
+                    const distance = zoom < 8 ? 20 : zoom < 10 ? 15 : zoom < 12 ? 10 : 5;
+                    const maxResults = zoom < 8 ? 50 : zoom < 10 ? 30 : zoom < 12 ? 20 : 10;
                     
                     const apiBase = window.API_BASE_URL || window.location.origin;
-                    const url = apiBase + '/api/stations/external?latitude=' + lat + '&longitude=' + lng + '&distance=' + distance + '&maxResults=' + maxResults;
+                    const url = `${apiBase}/api/stations/external?latitude=${lat}&longitude=${lng}&distance=${distance}&maxResults=${maxResults}`;
                     
-                    fetch(url, { 
-                        signal: currentRequestAbortController.signal,
-                        credentials: 'include'
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Erreur HTTP: ${response.status}`);
-                            }
-                            return response.json();
-                        })
+                    fetch(url, { signal: abortController.signal, credentials: 'include' })
+                        .then(res => res.json())
                         .then(data => {
                             const stations = Array.isArray(data) ? data : [];
-                            
-                            // Purger la couche OCM avant d'ajouter
                             ocmClusterLayer.clearLayers();
                             
-                            // Ajouter les stations OCM à la carte (cluster)
                             stations.forEach(station => {
                                 const location = locations.find(l => l.id === station.locationId);
                                 const lat = location ? location.latitude : (station.AddressInfo && station.AddressInfo.Latitude);
@@ -832,44 +727,29 @@
                                 }
                             });
                             
-                            isLoadStationsPending = false;
-                            currentRequestAbortController = null;
+                            loading = false;
+                            abortController = null;
                         })
-                        .catch(error => {
-                            if (error.name !== 'AbortError') {
-                                // Erreur silencieuse (sauf si c'est une annulation)
+                        .catch(err => {
+                            if (err.name !== 'AbortError') {
+                                loading = false;
+                                abortController = null;
                             }
-                            isLoadStationsPending = false;
-                            currentRequestAbortController = null;
                         });
-                }, 1000); // Debounce de 1000ms (augmenté pour réduire charge serveur)
+                }, 1000);
             }
             
-            // Debounce externe pour empêcher les appels multiples en rafale
-            let externalDebounceTimeout = null;
-            function loadStationsDebounced() {
-                if (externalDebounceTimeout) {
-                    clearTimeout(externalDebounceTimeout);
-                }
-                externalDebounceTimeout = setTimeout(() => {
-                    loadStationsForCurrentView();
-                }, 500); // Debounce externe de 500ms
-            }
+            setTimeout(loadStations, 3000);
             
-            setTimeout(() => {
-                loadStationsForCurrentView();
-            }, 3000);
-            
-            // Utiliser la version debounced pour tous les événements
-            map.on('moveend', loadStationsDebounced);
-            map.on('resize', loadStationsDebounced);
+            map.on('moveend', loadStations);
+            map.on('resize', loadStations);
             
             let lastZoom = map.getZoom() || 10;
             map.on('zoomend', function() {
                 const currentZoom = map.getZoom() || 10;
                 if (Math.abs(currentZoom - lastZoom) >= 2) {
                     lastZoom = currentZoom;
-                    loadStationsDebounced(); // Debounced aussi
+                    loadStations();
                 }
             });
         });
@@ -910,101 +790,50 @@
     <!-- Script pour mettre à jour le nom d'utilisateur dans la navbar -->
     <div th:replace="~{includes/navbar :: navbar-script}"></div>
     
-    <!-- Forcer la mise à jour de la navbar après le chargement complet -->
     <script>
-        // S'assurer que la navbar est mise à jour après le chargement de tous les scripts
         (function() {
-            function forceUpdateNavbar() {
+            function updateNavbar() {
                 if (typeof updateNavbarAuth === 'function') {
                     updateNavbarAuth();
-                    console.log('✅ Navbar mise à jour via updateNavbarAuth()');
-                    
-                    // Double vérification après un court délai
-                    setTimeout(function() {
-                        const loginItem = document.getElementById('loginItem');
-                        const isUserLoggedIn = typeof isAuthenticated === 'function' && isAuthenticated();
-                        if (loginItem && isUserLoggedIn) {
-                            // Forcer le masquage si toujours visible
-                            if (loginItem.style.display !== 'none') {
-                                console.warn('⚠️ loginItem toujours visible, forcer le masquage');
-                                loginItem.style.display = 'none';
-                                loginItem.style.setProperty('display', 'none', 'important');
-                                loginItem.classList.add('d-none');
-                            }
-                        }
-                    }, 200);
-                } else if (typeof isAuthenticated === 'function' && typeof getAuthUser === 'function') {
-                    // Si updateNavbarAuth n'est pas encore disponible, créer une mise à jour manuelle
-                    const isUserLoggedIn = isAuthenticated();
-                    const welcomeItem = document.getElementById('welcomeItem');
-                    const logoutItem = document.getElementById('logoutItem');
-                    const loginItem = document.getElementById('loginItem');
-                    const welcomeEl = document.getElementById('welcomeMessage');
-                    
-                    if (isUserLoggedIn) {
-                        if (welcomeItem) {
-                            welcomeItem.style.display = 'flex';
-                            welcomeItem.style.setProperty('display', 'flex', 'important');
-                        }
-                        if (logoutItem) {
-                            logoutItem.style.display = 'flex';
-                            logoutItem.style.setProperty('display', 'flex', 'important');
-                        }
-                        if (loginItem) {
-                            loginItem.style.display = 'none';
-                            loginItem.style.setProperty('display', 'none', 'important');
-                            loginItem.classList.add('d-none');
-                            loginItem.classList.remove('d-flex');
-                        }
-                        
-                        const user = getAuthUser();
-                        if (welcomeEl && user) {
-                            if (user.firstName && user.lastName) {
-                                welcomeEl.textContent = 'Utilisateur : ' + user.firstName + ' ' + user.lastName;
-                            } else if (user.email) {
-                                welcomeEl.textContent = 'Utilisateur : ' + user.email;
-                            }
-                        }
-                    } else {
-                        if (welcomeItem) {
-                            welcomeItem.style.display = 'none';
-                            welcomeItem.style.setProperty('display', 'none', 'important');
-                        }
-                        if (logoutItem) {
-                            logoutItem.style.display = 'none';
-                            logoutItem.style.setProperty('display', 'none', 'important');
-                        }
-                        if (loginItem) {
-                            loginItem.style.display = 'flex';
-                            loginItem.style.setProperty('display', 'flex', 'important');
-                            loginItem.classList.remove('d-none');
-                            loginItem.classList.add('d-flex');
-                        }
-                        if (welcomeEl) welcomeEl.textContent = '';
+                    return;
+                }
+                
+                if (typeof isAuthenticated !== 'function' || typeof getAuthUser !== 'function') {
+                    return;
+                }
+                
+                const user = getAuthUser();
+                const loginItem = document.getElementById('loginItem');
+                const logoutItem = document.getElementById('logoutItem');
+                const welcomeEl = document.getElementById('welcomeMessage');
+                const welcomeItem = document.getElementById('welcomeItem');
+                
+                if (user) {
+                    if (loginItem) loginItem.style.display = 'none';
+                    if (logoutItem) logoutItem.style.display = 'flex';
+                    if (welcomeItem) welcomeItem.style.display = 'flex';
+                    if (welcomeEl) {
+                        welcomeEl.textContent = user.firstName && user.lastName
+                            ? `Utilisateur : ${user.firstName} ${user.lastName}`
+                            : `Utilisateur : ${user.email}`;
                     }
-                    console.log('✅ Navbar mise à jour manuellement');
                 } else {
-                    // Réessayer après un court délai
-                    setTimeout(forceUpdateNavbar, 100);
+                    if (loginItem) loginItem.style.display = 'flex';
+                    if (logoutItem) logoutItem.style.display = 'none';
+                    if (welcomeItem) welcomeItem.style.display = 'none';
+                    if (welcomeEl) welcomeEl.textContent = '';
                 }
             }
             
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
-                    setTimeout(forceUpdateNavbar, 500);
-                });
+                document.addEventListener('DOMContentLoaded', updateNavbar);
             } else {
-                setTimeout(forceUpdateNavbar, 500);
+                updateNavbar();
             }
             
-            window.addEventListener('load', function() {
-                setTimeout(forceUpdateNavbar, 300);
-            });
-            
-            // Surveiller les changements dans localStorage pour mettre à jour la navbar
             window.addEventListener('storage', function(e) {
                 if (e.key === 'authUser' || e.key === 'authToken') {
-                    setTimeout(forceUpdateNavbar, 100);
+                    updateNavbar();
                 }
             });
         })();
