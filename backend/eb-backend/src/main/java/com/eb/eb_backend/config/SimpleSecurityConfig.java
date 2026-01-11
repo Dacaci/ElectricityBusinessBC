@@ -37,6 +37,7 @@ public class SimpleSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/stations/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/locations").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/medias/file/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/medias/upload").authenticated()
                 .anyRequest().authenticated()
