@@ -71,11 +71,9 @@ public class MediaService {
      */
     @Transactional
     public MediaDto uploadMedia(Long stationId, MultipartFile file, MediaType type, String customName, String description) throws IOException {
-        // 1. Valider la station
         Station station = stationRepository.findById(stationId)
             .orElseThrow(() -> new IllegalArgumentException("Station non trouvée: " + stationId));
         
-        // 2. Valider le fichier
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Le fichier est vide");
         }
@@ -85,7 +83,6 @@ public class MediaService {
             throw new IllegalArgumentException("Type de fichier non déterminé");
         }
         
-        // 3. Vérifier que le type de fichier correspond au MediaType
         if (type == MediaType.IMAGE && !ALLOWED_IMAGE_TYPES.contains(contentType)) {
             throw new IllegalArgumentException("Format d'image non supporté. Formats acceptés : JPG, PNG, GIF, WEBP");
         }
@@ -94,46 +91,36 @@ public class MediaService {
             throw new IllegalArgumentException("Format de vidéo non supporté. Formats acceptés : MP4, MPEG, MOV, AVI, WEBM");
         }
         
-        // 4. Créer le répertoire d'upload s'il n'existe pas
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
         
-        // 5. Générer un nom de fichier unique
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename != null && originalFilename.contains(".") 
             ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
             : "";
         String uniqueFilename = UUID.randomUUID().toString() + extension;
         
-        // 6. Sauvegarder le fichier
         Path filePath = uploadPath.resolve(uniqueFilename);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         
-        // 7. Créer l'entité Media
         Media media = new Media();
-        // Utiliser le nom personnalisé si fourni, sinon le nom du fichier original
         media.setName(customName != null && !customName.trim().isEmpty() ? customName.trim() : originalFilename);
-        // URL via l'API pour servir le fichier (au lieu d'une URL relative directe)
         media.setUrl("/api/medias/file/" + uniqueFilename);
         media.setType(type);
         media.setMimeType(contentType);
         media.setFileSize(file.getSize());
         media.setStation(station);
-        // Description optionnelle
         if (description != null && !description.trim().isEmpty()) {
             media.setDescription(description.trim());
         }
         
-        // 8. Sauvegarder en base
-        Media savedMedia = mediaRepository.save(media);
-        return new MediaDto(savedMedia);
+        return new MediaDto(mediaRepository.save(media));
     }
     
     @Transactional
     public MediaDto createMedia(MediaDto mediaDto) {
-        // Validation : stationId doit être fourni
         if (mediaDto.getStationId() == null) {
             throw new IllegalArgumentException("Un média doit être lié à une station");
         }

@@ -138,7 +138,6 @@ public class UserService {
         int activeReservationsCount = activeReservations.size();
         int totalReservationsCount = allReservations.size();
         
-        // Vérifier si la suppression est sûre
         boolean canDeleteSafely = activeReservationsCount == 0;
         String message = canDeleteSafely 
                 ? "La suppression est possible. Toutes les données associées seront supprimées (lieux, bornes, réservations passées conservées 3 ans pour obligation comptable)."
@@ -160,7 +159,6 @@ public class UserService {
      * Note: Les réservations passées sont conservées 3 ans pour obligation comptable
      */
     public void deleteUser(Long id) {
-        // Vérifier l'impact avant suppression
         UserDeletionImpactDto impact = checkUserDeletionImpact(id);
         if (!impact.isCanDeleteSafely()) {
             throw new ConflictException(impact.getMessage());

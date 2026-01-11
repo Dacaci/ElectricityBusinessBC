@@ -35,38 +35,30 @@ public class ReservationService {
     private final UserRepository userRepository;
     
     public ReservationDto createReservation(Long userId, CreateReservationDto dto) {
-        // Utiliser getReferenceById pour éviter une requête SQL inutile (on a juste besoin de la référence)
         User user = userRepository.getReferenceById(userId);
-        
-        // Récupérer la station (besoin de vérifier le statut, donc findById nécessaire)
         Station station = stationRepository.findById(dto.getStationId())
                 .orElseThrow(() -> new NotFoundException("Station non trouvée: " + dto.getStationId()));
         
-        // Vérifications métier
         if (station.getStatus() != StationStatus.ACTIVE) {
             throw new IllegalArgumentException("Station inactive");
         }
         
-        Long stationOwnerId = station.getOwner().getId();
-        if (stationOwnerId.equals(userId)) {
+        if (station.getOwner().getId().equals(userId)) {
             throw new IllegalArgumentException("Impossible de réserver sa propre borne");
         }
         
-        // Vérifier les conflits de réservation
         List<Reservation> conflicts = reservationRepository.findConflictingReservations(
                 station, dto.getStartTime(), dto.getEndTime());
         if (!conflicts.isEmpty()) {
             throw new ConflictException("Créneau déjà réservé");
         }
         
-        // Calculer le montant au prorata (utiliser les minutes pour une précision financière)
         long nbMinutes = Duration.between(dto.getStartTime(), dto.getEndTime()).toMinutes();
         BigDecimal nbHeuresDecimal = BigDecimal.valueOf(nbMinutes)
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
         BigDecimal prixTotal = station.getHourlyRate().multiply(nbHeuresDecimal)
                 .setScale(2, RoundingMode.HALF_UP);
         
-        // Créer la réservation
         Reservation reservation = new Reservation();
         reservation.setUser(user);
         reservation.setStation(station);
@@ -76,8 +68,7 @@ public class ReservationService {
         reservation.setStatus(Reservation.ReservationStatus.PENDING);
         reservation.setNotes(dto.getNotes());
         
-        Reservation saved = reservationRepository.save(reservation);
-        return toDto(saved);
+        return toDto(reservationRepository.save(reservation));
     }
     
     private ReservationDto toDto(Reservation reservation) {

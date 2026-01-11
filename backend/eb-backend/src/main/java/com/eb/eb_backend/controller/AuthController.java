@@ -32,8 +32,8 @@ public class AuthController {
             
             ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", response.getToken())
                 .httpOnly(true)
-                .secure(true)  // Nécessaire pour SameSite=None en HTTPS
-                .sameSite("None")  // Permet l'envoi cross-origin (frontend/backend sur domaines différents)
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .build();
@@ -133,8 +133,8 @@ public class AuthController {
     public ResponseEntity<String> logout(HttpServletResponse httpResponse) {
         ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", "")
             .httpOnly(true)
-            .secure(true)  // Nécessaire pour SameSite=None en HTTPS
-            .sameSite("None")  // Permet l'envoi cross-origin (frontend/backend sur domaines différents)
+            .secure(true)
+            .sameSite("None")
             .path("/")
             .maxAge(0)
             .build();

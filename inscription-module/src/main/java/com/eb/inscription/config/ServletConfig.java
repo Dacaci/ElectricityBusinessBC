@@ -53,7 +53,6 @@ public class ServletConfig {
         registration.setName("RegisterServlet");
         registration.setLoadOnStartup(1);
         
-        // Construire l'URL JDBC (priorité aux variables d'environnement Render)
         String finalDbUrl = dbUrlEnv;
         if (finalDbUrl == null || finalDbUrl.isEmpty()) {
             if (dbHost != null && !dbHost.isEmpty()) {
@@ -66,7 +65,6 @@ public class ServletConfig {
         String finalDbUser = (dbUserEnv != null && !dbUserEnv.isEmpty()) ? dbUserEnv : dbUsername;
         String finalDbPass = (dbPassEnv != null && !dbPassEnv.isEmpty()) ? dbPassEnv : dbPassword;
         
-        // Configuration des paramètres de contexte pour le Servlet
         registration.addInitParameter("db.url", finalDbUrl);
         registration.addInitParameter("db.username", finalDbUser);
         registration.addInitParameter("db.password", finalDbPass);
@@ -84,7 +82,6 @@ public class ServletConfig {
         registration.setName("VerifyServlet");
         registration.setLoadOnStartup(2);
         
-        // Construire l'URL JDBC (priorité aux variables d'environnement Render)
         String finalDbUrl = dbUrlEnv;
         if (finalDbUrl == null || finalDbUrl.isEmpty()) {
             if (dbHost != null && !dbHost.isEmpty()) {
@@ -97,7 +94,6 @@ public class ServletConfig {
         String finalDbUser = (dbUserEnv != null && !dbUserEnv.isEmpty()) ? dbUserEnv : dbUsername;
         String finalDbPass = (dbPassEnv != null && !dbPassEnv.isEmpty()) ? dbPassEnv : dbPassword;
         
-        // Configuration des paramètres de contexte pour le Servlet
         registration.addInitParameter("db.url", finalDbUrl);
         registration.addInitParameter("db.username", finalDbUser);
         registration.addInitParameter("db.password", finalDbPass);

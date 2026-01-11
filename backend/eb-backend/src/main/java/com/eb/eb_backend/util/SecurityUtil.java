@@ -25,7 +25,6 @@ public class SecurityUtil {
     public Long getCurrentUserId(HttpServletRequest request) {
         String token = null;
         
-        // 1. Essayer de récupérer le token depuis le cookie HTTPOnly (priorité)
         if (request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
                 if ("JWT_TOKEN".equals(cookie.getName())) {
@@ -35,7 +34,6 @@ public class SecurityUtil {
             }
         }
         
-        // 2. Si pas de cookie, essayer le header Authorization (pour compatibilité)
         if (token == null) {
             String authHeader = request.getHeader("Authorization");
             if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
@@ -43,7 +41,6 @@ public class SecurityUtil {
             }
         }
         
-        // 3. Extraire l'userId depuis le token
         if (token != null) {
             try {
                 return jwtUtil.extractUserId(token);

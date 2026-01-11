@@ -40,14 +40,13 @@ public class RegisterServlet extends HttpServlet {
         this.userDAO = new UserDAO(dbUrl, dbUser, dbPassword);
         this.codeDAO = new EmailVerificationCodeDAO(dbUrl, dbUser, dbPassword);
         
-        // Configuration SMTP (Brevo ou autre service)
         String smtpHost = System.getenv("MAIL_SMTP_HOST");
         String smtpPortStr = System.getenv("MAIL_SMTP_PORT");
         String smtpUser = System.getenv("MAIL_SMTP_USER");
         String smtpPassword = System.getenv("MAIL_SMTP_PASSWORD");
         String mailFrom = System.getenv("MAIL_FROM");
         
-        int smtpPort = 587; // Port par défaut
+        int smtpPort = 587;
         if (smtpPortStr != null && !smtpPortStr.isEmpty()) {
             try {
                 smtpPort = Integer.parseInt(smtpPortStr);
@@ -60,11 +59,9 @@ public class RegisterServlet extends HttpServlet {
             mailFrom = "noreply@localhost";
         }
         
-        // Créer le Mailer SMTP
         if (smtpHost != null && !smtpHost.isEmpty()) {
             this.mailer = new Mailer(smtpHost, smtpPort, mailFrom, smtpUser, smtpPassword);
         } else {
-            // Fallback : Mailer sans authentification (pour développement local)
             this.mailer = new Mailer("localhost", 1025, mailFrom);
         }
     }

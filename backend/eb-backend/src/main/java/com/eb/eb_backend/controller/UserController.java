@@ -87,7 +87,6 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> exportUserData(
             @PathVariable Long id,
             HttpServletRequest request) {
-        // Vérifier que l'utilisateur demande ses propres données
         Long currentUserId = securityUtil.getCurrentUserId(request);
         if (currentUserId == null || !currentUserId.equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -97,15 +96,10 @@ public class UserController {
         return ResponseEntity.ok(exportData);
     }
     
-    /**
-     * Vérifie l'impact de la suppression d'un utilisateur (RGPD)
-     * Permet à l'utilisateur de savoir ce qui sera supprimé avant de confirmer
-     */
     @GetMapping("/{id}/deletion-impact")
     public ResponseEntity<UserDeletionImpactDto> checkDeletionImpact(
             @PathVariable Long id,
             HttpServletRequest request) {
-        // Vérifier que l'utilisateur demande ses propres données
         Long currentUserId = securityUtil.getCurrentUserId(request);
         if (currentUserId == null || !currentUserId.equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

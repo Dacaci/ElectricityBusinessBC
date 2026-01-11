@@ -120,9 +120,6 @@ public class StationService {
     public void deleteStation(Long id) {
         Station station = stationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Borne introuvable: " + id));
-        
-        // Vérifier s'il existe des réservations actives (PENDING ou CONFIRMED) pour cette borne
-        // Même si une réservation est annulée, on garde l'historique donc on vérifie aussi
         long activeReservationsCount = reservationRepository.findByStation(station, Pageable.unpaged())
                 .stream()
                 .filter(r -> r.getStatus() == com.eb.eb_backend.entity.Reservation.ReservationStatus.PENDING ||
@@ -180,7 +177,6 @@ public class StationService {
         
         return stations.stream()
                 .filter(station -> {
-                    // Vérifier que la location est chargée et a des coordonnées
                     if (station.getLocation() == null || 
                         station.getLocation().getLatitude() == null || 
                         station.getLocation().getLongitude() == null) {

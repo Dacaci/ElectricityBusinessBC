@@ -38,7 +38,6 @@ public class AuthService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable: " + email));
         
-        // Créer les autorités (rôles) pour Spring Security
         java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new ArrayList<>();
         if (user.getRole() == User.UserRole.ADMIN) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));

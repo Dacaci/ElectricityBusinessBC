@@ -32,7 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Laisser passer les requêtes OPTIONS (preflight CORS) sans authentification
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
@@ -41,7 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        // 1. Essayer de récupérer le token depuis le cookie HTTPOnly (priorité)
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("JWT_TOKEN".equals(cookie.getName())) {
@@ -51,7 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. Fallback : si pas de cookie, essayer le header Authorization (pour compatibilité)
         if (token == null) {
             String authHeader = request.getHeader("Authorization");
             if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
@@ -59,12 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 3. Extraire le username du token
         if (token != null) {
             try {
                 username = jwtUtil.extractUsername(token);
             } catch (Exception ignored) {
-                // token invalide: on laisse la chaîne continuer sans authentifier
             }
         }
 

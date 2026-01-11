@@ -34,7 +34,6 @@ public class UserDataExportService {
         
         Map<String, Object> exportData = new HashMap<>();
         
-        // 1. Données du profil utilisateur
         Map<String, Object> profile = new HashMap<>();
         profile.put("id", user.getId());
         profile.put("email", user.getEmail());
@@ -50,7 +49,6 @@ public class UserDataExportService {
         profile.put("updatedAt", user.getUpdatedAt());
         exportData.put("profile", profile);
         
-        // 2. Lieux de recharge possédés
         List<Location> locations = locationRepository.findByOwner(user, org.springframework.data.domain.Pageable.unpaged()).getContent();
         List<Map<String, Object>> locationsData = locations.stream().map(loc -> {
             Map<String, Object> locMap = new HashMap<>();
@@ -66,7 +64,6 @@ public class UserDataExportService {
         }).collect(Collectors.toList());
         exportData.put("locations", locationsData);
         
-        // 3. Bornes de recharge possédées
         List<Station> stations = stationRepository.findByOwner(user, org.springframework.data.domain.Pageable.unpaged()).getContent();
         List<Map<String, Object>> stationsData = stations.stream().map(station -> {
             Map<String, Object> stationMap = new HashMap<>();
@@ -85,7 +82,6 @@ public class UserDataExportService {
         }).collect(Collectors.toList());
         exportData.put("stations", stationsData);
         
-        // 4. Réservations effectuées (en tant que conducteur)
         List<Reservation> reservations = reservationRepository.findByUser(user, org.springframework.data.domain.Pageable.unpaged()).getContent();
         List<Map<String, Object>> reservationsData = reservations.stream().map(res -> {
             Map<String, Object> resMap = new HashMap<>();
@@ -103,7 +99,6 @@ public class UserDataExportService {
         }).collect(Collectors.toList());
         exportData.put("reservations", reservationsData);
         
-        // 5. Métadonnées de l'export
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("exportDate", java.time.LocalDateTime.now());
         metadata.put("userId", userId);

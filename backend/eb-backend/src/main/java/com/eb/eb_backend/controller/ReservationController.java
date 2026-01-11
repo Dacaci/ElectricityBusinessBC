@@ -73,10 +73,8 @@ public class ReservationController {
             }
             reservations = reservationService.searchReservations(userId, stationId, statusEnum, search.trim(), pageable);
         } else if (userId != null) {
-            // Un utilisateur peut voir ses propres réservations (pas besoin d'admin)
             reservations = reservationService.getReservationsByUser(userId, pageable);
         } else if (stationId != null) {
-            // Un utilisateur peut voir les réservations d'une station (pas besoin d'admin)
             reservations = reservationService.getReservationsByStation(stationId, pageable);
         } else if (status != null && !status.trim().isEmpty()) {
             try {
@@ -86,8 +84,6 @@ public class ReservationController {
                 return ResponseEntity.badRequest().build();
             }
         } else {
-            // Voir TOUTES les réservations = admin uniquement
-            // Vérifier le rôle dans le service ou laisser la protection dans le controller
             reservations = reservationService.getAllReservations(pageable);
         }
         
